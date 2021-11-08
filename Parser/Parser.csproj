@@ -4,4 +4,8 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="OneOf" Version="3.0.201" />
+  </ItemGroup>
+
 </Project>
