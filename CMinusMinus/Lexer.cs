@@ -27,10 +27,15 @@ namespace CMinusMinus {
 			Lexer.AddRule(TokenType.LogicalOperator, @"&&|\|\|", 2);
 			Lexer.AddRule(TokenType.SentenceTerminator, @";", 1);
 			Lexer.AddRule(TokenType.Separator, @",", 1);
-			Lexer.AddRule(TokenType.CommentBoundary, @"\/\/|\/\*|\*\/", 2);
-			Lexer.AddRule(TokenType.Parenthesis, @"[()]", 1);
-			Lexer.AddRule(TokenType.BlockBoundary, @"[{}]", 1);
-			Lexer.AddRule(TokenType.WhiteSpace, @"\s+");
+			Lexer.AddRule(TokenType.SingleLineCommentStartSymbol, @"\/\/", 2);
+			Lexer.AddRule(TokenType.CommentBlockStartSymbol, @"\/\*", 2);
+			Lexer.AddRule(TokenType.CommentBlockEndSymbol, @"\*\/", 2);
+			Lexer.AddRule(TokenType.LeftParenthesis, @"\(", 1);
+			Lexer.AddRule(TokenType.RightParenthesis, @"\)", 1);
+			Lexer.AddRule(TokenType.BlockStartSymbol, @"\{", 1);
+			Lexer.AddRule(TokenType.BlockEndSymbol, @"\}", 1);
+			Lexer.AddRule(TokenType.LineBreak, @"\n|\r\n?", 2);
+			Lexer.AddRule(TokenType.WhiteSpace, @"[^\S\n\r]+");
 		}
 	}
 
@@ -59,11 +64,21 @@ namespace CMinusMinus {
 
 		Separator,
 
-		CommentBoundary,
+		SingleLineCommentStartSymbol,
 
-		Parenthesis,
+		CommentBlockStartSymbol,
 
-		BlockBoundary,
+		CommentBlockEndSymbol,
+
+		LeftParenthesis,
+
+		RightParenthesis,
+
+		BlockStartSymbol,
+
+		BlockEndSymbol,
+
+		LineBreak,
 
 		WhiteSpace
 	}
