@@ -1,0 +1,10 @@
+int main() {
+	int bin = -0b01101;
+	int hex = 0x24f;
+	double db = -23.11;
+	double exp = -2.8e-9;
+	char nl = '\n';
+	char uni = '\u1234';
+	char oct = '\002';
+	return 0;
+}

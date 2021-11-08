@@ -7,9 +7,9 @@ namespace CMinusMinus.Test {
 	public class LexerTests {
 		public static readonly Lexer<TokenType> Lexer = new CMinusMinus().Lexer;
 
-		[TestCase(@"int func(){}", false, ExpectedResult = true)]
-		[TestCase(@"'\'", true, ExpectedResult = false)]
-		public bool LiteralTest(string code, bool checkAmbiguity) {
+		[TestCase(@"int func(){}", ExpectedResult = true)]
+		[TestCase(@"'\'", ExpectedResult = false)]
+		public bool LiteralTest(string code, bool checkAmbiguity = false) {
 			try {
 				var lexemes = Lexer.Tokenize(code, checkAmbiguity);
 				foreach (var lexeme in lexemes)
@@ -21,13 +21,16 @@ namespace CMinusMinus.Test {
 			}
 		}
 
-		[TestCase()]
-		public bool FileTest(string filePath, bool checkAmbiguity) {
+		[TestCase(@"samples/0.cmm", ExpectedResult = true)]
+		[TestCase(@"samples/a+b.cmm", ExpectedResult = true)]
+		[TestCase(@"samples/hello.cmm", ExpectedResult = true)]
+		[TestCase(@"samples/literal.cmm", ExpectedResult = true)]
+		public bool FileTest(string filePath, bool checkAmbiguity = false) {
 			string code = File.ReadAllText(filePath);
 			try {
 				var lexemes = Lexer.Tokenize(code, checkAmbiguity);
 				foreach (var lexeme in lexemes)
-					Console.Write(lexeme.ToString());
+					Console.WriteLine(lexeme.ToString());
 				return true;
 			}
 			catch (LexerException) {
