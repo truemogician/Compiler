@@ -25,17 +25,6 @@ namespace CMinusMinus.Test {
 		[TestCase(@"samples/a+b.cmm", ExpectedResult = true)]
 		[TestCase(@"samples/hello.cmm", ExpectedResult = true)]
 		[TestCase(@"samples/literal.cmm", ExpectedResult = true)]
-		public bool FileTest(string filePath, bool checkAmbiguity = false) {
-			string code = File.ReadAllText(filePath);
-			try {
-				var lexemes = Lexer.Tokenize(code, checkAmbiguity);
-				foreach (var lexeme in lexemes)
-					Console.WriteLine(lexeme.ToString());
-				return true;
-			}
-			catch (LexerException) {
-				return false;
-			}
-		}
+		public bool FileTest(string filePath, bool checkAmbiguity = false) => LiteralTest(File.ReadAllText(filePath), checkAmbiguity);
 	}
 }
