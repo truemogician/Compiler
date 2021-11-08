@@ -6,7 +6,7 @@ using Microsoft.Extensions.Primitives;
 #nullable enable
 namespace Lexer {
 	public class Lexer<T> where T : struct, Enum {
-		public TokenCollection<T> Rules { get; } = new();
+		public Lexicon<T> Rules { get; } = new();
 
 		/// <inheritdoc cref="Token{T}(T, string, int)"/>
 		public void AddRule(T type, string pattern, int maxLength = 0) => Rules.Add(new Token<T>(type, pattern, maxLength));

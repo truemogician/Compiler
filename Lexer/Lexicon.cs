@@ -5,7 +5,7 @@ using Microsoft.Extensions.Primitives;
 
 #nullable enable
 namespace Lexer {
-	public class TokenCollection<T> : ICollection<Token<T>> where T : struct, Enum {
+	public class Lexicon<T> : ICollection<Token<T>> where T : struct, Enum {
 		private readonly Dictionary<T, Token<T>> _tokens = new();
 
 		public int Count => _tokens.Count;
