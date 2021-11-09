@@ -7,5 +7,7 @@ namespace Parser {
 		public SyntaxTreeNode<TNonterminal, TTerminal> Root { get; }
 
 		public static explicit operator AbstractSyntaxTree<TNonterminal, TTerminal>(SyntaxTreeNode<TNonterminal, TTerminal> node) => new(node);
+
+		public override string ToString() => Root.ToString(0);
 	}
 }
