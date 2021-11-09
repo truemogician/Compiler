@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 #nullable enable
 namespace Parser.CanonicalLR {
-	public class ActionTable<TNonterminal, TTerminal> where TNonterminal : struct, Enum where TTerminal : struct, Enum {
-		private readonly Dictionary<ItemSet<TNonterminal, TTerminal>, Dictionary<TTerminal, IAction>> _table = new();
+	public class ActionTable<TNonterminal, TToken> where TNonterminal : struct, Enum where TToken : struct, Enum {
+		private readonly Dictionary<ItemSet<TNonterminal, TToken>, Dictionary<TToken, IAction>> _table = new();
 
-		public IAction this[ItemSet<TNonterminal, TTerminal> set, TTerminal token] {
+		public IAction this[ItemSet<TNonterminal, TToken> set, TToken token] {
 			get => _table[set][token];
 			set {
 				if (!_table.ContainsKey(set))
-					_table[set] = new Dictionary<TTerminal, IAction> {[token] = value};
+					_table[set] = new Dictionary<TToken, IAction> {[token] = value};
 				else
 					_table[set][token] = value;
 			}
@@ -31,11 +31,11 @@ namespace Parser.CanonicalLR {
 		public ActionType Type { get; }
 	}
 
-	public record ShiftAction<TNonterminal, TTerminal>(ItemSet<TNonterminal, TTerminal> NextSet) : IAction where TNonterminal : struct, Enum where TTerminal : struct, Enum {
+	public record ShiftAction<TNonterminal, TToken>(ItemSet<TNonterminal, TToken> NextSet) : IAction where TNonterminal : struct, Enum where TToken : struct, Enum {
 		public ActionType Type => ActionType.Shift;
 	}
 
-	public record ReduceAction<TNonterminal, TTerminal>(ProductionRule<TNonterminal, TTerminal> ProductionRule) : IAction where TNonterminal : struct, Enum where TTerminal : struct, Enum {
+	public record ReduceAction<TNonterminal, TToken>(ProductionRule<TNonterminal, TToken> ProductionRule) : IAction where TNonterminal : struct, Enum where TToken : struct, Enum {
 		public ActionType Type => ActionType.Reduce;
 	}
 
@@ -47,13 +47,13 @@ namespace Parser.CanonicalLR {
 		public ActionType Type => ActionType.Error;
 	}
 
-	public static class ActionFactory<TNonterminal, TTerminal> where TNonterminal : struct, Enum where TTerminal : struct, Enum {
+	public static class ActionFactory<TNonterminal, TToken> where TNonterminal : struct, Enum where TToken : struct, Enum {
 		public static AcceptAction AcceptAction { get; } = new();
 
 		public static ErrorAction ErrorAction { get; } = new();
 
-		public static ShiftAction<TNonterminal, TTerminal> CreateShiftAction(ItemSet<TNonterminal, TTerminal> nextSet) => new(nextSet);
+		public static ShiftAction<TNonterminal, TToken> CreateShiftAction(ItemSet<TNonterminal, TToken> nextSet) => new(nextSet);
 
-		public static ReduceAction<TNonterminal, TTerminal> CreateReduceAction(ProductionRule<TNonterminal, TTerminal> productionRule) => new(productionRule);
+		public static ReduceAction<TNonterminal, TToken> CreateReduceAction(ProductionRule<TNonterminal, TToken> productionRule) => new(productionRule);
 	}
 }

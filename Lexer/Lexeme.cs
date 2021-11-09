@@ -8,6 +8,8 @@ namespace Lexer {
 
 		public T Type { get; init; }
 
+		public StringSegment Segment => _segment;
+
 		public int Position => _segment.Offset;
 
 		public int Length => _segment.Length;

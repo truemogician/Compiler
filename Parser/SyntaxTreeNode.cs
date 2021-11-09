@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Parser {
 	public class SyntaxTreeNode<TNonterminal, TTerminal> where TNonterminal : struct, Enum where TTerminal : struct, Enum {
-		public Component<TNonterminal, TTerminal> Value { get; init; }
+		public Symbol<TNonterminal, TTerminal> Value { get; init; }
 
 		public SyntaxTreeNode<TNonterminal, TTerminal> Parent { get; set; }
 

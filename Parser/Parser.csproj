@@ -8,4 +8,8 @@
     <PackageReference Include="OneOf" Version="3.0.201" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Lexer\Lexer.csproj" />
+  </ItemGroup>
+
 </Project>
