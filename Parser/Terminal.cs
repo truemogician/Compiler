@@ -26,7 +26,11 @@ namespace Parser {
 
 		public TToken TokenType => _type ?? throw new NullReferenceException();
 
-		public bool Match(Lexeme<TToken> lexeme) => _matcher?.Invoke(lexeme) ?? throw new NullReferenceException();
+		public bool Match(Lexeme<TToken> lexeme) {
+			if (_type is null || _matcher is null)
+				throw new InvalidOperationException("Terminator cannot match");
+			return lexeme.Type.Equals(TokenType) && _matcher(lexeme);
+		}
 
 		public bool Equals(Terminal<TToken>? other) {
 			if (other is null)
