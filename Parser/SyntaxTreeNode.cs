@@ -1,16 +1,59 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Linq;
 using System.Text;
 using Lexer;
 
 #nullable enable
 namespace Parser {
 	public class SyntaxTreeNode<TNonterminal, TToken> where TNonterminal : struct, Enum where TToken : struct, Enum {
-		public SyntaxTreeValue<TNonterminal, TToken> Value { get; init; }
+		private bool _changeParentOnChildrenChanged = true;
 
-		public SyntaxTreeNode<TNonterminal, TToken> Parent { get; set; }
+		private SyntaxTreeNode<TNonterminal, TToken>? _parent;
 
-		public List<SyntaxTreeNode<TNonterminal, TToken>> Children { get; } = new();
+		private readonly ObservableCollection<SyntaxTreeNode<TNonterminal, TToken>> _children = new();
+
+		public SyntaxTreeNode(SyntaxTreeValue<TNonterminal, TToken> value) {
+			Value = value;
+			_children.CollectionChanged += (_, args) => {
+				if (!_changeParentOnChildrenChanged)
+					return;
+				switch (args.Action) {
+					case NotifyCollectionChangedAction.Add:
+						foreach (var node in args.NewItems!.OfType<SyntaxTreeNode<TNonterminal, TToken>>())
+							node._parent = this;
+						break;
+					case NotifyCollectionChangedAction.Remove:
+						foreach (var node in args.OldItems!.OfType<SyntaxTreeNode<TNonterminal, TToken>>())
+							node._parent = null;
+						break;
+				}
+			};
+		}
+
+		public SyntaxTreeValue<TNonterminal, TToken> Value { get; }
+
+		public SyntaxTreeNode<TNonterminal, TToken>? Parent {
+			get => _parent;
+			set {
+				if (_parent is not null) {
+					_changeParentOnChildrenChanged = false;
+					_parent.Children.Remove(this);
+					_changeParentOnChildrenChanged = true;
+				}
+				if (value is not null) {
+					value._changeParentOnChildrenChanged = false;
+					value.Children.Add(this);
+					value._changeParentOnChildrenChanged = true;
+				}
+				_parent = value;
+			}
+		}
+
+		public IList<SyntaxTreeNode<TNonterminal, TToken>> Children => _children;
 
 		public bool IsLeaf => Value.IsTerminal;
 
