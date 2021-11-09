@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Lexer;
 
 namespace Parser.CanonicalLR {
 	// ReSharper disable once InconsistentNaming
@@ -7,6 +9,6 @@ namespace Parser.CanonicalLR {
 
 		public ParsingTable<TNonterminal, TToken> ParsingTable { get; }
 
-		public AbstractSyntaxTree<TNonterminal, TToken> Parse(IEquatable<TToken> lexemes) => throw new NotImplementedException();
+		public AbstractSyntaxTree<TNonterminal, TToken> Parse(IEnumerable<Lexeme<TToken>> lexemes) => throw new NotImplementedException();
 	}
 }
