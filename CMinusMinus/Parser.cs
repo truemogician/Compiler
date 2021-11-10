@@ -1,6 +1,6 @@
 ﻿using System;
 using Parser;
-using Parser.CanonicalLR;
+using Parser.LR.LR1;
 
 namespace CMinusMinus {
 	public partial class CMinusMinus {

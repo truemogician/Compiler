@@ -1,5 +1,4 @@
 using System.IO;
-using Parser.CanonicalLR;
 using NUnit.Framework;
 
 namespace CMinusMinus.Test {

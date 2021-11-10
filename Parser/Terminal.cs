@@ -13,6 +13,8 @@ namespace Parser {
 
 		private Terminal() { }
 
+		public Terminal(TToken tokenType) : this(tokenType, _ => true) { }
+
 		public Terminal(TToken tokenType, TerminalMatcher<TToken> matcher) {
 			_type = tokenType;
 			_matcher = matcher;
@@ -41,5 +43,7 @@ namespace Parser {
 		}
 
 		public override int GetHashCode() => HashCode.Combine(_type, _matcher);
+
+		public static implicit operator Terminal<TToken>(TToken tokenType) => new(tokenType);
 	}
 }

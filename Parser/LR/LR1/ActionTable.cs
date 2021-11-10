@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 #nullable enable
-namespace Parser.CanonicalLR {
+namespace Parser.LR.LR1 {
 	public class ActionTable<TNonterminal, TToken> where TNonterminal : struct, Enum where TToken : struct, Enum {
 		private readonly Dictionary<ItemSet<TNonterminal, TToken>, Dictionary<TToken, IAction>> _table = new();
 

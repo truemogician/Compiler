@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Parser.CanonicalLR {
+namespace Parser.LR.LR1 {
 	public class GotoTable<TNonterminal, TToken> where TNonterminal : struct, Enum where TToken : struct, Enum {
 		private readonly Dictionary<ItemSet<TNonterminal, TToken>, Dictionary<TNonterminal, ItemSet<TNonterminal, TToken>>> _table = new();
 

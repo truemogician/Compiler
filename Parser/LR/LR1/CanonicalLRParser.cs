@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Lexer;
 
-namespace Parser.CanonicalLR {
+namespace Parser.LR.LR1 {
 	// ReSharper disable once InconsistentNaming
 	public class CanonicalLRParser<TNonterminal, TToken> where TNonterminal : struct, Enum where TToken : struct, Enum {
 		public CanonicalLRParser(Grammar<TNonterminal, TToken> grammar) => ParsingTable = new ParsingTable<TNonterminal, TToken>(grammar);

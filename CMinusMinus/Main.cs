@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Lexer;
-using Parser.CanonicalLR;
+using Parser.LR.LR1;
 
 namespace CMinusMinus {
 	public partial class CMinusMinus {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Parser.CanonicalLR {
+namespace Parser.LR.LR1 {
 	public class ParsingTable<TNonterminal, TToken> where TNonterminal : struct, Enum where TToken : struct, Enum {
 		internal ParsingTable() { }
 
