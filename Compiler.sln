@@ -3,15 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31624.102
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lexer", "Lexer\Lexer.csproj", "{8F8BB1AE-317D-4B5C-A58F-E950B3BDFB4A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lexer", "Lexer\Lexer.csproj", "{8F8BB1AE-317D-4B5C-A58F-E950B3BDFB4A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Formatter", "Formatter\Formatter.csproj", "{108FD53E-C22D-4322-BCBF-26E50EF8F150}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Parser", "Parser\Parser.csproj", "{334610DD-0916-46B3-9D20-694F92708E84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parser", "Parser\Parser.csproj", "{334610DD-0916-46B3-9D20-694F92708E84}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CMinusMinus", "CMinusMinus\CMinusMinus.csproj", "{9ADC9978-7D1E-4486-B094-3635286C0D07}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CMinusMinus", "CMinusMinus\CMinusMinus.csproj", "{9ADC9978-7D1E-4486-B094-3635286C0D07}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CMinusMinus.Test", "CMinusMinus.Test\CMinusMinus.Test.csproj", "{899E5FEB-DC75-4D6D-B22B-C6A48053D894}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CMinusMinus.Test", "CMinusMinus.Test\CMinusMinus.Test.csproj", "{899E5FEB-DC75-4D6D-B22B-C6A48053D894}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +21,6 @@ Global
 		{8F8BB1AE-317D-4B5C-A58F-E950B3BDFB4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F8BB1AE-317D-4B5C-A58F-E950B3BDFB4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F8BB1AE-317D-4B5C-A58F-E950B3BDFB4A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{108FD53E-C22D-4322-BCBF-26E50EF8F150}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{108FD53E-C22D-4322-BCBF-26E50EF8F150}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{108FD53E-C22D-4322-BCBF-26E50EF8F150}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{108FD53E-C22D-4322-BCBF-26E50EF8F150}.Release|Any CPU.Build.0 = Release|Any CPU
 		{334610DD-0916-46B3-9D20-694F92708E84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{334610DD-0916-46B3-9D20-694F92708E84}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{334610DD-0916-46B3-9D20-694F92708E84}.Release|Any CPU.ActiveCfg = Release|Any CPU
