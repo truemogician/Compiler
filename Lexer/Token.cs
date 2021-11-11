@@ -12,17 +12,36 @@ namespace Lexer {
 
 		public T Type { get; init; }
 
+		/// <summary>
+		/// Create a token that matches a specific character
+		/// </summary>
+		/// <param name="type">Type of the token</param>
+		/// <param name="character">The character to be matched</param>
+		public Token(T type, char character) {
+			Type = type;
+			_matcher = code => code[0] == character ? 1 : null;
+		}
+
+		/// <summary>
+		/// Create a token that matches an exact string
+		/// </summary>
+		/// <param name="type">Type of the token</param>
+		/// <param name="pattern">The string to be matched</param>
+		public Token(T type, string pattern) {
+			Type = type;
+			_matcher = code => pattern.Length <= code.Buffer.Length - code.Offset - code.Length && code.Subsegment(0, pattern.Length) == pattern ? pattern.Length : null;
+		}
+
 		//TODO calculate maxLength automatically
 		/// <summary>
-		/// 
+		/// Create a token that matches a regex pattern
 		/// </summary>
-		/// <param name="type"></param>
+		/// <param name="type">Type of the token</param>
 		/// <param name="pattern">Pattern of the token. Beginning symbol will be automatically added.</param>
 		/// <param name="maxLength"></param>
-		public Token(T type, string pattern, int maxLength = 0) : this(type, new Regex($"^(?:{pattern})", RegexOptions.Compiled), maxLength) { }
-
 		public Token(T type, Regex pattern, int maxLength = 0) {
 			Type = type;
+			pattern = new Regex($"^(?:{pattern})", RegexOptions.Compiled);
 			_matcher = code => maxLength == 0 ? pattern.Match(code) : pattern.Match(code, 0, maxLength);
 		}
 
