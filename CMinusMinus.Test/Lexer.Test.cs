@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace CMinusMinus.Test {
 	public class LexerTests {
-		public static readonly Lexer<TokenType> Lexer = new CMinusMinus().Lexer;
+		public static readonly Lexer.Lexer Lexer = new CMinusMinus().Lexer;
 
 		[TestCase(@"int func(){}", ExpectedResult = true)]
 		[TestCase(@"'\'", ExpectedResult = false)]

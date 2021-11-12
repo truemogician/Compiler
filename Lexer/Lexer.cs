@@ -7,35 +7,49 @@ using Microsoft.Extensions.Primitives;
 
 #nullable enable
 namespace Lexer {
-	public class Lexer<T> where T : struct, Enum {
-		public Lexicon<T> Rules { get; } = new();
+	public class Lexer {
+		public Lexicon Lexicon { get; } = new();
 
-		/// <inheritdoc cref="Token{T}(T, char)"/>
-		public void AddToken(T type, char character) => Rules.Add(new Token<T>(type, character));
+		public void AddToken(Token token) => Lexicon.Add(token);
 
-		/// <inheritdoc cref="Token{T}(T, string)"/>
-		public void AddToken(T type, string pattern) => Rules.Add(new Token<T>(type, pattern));
+		/// <inheritdoc cref="Token(string, char)"/>
+		public void AddToken(string name, char character) => Lexicon.Add(new Token(name, character));
 
-		/// <inheritdoc cref="Token{T}(T, Regex, int)"/>
-		public void AddToken(T type, Regex pattern, int maxLength = 0) => Rules.Add(new Token<T>(type, pattern, maxLength));
+		/// <inheritdoc cref="Token(string, string)"/>
+		public void AddToken(string name, string pattern) => Lexicon.Add(new Token(name, pattern));
 
-		/// <inheritdoc cref="Token{T}(T, LexemeMatcher{T})"/>
-		public void AddToken(T type, LexemeMatcher<T> match) => Rules.Add(new Token<T>(type, match));
+		/// <inheritdoc cref="Token(string, Regex, int)"/>
+		public void AddToken(string name, Regex pattern, int maxLength = 0) => Lexicon.Add(new Token(name, pattern, maxLength));
 
-		public IEnumerable<Lexeme<T>> Tokenize(string code, bool checkAmbiguity = false) {
+		/// <inheritdoc cref="Token(string, LexemeMatcher)"/>
+		public void AddToken(string name, LexemeMatcher match) => Lexicon.Add(new Token(name, match));
+
+		/// <inheritdoc cref="Token(Enum, char)"/>
+		public void AddToken(Enum name, char character) => Lexicon.Add(new Token(name, character));
+
+		/// <inheritdoc cref="Token(Enum, string)"/>
+		public void AddToken(Enum name, string pattern) => Lexicon.Add(new Token(name, pattern));
+
+		/// <inheritdoc cref="Token(Enum, Regex, int)"/>
+		public void AddToken(Enum name, Regex pattern, int maxLength = 0) => Lexicon.Add(new Token(name, pattern, maxLength));
+
+		/// <inheritdoc cref="Token(Enum, LexemeMatcher)"/>
+		public void AddToken(Enum name, LexemeMatcher match) => Lexicon.Add(new Token(name, match));
+
+		public IEnumerable<Lexeme> Tokenize(string code, bool checkAmbiguity = false) {
 			var segment = new StringSegment(code);
 			while (true) {
-				Lexeme<T> lexeme;
+				Lexeme lexeme;
 				if (checkAmbiguity) {
-					var lexemes = Rules.MatchAll(segment).ToArray();
+					var lexemes = Lexicon.MatchAll(segment).ToArray();
 					lexeme = lexemes.Length switch {
 						0 => throw new NoMatchException(code, segment.Offset),
 						1 => lexemes[0],
-						_ => throw new AmbiguityException<T>(code, segment.Offset, lexemes.Select(l => l.Type))
+						_ => throw new AmbiguityException(code, segment.Offset, lexemes.Select(l => l.Token))
 					};
 				}
 				else
-					lexeme = Rules.Match(segment) ?? throw new NoMatchException(code, segment.Offset);
+					lexeme = Lexicon.Match(segment) ?? throw new NoMatchException(code, segment.Offset);
 				segment = segment.Subsegment(lexeme.Length);
 				yield return lexeme;
 				if (segment.Offset == code.Length)
@@ -44,7 +58,7 @@ namespace Lexer {
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool TryTokenize(string code, bool checkAmbiguity, out IEnumerable<Lexeme<T>>? tokens) {
+		public bool TryTokenize(string code, bool checkAmbiguity, out IEnumerable<Lexeme>? tokens) {
 			try {
 				tokens = Tokenize(code);
 				return true;
@@ -56,6 +70,6 @@ namespace Lexer {
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool TryTokenize(string code, out IEnumerable<Lexeme<T>>? tokens) => TryTokenize(code, false, out tokens);
+		public bool TryTokenize(string code, out IEnumerable<Lexeme>? tokens) => TryTokenize(code, false, out tokens);
 	}
 }

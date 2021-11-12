@@ -21,16 +21,16 @@ namespace Lexer {
 		public NoMatchException(string code, int position) : base(code, $"No token match code at {position}") => Position = position;
 	}
 
-	public class AmbiguityException<T> : LexerException where T : Enum {
+	public class AmbiguityException : LexerException {
 		public int? Position { get; }
 
-		public IEnumerable<T>? TokenTypes { get; }
+		public IEnumerable<Token>? Tokens { get; }
 
 		public AmbiguityException() { }
 
-		public AmbiguityException(string code, int position, IEnumerable<T> tokenTypes) : base(code, $"Multiple tokens match code at {position}") {
+		public AmbiguityException(string code, int position, IEnumerable<Token> tokens) : base(code, $"Multiple tokens match code at {position}") {
 			Position = position;
-			TokenTypes = tokenTypes;
+			Tokens = tokens;
 		}
 	}
 }

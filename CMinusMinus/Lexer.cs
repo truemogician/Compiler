@@ -6,11 +6,11 @@ namespace CMinusMinus {
 	public partial class CMinusMinus {
 		public static readonly string[] Keywords = {"char", "short", "int", "long", "float", "double", "void", "if", "else", "do", "while", "return"};
 
-		public Lexer<TokenType> Lexer { get; } = new();
+		public Lexer.Lexer Lexer { get; } = new();
 
 		private void InitializeLexer() {
-			var keywordToken = new Token<TokenType>(TokenType.Keyword, new Regex($@"{string.Join('|', Keywords)}"), Keywords.Max(k => k.Length));
-			Lexer.Rules.Add(keywordToken);
+			var keywordToken = new Token(TokenType.Keyword, new Regex($@"{string.Join('|', Keywords)}"), Keywords.Max(k => k.Length));
+			Lexer.AddToken(keywordToken);
 			var identifierPattern = new Regex($@"^@({string.Join('|', Keywords)})|^[a-zA-Z_][a-zA-Z0-9_]*", RegexOptions.Compiled);
 			Lexer.AddToken(
 				TokenType.Identifier,

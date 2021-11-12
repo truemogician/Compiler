@@ -3,10 +3,10 @@ using Microsoft.Extensions.Primitives;
 
 #nullable enable
 namespace Lexer {
-	public class Lexeme<T> where T : struct, Enum {
+	public class Lexeme {
 		private readonly StringSegment _segment;
 
-		public T Type { get; init; }
+		public Token Token { get; init; }
 
 		public StringSegment Segment => _segment;
 
@@ -18,14 +18,11 @@ namespace Lexer {
 
 		public string Code => _segment.Buffer;
 
-		public Lexeme(T type, StringSegment segment) {
-			Type = type;
+		public Lexeme(Token token, StringSegment segment) {
+			Token = token;
 			_segment = segment;
 		}
 
-		public override string ToString() {
-			string typeName = Enum.GetName(Type)!;
-			return $"<{typeName}>{Value}</{typeName}>";
-		}
+		public override string ToString() => $"<{Token}>{Value}</{Token}>";
 	}
 }
