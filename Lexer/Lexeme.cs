@@ -24,5 +24,9 @@ namespace Lexer {
 		}
 
 		public override string ToString() => $"<{Token}>{Value}</{Token}>";
+
+		public static bool operator ==(Lexeme self, StringSegment stringSegment) => self.Segment == stringSegment;
+
+		public static bool operator !=(Lexeme self, StringSegment stringSegment) => self.Segment != stringSegment;
 	}
 }
