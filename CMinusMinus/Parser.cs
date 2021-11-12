@@ -1,12 +1,13 @@
 ﻿using System;
 using Parser;
-using Parser.LR.LR1;
 
 namespace CMinusMinus {
-	public partial class CMinusMinus {
-		public CanonicalLRParser<NonterminalType, TokenType> Parser { get; }
+	using CLRParser = Parser.LR.CLR.Parser;
 
-		private Grammar<NonterminalType, TokenType> InitializeGrammar() => throw new NotImplementedException();
+	public partial class CMinusMinus {
+		public CLRParser Parser { get; }
+
+		private Grammar InitializeGrammar() => throw new NotImplementedException();
 	}
 
 	public enum NonterminalType : byte { }

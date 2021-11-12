@@ -1,13 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Lexer;
 
+#nullable enable
 namespace Parser.LR.CLR {
-	public class Parser<TNonterminal, TToken> where TNonterminal : struct, Enum where TToken : struct, Enum {
-		public Parser(Grammar<TNonterminal, TToken> grammar) => ParsingTable = new ParsingTable<TNonterminal, TToken>(grammar);
+	public class Parser {
+		public Parser(Grammar grammar) => ParsingTable = new ParsingTable(grammar);
 
-		public ParsingTable<TNonterminal, TToken> ParsingTable { get; }
+		public ParsingTable ParsingTable { get; }
 
-		public AbstractSyntaxTree<TNonterminal, TToken> Parse(IEnumerable<Lexeme<TToken>> lexemes) => throw new NotImplementedException();
+		public AbstractSyntaxTree Parse(IEnumerable<Lexeme> lexemes) {
+			foreach (var lexeme in lexemes) { }
+			throw new NotImplementedException();
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool TryParse(IEnumerable<Lexeme> lexemes, out AbstractSyntaxTree? ast) {
+			try {
+				ast = Parse(lexemes);
+				return true;
+			}
+			catch {
+				ast = null;
+				return false;
+			}
+		}
 	}
 }

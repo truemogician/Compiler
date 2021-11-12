@@ -1,13 +1,13 @@
 ﻿using System;
 
 namespace Parser {
-	public class AbstractSyntaxTree<TNonterminal, TTerminal> where TNonterminal : struct, Enum where TTerminal : struct, Enum {
-		public AbstractSyntaxTree(SyntaxTreeNode<TNonterminal, TTerminal> root) => Root = root;
+	public class AbstractSyntaxTree {
+		public AbstractSyntaxTree(SyntaxTreeNode root) => Root = root;
 
-		public SyntaxTreeNode<TNonterminal, TTerminal> Root { get; }
+		public SyntaxTreeNode Root { get; }
 
-		public static explicit operator AbstractSyntaxTree<TNonterminal, TTerminal>(SyntaxTreeNode<TNonterminal, TTerminal> node) => new(node);
+		public static explicit operator AbstractSyntaxTree(SyntaxTreeNode node) => new(node);
 
-		public override string ToString() => Root.ToString(0);
+		public override string ToString() => Root.ToString();
 	}
 }

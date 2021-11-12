@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Parser {
-	public class ProductionRule<TNonterminal, TTerminal> where TNonterminal : struct, Enum where TTerminal : struct, Enum {
-		public ProductionRule(TNonterminal nonTerminal, SentenceForm<TNonterminal, TTerminal> sentenceForm) {
+	public class ProductionRule {
+		public ProductionRule(Nonterminal nonTerminal, SentenceForm sentenceForm) {
 			NonTerminal = nonTerminal;
 			Production = sentenceForm;
 		}
 
-		public TNonterminal NonTerminal { get; init; }
+		public Nonterminal NonTerminal { get; init; }
 
-		public SentenceForm<TNonterminal, TTerminal> Production { get; init; }
+		public SentenceForm Production { get; init; }
 
-		public IEnumerable<TNonterminal> InvolvedNonterminals {
+		public IEnumerable<Nonterminal> InvolvedNonterminals {
 			get {
 				yield return NonTerminal;
 				foreach (var n in Production.Nonterminals)
@@ -22,6 +22,6 @@ namespace Parser {
 			}
 		}
 
-		public IEnumerable<Terminal<TTerminal>> InvolvedTerminals => Production.Terminals;
+		public IEnumerable<Terminal> InvolvedTerminals => Production.Terminals;
 	}
 }

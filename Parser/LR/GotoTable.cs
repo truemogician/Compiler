@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 #nullable enable
 namespace Parser.LR {
-	public class GotoTable<TNonterminal, TToken, TItem> where TNonterminal : struct, Enum where TToken : struct, Enum where TItem : IItem<TNonterminal, TToken> {
-		private readonly Dictionary<ItemSetBase<TNonterminal, TToken, TItem>, Dictionary<TNonterminal, ItemSetBase<TNonterminal, TToken, TItem>?>> _table = new();
+	public class GotoTable<TItem> where TItem : ItemBase {
+		private readonly Dictionary<ItemSetBase<TItem>, Dictionary<Nonterminal, ItemSetBase<TItem>?>> _table = new();
 
-		public ItemSetBase<TNonterminal, TToken, TItem>? this[ItemSetBase<TNonterminal, TToken, TItem> set, TNonterminal nonTerminal] {
+		public ItemSetBase<TItem>? this[ItemSetBase<TItem> set, Nonterminal nonTerminal] {
 			get => _table[set][nonTerminal];
 			set {
 				if (!_table.ContainsKey(set))
-					_table[set] = new Dictionary<TNonterminal, ItemSetBase<TNonterminal, TToken, TItem>?> {[nonTerminal] = value};
+					_table[set] = new Dictionary<Nonterminal, ItemSetBase<TItem>?> {[nonTerminal] = value};
 				else
 					_table[set][nonTerminal] = value;
 			}

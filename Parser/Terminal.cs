@@ -4,46 +4,51 @@ using Lexer;
 
 #nullable enable
 namespace Parser {
-	public delegate bool TerminalMatcher<TToken>(Lexeme<TToken> lexeme) where TToken : struct, Enum;
+	/// <summary>
+	/// Determine whether a <paramref name="lexeme"/> belongs to a terminal
+	/// </summary>
+	public delegate bool TerminalMatcher(Lexeme lexeme);
 
-	public class Terminal<TToken> : IEquatable<Terminal<TToken>> where TToken : struct, Enum {
-		private readonly TToken? _type;
+	public class Terminal : IEquatable<Terminal> {
+		private readonly Token? _token;
 
-		private readonly TerminalMatcher<TToken>? _matcher;
+		private readonly TerminalMatcher? _matcher;
 
 		private Terminal() { }
 
-		public Terminal(TToken tokenType) : this(tokenType, _ => true) { }
+		public Terminal(Token token) : this(token, _ => true) { }
 
-		public Terminal(TToken tokenType, TerminalMatcher<TToken> matcher) {
-			_type = tokenType;
+		public Terminal(Token token, TerminalMatcher matcher) {
+			_token = token;
 			_matcher = matcher;
 		}
 
-		public Terminal(TToken tokenType, Regex pattern) : this(tokenType, lexeme => pattern.IsMatch(lexeme.Value)) { }
+		public Terminal(Token token, string pattern) : this(token, lexeme => lexeme == pattern) { }
 
-		public Terminal(TToken tokenType, string pattern) : this(tokenType, new Regex(pattern)) { }
+		public Terminal(Token token, Regex pattern) : this(token, lexeme => pattern.IsMatch(lexeme.Value)) { }
 
-		public static Terminal<TToken> Terminator { get; } = new();
+		public static Terminal Terminator { get; } = new();
 
-		public TToken TokenType => _type ?? throw new NullReferenceException();
+		public Token Token => _token ?? throw new NullReferenceException();
 
-		public bool Match(Lexeme<TToken> lexeme) {
-			if (_type is null || _matcher is null)
+		public bool Match(Lexeme lexeme) {
+			if (_token is null || _matcher is null)
 				throw new InvalidOperationException("Terminator cannot match");
-			return lexeme.Type.Equals(TokenType) && _matcher(lexeme);
+			return lexeme.Token.Equals(Token) && _matcher(lexeme);
 		}
 
-		public bool Equals(Terminal<TToken>? other) {
+		public bool Equals(Terminal? other) {
 			if (other is null)
 				return false;
 			if (ReferenceEquals(this, other))
 				return true;
-			return Nullable.Equals(_type, other._type) && Equals(_matcher, other._matcher);
+			return _token == other._token && Equals(_matcher, other._matcher);
 		}
 
-		public override int GetHashCode() => HashCode.Combine(_type, _matcher);
+		public override int GetHashCode() => HashCode.Combine(_token, _matcher);
 
-		public static implicit operator Terminal<TToken>(TToken tokenType) => new(tokenType);
+		public static implicit operator Terminal(Token tokenType) => new(tokenType);
+
+		public override bool Equals(object? obj) => Equals(obj as Terminal);
 	}
 }

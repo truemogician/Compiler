@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace Parser.LR {
-	public abstract class ItemSetBase<TNonterminal, TToken, TItem> : IList<TItem> where TNonterminal : struct, Enum where TToken : struct, Enum where TItem : IItem<TNonterminal, TToken> {
+	public abstract class ItemSetBase<TItem> : IList<TItem> where TItem : ItemBase {
 		protected readonly List<TItem> Items = new();
 
 		public int Count => Items.Count;

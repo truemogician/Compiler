@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 #nullable enable
 namespace Parser.LR {
-	public class ActionTable<TNonterminal, TToken, TItem> where TNonterminal : struct, Enum where TToken : struct, Enum where TItem : IItem<TNonterminal, TToken> {
-		private readonly Dictionary<ItemSetBase<TNonterminal, TToken, TItem>, Dictionary<Terminal<TToken>, IAction>> _table = new();
+	public class ActionTable<TItem> where TItem : ItemBase {
+		private readonly Dictionary<ItemSetBase<TItem>, Dictionary<Terminal, IAction>> _table = new();
 
-		public IAction this[ItemSetBase<TNonterminal, TToken, TItem> set, Terminal<TToken> token] {
+		public IAction this[ItemSetBase<TItem> set, Terminal token] {
 			get => _table[set][token];
 			set {
 				if (!_table.ContainsKey(set))
-					_table[set] = new Dictionary<Terminal<TToken>, IAction> {[token] = value};
+					_table[set] = new Dictionary<Terminal, IAction> {[token] = value};
 				else
 					_table[set][token] = value;
 			}
@@ -31,11 +31,11 @@ namespace Parser.LR {
 		public ActionType Type { get; }
 	}
 
-	public record ShiftAction<TNonterminal, TToken, TItem>(ItemSetBase<TNonterminal, TToken, TItem> NextState) : IAction where TNonterminal : struct, Enum where TToken : struct, Enum where TItem : IItem<TNonterminal, TToken> {
+	public record ShiftAction<TItem>(ItemSetBase<TItem> NextState) : IAction where TItem : ItemBase {
 		public ActionType Type => ActionType.Shift;
 	}
 
-	public record ReduceAction<TNonterminal, TToken>(ProductionRule<TNonterminal, TToken> ProductionRule) : IAction where TNonterminal : struct, Enum where TToken : struct, Enum {
+	public record ReduceAction(ProductionRule ProductionRule) : IAction {
 		public ActionType Type => ActionType.Reduce;
 	}
 
@@ -51,15 +51,15 @@ namespace Parser.LR {
 		public ActionType Type => ActionType.Error;
 	}
 
-	public class ActionFactory<TNonterminal, TToken, TItem> where TNonterminal : struct, Enum where TToken : struct, Enum where TItem : IItem<TNonterminal, TToken> {
+	public class ActionFactory<TItem> where TItem : ItemBase {
 		protected internal ActionFactory() { }
 
 		public static AcceptAction AcceptAction { get; } = new();
 
 		public static ErrorAction ErrorAction { get; } = new();
 
-		public static ShiftAction<TNonterminal, TToken, TItem> CreateShiftAction(ItemSetBase<TNonterminal, TToken, TItem> nextSet) => new(nextSet);
+		public static ShiftAction<TItem> CreateShiftAction(ItemSetBase<TItem> nextSet) => new(nextSet);
 
-		public static ReduceAction<TNonterminal, TToken> CreateReduceAction(ProductionRule<TNonterminal, TToken> productionRule) => new(productionRule);
+		public static ReduceAction CreateReduceAction(ProductionRule productionRule) => new(productionRule);
 	}
 }
