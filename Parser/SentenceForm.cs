@@ -7,7 +7,11 @@ namespace Parser {
 	public class SentenceForm : IList<Symbol> {
 		private readonly List<Symbol> _list = new();
 
+		private SentenceForm() { }
+
 		public SentenceForm(params Symbol[] items) => _list.AddRange(items);
+
+		public static SentenceForm Empty { get; } = new();
 
 		public int Count => _list.Count;
 

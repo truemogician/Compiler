@@ -1,27 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 
+#nullable enable
 namespace Parser {
-	public class ProductionRule {
-		public ProductionRule(Nonterminal nonTerminal, SentenceForm sentenceForm) {
-			NonTerminal = nonTerminal;
-			Production = sentenceForm;
-		}
-
-		public Nonterminal NonTerminal { get; init; }
-
-		public SentenceForm Production { get; init; }
-
+	public record ProductionRule(Nonterminal Nonterminal, SentenceForm Production) {
 		public IEnumerable<Nonterminal> InvolvedNonterminals {
 			get {
-				yield return NonTerminal;
+				yield return Nonterminal;
 				foreach (var n in Production.Nonterminals)
-					if (!n.Equals(NonTerminal))
+					if (!n.Equals(Nonterminal))
 						yield return n;
 			}
 		}
 
 		public IEnumerable<Terminal> InvolvedTerminals => Production.Terminals;
+
+		public Symbol this[int index] => Production[index];
 	}
 }
