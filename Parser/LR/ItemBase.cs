@@ -1,14 +1,7 @@
 ﻿using System;
 
 namespace Parser.LR {
-	public abstract class ItemBase {
-		protected ItemBase(ProductionRule productionRule, int marker) {
-			ProductionRule = productionRule;
-			Marker = marker;
-		}
-
-		public ProductionRule ProductionRule { get; }
-
-		public int Marker { get; }
+	public abstract record ItemBase(ProductionRule ProductionRule, int Marker) {
+		public Symbol NextSymbol => Marker == ProductionRule.Production.Count ? Terminal.Terminator : ProductionRule[Marker];
 	}
 }
