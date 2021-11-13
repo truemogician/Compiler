@@ -1,16 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="OneOf" Version="3.0.201" />
-    <PackageReference Include="TrueMogician.Exceptions" Version="1.1.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="OneOf" Version="3.0.201" />
+		<PackageReference Include="TrueMogician.Exceptions" Version="1.1.1" />
+		<PackageReference Include="TrueMogician.Extensions.Enumerable" Version="1.2.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Lexer\Lexer.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Lexer\Lexer.csproj" />
+	</ItemGroup>
 
 </Project>

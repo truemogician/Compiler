@@ -20,6 +20,8 @@ namespace Parser {
 
 		public bool IsReadOnly => false;
 
+		public IEnumerable<Nonterminal> SourceNonterminals => _rules.Keys;
+
 		public IEnumerable<Nonterminal> Nonterminals => _rules.SelectMany(pair => pair.Value.SelectMany(pr => pr.InvolvedNonterminals).Append(pair.Key)).Distinct();
 
 		public IEnumerable<Terminal> Terminals => _rules.SelectMany(pair => pair.Value.SelectMany(pr => pr.InvolvedTerminals)).Distinct();
@@ -42,7 +44,12 @@ namespace Parser {
 
 		public void CopyTo(ProductionRule[] array, int arrayIndex) => throw new NotSupportedException();
 
-		public bool Remove(ProductionRule rule) => _rules.ContainsKey(rule.Nonterminal) && _rules[rule.Nonterminal].Remove(rule);
+		public bool Remove(ProductionRule rule) {
+			bool result = _rules.ContainsKey(rule.Nonterminal) && _rules[rule.Nonterminal].Remove(rule);
+			if (result && _rules[rule.Nonterminal].Count == 0)
+				_rules.Remove(rule.Nonterminal);
+			return result;
+		}
 
 		public void AddProductionRule(Nonterminal nonterminal, IEnumerable<SentenceForm> productions) {
 			if (!_rules.ContainsKey(nonterminal))
@@ -54,6 +61,6 @@ namespace Parser {
 
 		public void Simplify() => throw new NotImplementedException();
 
-		public IReadOnlyList<ProductionRule> this[Nonterminal index] => _rules.ContainsKey(index) && _rules[index] is {Count: >0} result ? result : throw new KeyNotFoundException();
+		public IReadOnlyList<ProductionRule> this[Nonterminal index] => _rules.ContainsKey(index) ? _rules[index] : throw new KeyNotFoundException();
 	}
 }
