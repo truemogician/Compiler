@@ -14,6 +14,10 @@ namespace Parser {
 
 		public IEnumerable<Terminal> InvolvedTerminals => Production.Terminals;
 
+		public int Length => Production.Count;
+
+		public bool IsEmpty => Production.Equals(SentenceForm.Empty);
+
 		public Symbol this[int index] => Production[index];
 	}
 }
