@@ -3,16 +3,16 @@ using System.Collections.Generic;
 
 #nullable enable
 namespace Parser.LR {
-	public class GotoTable<TItem> where TItem : ItemBase {
-		private readonly Dictionary<ItemSetBase<TItem>, Dictionary<Nonterminal, ItemSetBase<TItem>?>> _table = new();
+	public abstract class GotoTable<TItem> where TItem : ItemBase {
+		protected readonly Dictionary<ItemSet<TItem>, Dictionary<Nonterminal, ItemSet<TItem>?>> Table = new();
 
-		public ItemSetBase<TItem>? this[ItemSetBase<TItem> set, Nonterminal nonTerminal] {
-			get => _table[set][nonTerminal];
+		internal ItemSet<TItem>? this[ItemSet<TItem> state, Nonterminal nonterminal] {
+			get => Table[state][nonterminal];
 			set {
-				if (!_table.ContainsKey(set))
-					_table[set] = new Dictionary<Nonterminal, ItemSetBase<TItem>?> {[nonTerminal] = value};
+				if (!Table.ContainsKey(state))
+					Table[state] = new Dictionary<Nonterminal, ItemSet<TItem>?> {[nonterminal] = value};
 				else
-					_table[set][nonTerminal] = value;
+					Table[state][nonterminal] = value;
 			}
 		}
 	}

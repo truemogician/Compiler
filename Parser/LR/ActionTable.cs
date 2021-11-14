@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 #nullable enable
 namespace Parser.LR {
-	public class ActionTable<TItem> where TItem : ItemBase {
-		private readonly Dictionary<ItemSetBase<TItem>, Dictionary<Terminal, IAction>> _table = new();
+	public abstract class ActionTable<TItem> where TItem : ItemBase {
+		protected readonly Dictionary<ItemSet<TItem>, Dictionary<Terminal, IAction>> Table = new();
 
-		public IAction this[ItemSetBase<TItem> set, Terminal token] {
-			get => _table[set][token];
+		internal IAction this[ItemSet<TItem> state, Terminal terminal] {
+			get => Table[state][terminal];
 			set {
-				if (!_table.ContainsKey(set))
-					_table[set] = new Dictionary<Terminal, IAction> {[token] = value};
+				if (!Table.ContainsKey(state))
+					Table[state] = new Dictionary<Terminal, IAction> {[terminal] = value};
 				else
-					_table[set][token] = value;
+					Table[state][terminal] = value;
 			}
 		}
 	}
@@ -31,7 +30,7 @@ namespace Parser.LR {
 		public ActionType Type { get; }
 	}
 
-	public record ShiftAction<TItem>(ItemSetBase<TItem> NextState) : IAction where TItem : ItemBase {
+	public record ShiftAction<TItem>(ItemSet<TItem> NextState) : IAction where TItem : ItemBase {
 		public ActionType Type => ActionType.Shift;
 	}
 
@@ -51,14 +50,12 @@ namespace Parser.LR {
 		public ActionType Type => ActionType.Error;
 	}
 
-	public class ActionFactory<TItem> where TItem : ItemBase {
-		protected internal ActionFactory() { }
-
+	public static class ActionFactory<TItem> where TItem : ItemBase {
 		public static AcceptAction AcceptAction { get; } = new();
 
 		public static ErrorAction ErrorAction { get; } = new();
 
-		public static ShiftAction<TItem> CreateShiftAction(ItemSetBase<TItem> nextSet) => new(nextSet);
+		public static ShiftAction<TItem> CreateShiftAction(ItemSet<TItem> nextState) => new(nextState);
 
 		public static ReduceAction CreateReduceAction(ProductionRule productionRule) => new(productionRule);
 	}

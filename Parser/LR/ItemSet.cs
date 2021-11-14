@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 namespace Parser.LR {
-	public abstract class ItemSetBase<TItem> : ISet<TItem> where TItem : ItemBase {
+	public class ItemSet<TItem> : ISet<TItem> where TItem : ItemBase {
 		protected readonly HashSet<TItem> Items = new();
 
 		public IEnumerator<TItem> GetEnumerator() => Items.GetEnumerator();

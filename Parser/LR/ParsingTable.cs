@@ -24,7 +24,7 @@ namespace Parser.LR {
 
 		protected FirstSetCollection FirstSetCollection { get; }
 
-		public IAction this[ItemSetBase<TItem> state, Symbol symbol] {
+		public IAction this[ItemSet<TItem> state, Symbol symbol] {
 			get => symbol.IsTerminal
 				? ActionTable[state, symbol.AsTerminal]
 				: GotoTable[state, symbol.AsNonterminal] is { } nextState
