@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Parser.LR.CLR {
+	using ActionFactory = ActionFactory<Item>;
+	using ItemSet = ItemSet<Item>;
+
 	public class ParsingTable : ParsingTable<Item> {
 		private readonly HashSet<ItemSet> _itemSets = new();
 
@@ -10,9 +13,30 @@ namespace Parser.LR.CLR {
 
 		public ParsingTable(Grammar grammar) : base(grammar) { }
 
-		protected override bool BuildTables(out ActionTable<Item> actionTable, out GotoTable<Item> gotoTable) => throw new NotImplementedException();
+		protected override bool BuildTables(out ActionTable<Item> actionTable, out GotoTable<Item> gotoTable) {
+			CreateItemSets();
+			actionTable = new ActionTable();
+			gotoTable = new GotoTable();
+			var acceptItem = new Item(ExtendedGrammar[ExtendedGrammar.InitialState][0], 1, Terminal.Terminator);
+			foreach (var state in _itemSets) {
+				foreach (var item in state)
+					if (item == acceptItem)
+						actionTable[state, Terminal.Terminator] = ActionFactory.AcceptAction;
+					else if (item.NextSymbol.IsTerminal) {
+						var nextTerminal = item.NextSymbol.AsTerminal;
+						actionTable[state, nextTerminal] = nextTerminal.Equals(Terminal.Terminator)
+							? ActionFactory.CreateShiftAction(Go(state, nextTerminal))
+							: ActionFactory.CreateReduceAction(item.ProductionRule);
+					}
+					else {
+						var nextSymbol = item.NextSymbol;
+						gotoTable[state, nextSymbol.AsNonterminal] = Go(state, nextSymbol);
+					}
+			}
+			return true;
+		}
 
-		protected IEnumerable<ItemSet> CreateItemSets() {
+		protected void CreateItemSets() {
 			var queue = new Queue<ItemSet>();
 			var first = Closure(new Item(ExtendedGrammar[ExtendedGrammar.InitialState][0], 0, Terminal.Terminator));
 			queue.Enqueue(first);
@@ -30,7 +54,6 @@ namespace Parser.LR.CLR {
 					}
 				}
 			}
-			return _itemSets;
 		}
 
 		private ItemSet Closure(IEnumerable<Item> items) {
