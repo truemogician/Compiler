@@ -58,7 +58,7 @@ namespace Parser {
 
 		public string ToString(int indentation) {
 			if (IsLeaf)
-				return Value.AsTerminal.ToString();
+				return Value.AsTerminalInstance.ToString();
 			var builder = new StringBuilder();
 			var indent = new string('\t', indentation);
 			builder.AppendLine($"{indent}<{Value.AsNonterminal}>");
@@ -69,25 +69,35 @@ namespace Parser {
 		}
 
 		public override string ToString() => ToString(0);
+
+		public static implicit operator SyntaxTreeNode(SyntaxTreeValue value) => new(value);
+	}
+
+	public record TerminalInstance(Terminal Terminal, Lexeme Lexeme) {
+		public override string ToString() => Lexeme.ToString();
+
+		public static implicit operator TerminalInstance((Terminal, Lexeme) tuple) => new(tuple.Item1, tuple.Item2);
 	}
 
 	public class SyntaxTreeValue {
 		private readonly Nonterminal? _nonterminal;
 
-		private readonly Lexeme? _lexeme;
+		private readonly TerminalInstance? _terminalInstance;
 
 		public SyntaxTreeValue(Nonterminal nonterminal) => _nonterminal = nonterminal;
 
-		public SyntaxTreeValue(Lexeme lexeme) => _lexeme = lexeme;
+		public SyntaxTreeValue(TerminalInstance terminalInstance) => _terminalInstance = terminalInstance;
 
-		public bool IsTerminal => _lexeme is not null;
+		public SyntaxTreeValue(Terminal terminal, Lexeme lexeme) : this(new TerminalInstance(terminal, lexeme)) { }
 
-		public Lexeme AsTerminal => _lexeme ?? throw new InvalidOperationException($"Not a terminal");
+		public bool IsTerminal => _terminalInstance is not null;
+
+		public TerminalInstance AsTerminalInstance => _terminalInstance ?? throw new InvalidOperationException($"Not a terminal");
 
 		public Nonterminal AsNonterminal => _nonterminal ?? throw new InvalidOperationException($"Not a nonterminal");
 
 		public static implicit operator SyntaxTreeValue(Nonterminal nonterminal) => new(nonterminal);
 
-		public static implicit operator SyntaxTreeValue(Lexeme lexeme) => new(lexeme);
+		public static implicit operator SyntaxTreeValue(TerminalInstance terminalInstance) => new(terminalInstance);
 	}
 }
