@@ -15,18 +15,9 @@ namespace Parser {
 
 		public static SentenceForm Empty { get; } = new();
 
-		public int Count => _list.Count;
-
-		public bool IsReadOnly => false;
-
 		public IEnumerable<Terminal> Terminals => _list.Where(s => s.IsTerminal).Select(s => s.AsTerminal).Distinct();
 
 		public IEnumerable<Nonterminal> Nonterminals => _list.Where(s => !s.IsTerminal).Select(s => s.AsNonterminal).Distinct();
-
-		public Symbol this[int index] {
-			get => _list[index];
-			set => _list[index] = value;
-		}
 
 		public Symbol this[Index index] {
 			get => _list[index];
@@ -44,6 +35,25 @@ namespace Parser {
 				for (var i = 0; i < value.Count; ++i)
 					_list[i + range.Start.Value] = value[i];
 			}
+		}
+
+		public bool Equals(SentenceForm other) {
+			if (other is null)
+				return false;
+			if (ReferenceEquals(this, other))
+				return true;
+			if (_list.Count != other.Count)
+				return false;
+			return !_list.Where((t, i) => !t.Equals(other._list[i])).Any();
+		}
+
+		public int Count => _list.Count;
+
+		public bool IsReadOnly => false;
+
+		public Symbol this[int index] {
+			get => _list[index];
+			set => _list[index] = value;
 		}
 
 		public IEnumerator<Symbol> GetEnumerator() => _list.GetEnumerator();
@@ -65,16 +75,6 @@ namespace Parser {
 		public void Insert(int index, Symbol item) => _list.Insert(index, item);
 
 		public void RemoveAt(int index) => _list.RemoveAt(index);
-
-		public bool Equals(SentenceForm other) {
-			if (other is null)
-				return false;
-			if (ReferenceEquals(this, other))
-				return true;
-			if (_list.Count != other.Count)
-				return false;
-			return !_list.Where((t, i) => !t.Equals(other._list[i])).Any();
-		}
 
 		public override bool Equals(object obj) {
 			if (obj is null)

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Parser {
+﻿namespace Parser {
 	public class AbstractSyntaxTree {
 		public AbstractSyntaxTree(SyntaxTreeNode root) => Root = root;
 

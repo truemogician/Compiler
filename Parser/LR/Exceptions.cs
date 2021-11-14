@@ -5,12 +5,12 @@ using Lexer;
 #nullable enable
 namespace Parser.LR {
 	public class ParserException : Exception {
-		public IEnumerable<Lexeme>? Lexemes { get; }
-
 		public ParserException() { }
 
 		public ParserException(IEnumerable<Lexeme> lexemes) => Lexemes = lexemes;
 
 		public ParserException(IEnumerable<Lexeme> lexemes, string? message = null, Exception? innerException = null) : base(message, innerException) => Lexemes = lexemes;
+
+		public IEnumerable<Lexeme>? Lexemes { get; }
 	}
 }

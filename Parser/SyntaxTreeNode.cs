@@ -9,11 +9,11 @@ using Lexer;
 #nullable enable
 namespace Parser {
 	public class SyntaxTreeNode {
+		private readonly ObservableCollection<SyntaxTreeNode> _children = new();
+
 		private bool _changeParentOnChildrenChanged = true;
 
 		private SyntaxTreeNode? _parent;
-
-		private readonly ObservableCollection<SyntaxTreeNode> _children = new();
 
 		public SyntaxTreeNode(SyntaxTreeValue value) {
 			Value = value;
@@ -92,9 +92,9 @@ namespace Parser {
 
 		public bool IsTerminal => _terminalInstance is not null;
 
-		public TerminalInstance AsTerminalInstance => _terminalInstance ?? throw new InvalidOperationException($"Not a terminal");
+		public TerminalInstance AsTerminalInstance => _terminalInstance ?? throw new InvalidOperationException("Not a terminal");
 
-		public Nonterminal AsNonterminal => _nonterminal ?? throw new InvalidOperationException($"Not a nonterminal");
+		public Nonterminal AsNonterminal => _nonterminal ?? throw new InvalidOperationException("Not a nonterminal");
 
 		public static implicit operator SyntaxTreeValue(Nonterminal nonterminal) => new(nonterminal);
 

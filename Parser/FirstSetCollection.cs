@@ -7,9 +7,9 @@ using TrueMogician.Exceptions;
 #nullable enable
 namespace Parser {
 	public class FirstSetCollection : IReadOnlyDictionary<Nonterminal, HashSet<Terminal?>> {
-		private readonly Dictionary<Nonterminal, HashSet<Terminal?>> _firstSets = new();
-
 		private readonly HashSet<Nonterminal> _emptiableNonterminals = new();
+
+		private readonly Dictionary<Nonterminal, HashSet<Terminal?>> _firstSets = new();
 
 		public FirstSetCollection(Grammar grammar) {
 			SourceGrammar = grammar;
@@ -22,9 +22,15 @@ namespace Parser {
 				}
 		}
 
-		public int Count => _firstSets.Count;
-
 		public Grammar SourceGrammar { get; }
+
+		public HashSet<Terminal?> this[Terminal key] => new() {key};
+
+		public HashSet<Terminal?> this[Symbol key] => key.IsTerminal ? this[key.AsTerminal] : this[key.AsNonterminal];
+
+		public HashSet<Terminal?> this[SentenceForm sentence] => sentence.Count > 0 ? this[sentence[0]] : throw new ArgumentException("Empty symbol has no first set");
+
+		public int Count => _firstSets.Count;
 
 		public IEnumerable<Nonterminal> Keys => _firstSets.Keys;
 
@@ -39,6 +45,8 @@ namespace Parser {
 		#pragma warning disable 8601
 		public bool TryGetValue(Nonterminal key, out HashSet<Terminal?> value) => _firstSets.TryGetValue(key, out value);
 		#pragma warning restore 8601
+
+		public HashSet<Terminal?> this[Nonterminal key] => _firstSets[key];
 
 		private void FindEmptiableNonterminals() {
 			var nonterminalSets = new Dictionary<Nonterminal, HashSet<Nonterminal>[]>();
@@ -87,13 +95,5 @@ namespace Parser {
 				}
 			_firstSets[nonterminal] = result;
 		}
-
-		public HashSet<Terminal?> this[Nonterminal key] => _firstSets[key];
-
-		public HashSet<Terminal?> this[Terminal key] => new() {key};
-
-		public HashSet<Terminal?> this[Symbol key] => key.IsTerminal ? this[key.AsTerminal] : this[key.AsNonterminal];
-
-		public HashSet<Terminal?> this[SentenceForm sentence] => sentence.Count > 0 ? this[sentence[0]] : throw new ArgumentException("Empty symbol has no first set");
 	}
 }

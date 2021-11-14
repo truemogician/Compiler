@@ -41,10 +41,10 @@ namespace Parser.LR {
 
 		public bool Remove(TItem item) => Items.Remove(item);
 
-		public bool Add(TItem item) => Items.Add(item);
-
 		public int Count => Items.Count;
 
 		public bool IsReadOnly => false;
+
+		public bool Add(TItem item) => Items.Add(item);
 	}
 }

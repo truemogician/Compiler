@@ -19,10 +19,6 @@ namespace Parser {
 			InitialState = grammar.InitialState;
 		}
 
-		public int Count => _rules.Count;
-
-		public bool IsReadOnly => false;
-
 		public IEnumerable<Nonterminal> SourceNonterminals => _rules.Keys;
 
 		public IEnumerable<Nonterminal> Nonterminals => _rules.SelectMany(pair => pair.Value.SelectMany(pr => pr.InvolvedNonterminals).Append(pair.Key)).Distinct();
@@ -30,6 +26,12 @@ namespace Parser {
 		public IEnumerable<Terminal> Terminals => _terminals.Values.SelectMany(l => l).Select(tc => tc.Terminal);
 
 		public Nonterminal InitialState { get; set; }
+
+		public IReadOnlyList<ProductionRule> this[Nonterminal index] => _rules.ContainsKey(index) ? _rules[index] : throw new KeyNotFoundException();
+
+		public int Count => _rules.Count;
+
+		public bool IsReadOnly => false;
 
 		public IEnumerator<ProductionRule> GetEnumerator() => _rules.Values.SelectMany(rules => rules).GetEnumerator();
 
@@ -90,22 +92,20 @@ namespace Parser {
 
 		public void Simplify() => throw new NotImplementedException();
 
-		public IReadOnlyList<ProductionRule> this[Nonterminal index] => _rules.ContainsKey(index) ? _rules[index] : throw new KeyNotFoundException();
-
 		private class TerminalCount : IEquatable<TerminalCount> {
 			public TerminalCount(Terminal terminal) => Terminal = terminal;
 
 			public Terminal Terminal { get; }
 
-			public int Count { get; set; } = 0;
-
-			public static implicit operator TerminalCount(Terminal terminal) => new(terminal);
+			public int Count { get; set; }
 
 			public bool Equals(TerminalCount? other) {
 				if (other is null)
 					return false;
 				return ReferenceEquals(this, other) || Terminal.Equals(other.Terminal);
 			}
+
+			public static implicit operator TerminalCount(Terminal terminal) => new(terminal);
 
 			public override bool Equals(object? obj) {
 				if (obj is null)

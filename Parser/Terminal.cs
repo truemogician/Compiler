@@ -5,14 +5,14 @@ using Lexer;
 #nullable enable
 namespace Parser {
 	/// <summary>
-	/// Determine whether a <paramref name="lexeme"/> belongs to a terminal
+	///     Determine whether a <paramref name="lexeme" /> belongs to a terminal
 	/// </summary>
 	public delegate bool TerminalMatcher(Lexeme lexeme);
 
 	public class Terminal : IEquatable<Terminal> {
-		private readonly Token? _token;
-
 		private readonly TerminalMatcher? _matcher;
+
+		private readonly Token? _token;
 
 		private Terminal() { }
 
@@ -31,18 +31,18 @@ namespace Parser {
 
 		public Token Token => _token ?? throw new NullReferenceException();
 
-		public bool Match(Lexeme lexeme) {
-			if (_token is null || _matcher is null)
-				throw new InvalidOperationException("Terminator cannot match");
-			return lexeme.Token.Equals(Token) && _matcher(lexeme);
-		}
-
 		public bool Equals(Terminal? other) {
 			if (other is null)
 				return false;
 			if (ReferenceEquals(this, other))
 				return true;
 			return _token == other._token && Equals(_matcher, other._matcher);
+		}
+
+		public bool Match(Lexeme lexeme) {
+			if (_token is null || _matcher is null)
+				throw new InvalidOperationException("Terminator cannot match");
+			return lexeme.Token.Equals(Token) && _matcher(lexeme);
 		}
 
 		public override int GetHashCode() => HashCode.Combine(_token, _matcher);
