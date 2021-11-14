@@ -16,6 +16,8 @@ namespace Parser.LR {
 
 		public Grammar Grammar { get; }
 
+		public abstract ItemSet<TItem> InitialState { get; }
+
 		public ActionTable<TItem> ActionTable { get; }
 
 		public GotoTable<TItem> GotoTable { get; }

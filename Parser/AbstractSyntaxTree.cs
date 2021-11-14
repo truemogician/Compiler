@@ -6,7 +6,7 @@ namespace Parser {
 
 		public SyntaxTreeNode Root { get; }
 
-		public static explicit operator AbstractSyntaxTree(SyntaxTreeNode node) => new(node);
+		public static implicit operator AbstractSyntaxTree(SyntaxTreeNode node) => new(node);
 
 		public override string ToString() => Root.ToString();
 	}

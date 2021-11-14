@@ -13,11 +13,15 @@ namespace Parser.LR.CLR {
 
 		public ParsingTable(Grammar grammar) : base(grammar) { }
 
+		public override ItemSet InitialState => Closure(new Item(InitialProductionRule, 0, Terminal.Terminator));
+
+		private ProductionRule InitialProductionRule => ExtendedGrammar[ExtendedGrammar.InitialState][0];
+
 		protected override bool BuildTables(out ActionTable<Item> actionTable, out GotoTable<Item> gotoTable) {
 			CreateItemSets();
 			actionTable = new ActionTable();
 			gotoTable = new GotoTable();
-			var acceptItem = new Item(ExtendedGrammar[ExtendedGrammar.InitialState][0], 1, Terminal.Terminator);
+			var acceptItem = new Item(InitialProductionRule, 1, Terminal.Terminator);
 			foreach (var state in _itemSets) {
 				foreach (var item in state)
 					if (item == acceptItem)
@@ -38,7 +42,7 @@ namespace Parser.LR.CLR {
 
 		protected void CreateItemSets() {
 			var queue = new Queue<ItemSet>();
-			var first = Closure(new Item(ExtendedGrammar[ExtendedGrammar.InitialState][0], 0, Terminal.Terminator));
+			var first = InitialState;
 			queue.Enqueue(first);
 			_itemSets.Add(first);
 			while (queue.Count > 0) {
