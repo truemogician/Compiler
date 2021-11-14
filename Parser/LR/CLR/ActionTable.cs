@@ -1,7 +1,11 @@
-﻿using System;
+﻿namespace Parser.LR.CLR {
+	using ActionFactory = ActionFactory<Item>;
+	using ItemSet = ItemSet<Item>;
 
-namespace Parser.LR.CLR {
-	public class ActionTable : ActionTable<Item> { }
-
-	public class ActionFactory : ActionFactory<Item> { }
+	public class ActionTable : ActionTable<Item> {
+		public IAction this[ItemSet state, Terminal terminal] {
+			get => Table.ContainsKey(state) && Table[state].ContainsKey(terminal) ? Table[state][terminal] : ActionFactory.ErrorAction;
+			set => base[state, terminal] = value;
+		}
+	}
 }
