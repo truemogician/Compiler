@@ -82,6 +82,12 @@ namespace Parser {
 
 		public void AddProductionRule(Nonterminal nonterminal, params SentenceForm[] productions) => AddProductionRule(nonterminal, productions.AsEnumerable());
 
+		public void AddProductionRule(Nonterminal nonterminal, RegularSentenceForm regularSentenceForm) {
+			if (!_rules.ContainsKey(nonterminal))
+				_rules.Add(nonterminal, new List<ProductionRule>());
+			_rules[nonterminal].AddRange(regularSentenceForm.GenerateGrammar(nonterminal));
+		}
+
 		public Terminal? Match(Lexeme lexeme, bool checkAmbiguity = false) {
 			if (!_terminals.ContainsKey(lexeme.Token))
 				return null;
