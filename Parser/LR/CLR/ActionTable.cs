@@ -3,7 +3,7 @@
 	using ItemSet = ItemSet<Item>;
 
 	public class ActionTable : ActionTable<Item> {
-		public IAction this[ItemSet state, Terminal terminal] {
+		public override IAction this[ItemSet state, Terminal terminal] {
 			get => Table.ContainsKey(state) && Table[state].ContainsKey(terminal) ? Table[state][terminal] : ActionFactory.ErrorAction;
 			set => base[state, terminal] = value;
 		}

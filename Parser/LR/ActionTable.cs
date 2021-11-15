@@ -5,7 +5,7 @@ namespace Parser.LR {
 	public abstract class ActionTable<TItem> where TItem : ItemBase {
 		protected readonly Dictionary<ItemSet<TItem>, Dictionary<Terminal, IAction>> Table = new();
 
-		internal IAction this[ItemSet<TItem> state, Terminal terminal] {
+		public virtual IAction this[ItemSet<TItem> state, Terminal terminal] {
 			get => Table[state][terminal];
 			set {
 				if (!Table.ContainsKey(state))
