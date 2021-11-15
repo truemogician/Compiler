@@ -4,14 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Parser {
-	public class SentenceForm : IList<Symbol>, IEquatable<SentenceForm> {
-		private readonly List<Symbol> _list = new();
+	public class SentenceForm : IReadOnlyList<Symbol>, IEquatable<SentenceForm> {
+		private readonly List<Symbol> _list;
 
-		private SentenceForm() { }
+		private SentenceForm() => _list = new List<Symbol>();
 
 		public SentenceForm(IEnumerable<Symbol> items) : this(items.ToArray()) { }
 
-		public SentenceForm(params Symbol[] items) => _list.AddRange(items);
+		public SentenceForm(params Symbol[] items) => _list = new List<Symbol>(items);
 
 		public static SentenceForm Empty { get; } = new();
 
@@ -19,10 +19,7 @@ namespace Parser {
 
 		public IEnumerable<Nonterminal> Nonterminals => _list.Where(s => !s.IsTerminal).Select(s => s.AsNonterminal).Distinct();
 
-		public Symbol this[Index index] {
-			get => _list[index];
-			set => _list[index] = value;
-		}
+		public Symbol this[Index index] => _list[index];
 
 		public SentenceForm this[Range range] {
 			get {
@@ -31,7 +28,8 @@ namespace Parser {
 					arr[i] = _list[i + range.Start.Value];
 				return new SentenceForm(arr);
 			}
-			set {
+			//Bug: different length
+			private set {
 				for (var i = 0; i < value.Count; ++i)
 					_list[i + range.Start.Value] = value[i];
 			}
@@ -49,32 +47,11 @@ namespace Parser {
 
 		public int Count => _list.Count;
 
-		public bool IsReadOnly => false;
-
-		public Symbol this[int index] {
-			get => _list[index];
-			set => _list[index] = value;
-		}
+		public Symbol this[int index] => _list[index];
 
 		public IEnumerator<Symbol> GetEnumerator() => _list.GetEnumerator();
 
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-		public void Add(Symbol item) => _list.Add(item);
-
-		public void Clear() => _list.Clear();
-
-		public bool Contains(Symbol item) => _list.Contains(item);
-
-		public void CopyTo(Symbol[] array, int arrayIndex) => _list.CopyTo(array, arrayIndex);
-
-		public bool Remove(Symbol item) => _list.Remove(item);
-
-		public int IndexOf(Symbol item) => _list.IndexOf(item);
-
-		public void Insert(int index, Symbol item) => _list.Insert(index, item);
-
-		public void RemoveAt(int index) => _list.RemoveAt(index);
 
 		public override bool Equals(object obj) {
 			if (obj is null)
@@ -105,5 +82,17 @@ namespace Parser {
 		public static SentenceForm operator +(Terminal left, SentenceForm right) => (SentenceForm)left + right;
 
 		public static SentenceForm operator +(SentenceForm left, Terminal right) => left + (SentenceForm)right;
+
+		public static SentenceForm operator *(SentenceForm self, int count) {
+			switch (count) {
+				case < 0: throw new ArgumentOutOfRangeException(nameof(count));
+				case 0:   return Empty;
+			}
+			var result = new SentenceForm(self);
+			var operand = new SentenceForm(self);
+			while (--count > 0)
+				result += operand;
+			return result;
+		}
 	}
 }
