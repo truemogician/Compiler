@@ -60,11 +60,16 @@ namespace Parser {
 			if (IsLeaf)
 				return Value.AsTerminalInstance.ToString();
 			var builder = new StringBuilder();
-			var indent = new string('\t', indentation);
-			builder.AppendLine($"{indent}<{Value.AsNonterminal}>");
-			foreach (var child in Children)
-				builder.AppendLine(child.ToString(indentation + 1));
-			builder.AppendLine($"{indent}</{Value.AsNonterminal}>");
+			if (!Value.IsTerminal && Value.AsNonterminal.Temporary)
+				foreach (var child in Children)
+					builder.AppendLine(child.ToString(indentation));
+			else {
+				var indent = new string('\t', indentation);
+				builder.AppendLine($"{indent}<{Value.AsNonterminal}>");
+				foreach (var child in Children)
+					builder.AppendLine(child.ToString(indentation + 1));
+				builder.AppendLine($"{indent}</{Value.AsNonterminal}>");
+			}
 			return builder.ToString();
 		}
 
