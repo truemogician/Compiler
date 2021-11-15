@@ -14,7 +14,7 @@ namespace Parser.LR.CLR {
 
 		public override ItemSet InitialState => Closure(new Item(InitialProductionRule, 0, Terminal.Terminator));
 
-		private ProductionRule InitialProductionRule => ExtendedGrammar[ExtendedGrammar.InitialState][0];
+		private ProductionRule InitialProductionRule => ExtendedGrammar[ExtendedGrammar.InitialState].Single();
 
 		protected override bool BuildTables(out ActionTable<Item> actionTable, out GotoTable<Item> gotoTable) {
 			CreateItemSets();

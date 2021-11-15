@@ -3,11 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Lexer;
+using TrueMogician.Extensions.Enumerable;
 
 #nullable enable
 namespace Parser {
-	public class Grammar : ICollection<ProductionRule> {
-		private readonly Dictionary<Nonterminal, List<ProductionRule>> _rules = new();
+	public class Grammar : ISet<ProductionRule> {
+		private readonly Dictionary<Nonterminal, HashSet<ProductionRule>> _rules = new();
 
 		private readonly Dictionary<Token, HashSet<TerminalCount>> _terminals = new();
 
@@ -15,7 +16,7 @@ namespace Parser {
 
 		public Grammar(Grammar grammar) {
 			foreach (var (nonterminal, rules) in grammar._rules)
-				_rules.Add(nonterminal, new List<ProductionRule>(rules));
+				_rules.Add(nonterminal, new HashSet<ProductionRule>(rules));
 			InitialState = grammar.InitialState;
 		}
 
@@ -27,9 +28,9 @@ namespace Parser {
 
 		public Nonterminal InitialState { get; set; }
 
-		public IReadOnlyList<ProductionRule> this[Nonterminal index] => _rules.ContainsKey(index) ? _rules[index] : throw new KeyNotFoundException();
+		public IReadOnlySet<ProductionRule> this[Nonterminal index] => _rules.ContainsKey(index) ? _rules[index] : throw new KeyNotFoundException();
 
-		public int Count => _rules.Count;
+		public int Count => _rules.Sum(pair => pair.Value.Count);
 
 		public bool IsReadOnly => false;
 
@@ -37,19 +38,67 @@ namespace Parser {
 
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-		public void Add(ProductionRule rule) {
-			if (!_rules.ContainsKey(rule.Nonterminal))
-				_rules[rule.Nonterminal] = new List<ProductionRule>();
-			_rules[rule.Nonterminal].Add(rule);
-			foreach (var terminal in rule.InvolvedTerminals) {
-				var token = terminal.Token;
-				if (!_terminals.ContainsKey(token))
-					_terminals[token] = new HashSet<TerminalCount>();
-				if (_terminals[token].TryGetValue(terminal, out var tc))
-					++tc.Count;
+		public void Add(ProductionRule rule) => ((ISet<ProductionRule>)this).Add(rule);
+
+		public void ExceptWith(IEnumerable<ProductionRule> other) {
+			foreach (var group in other.GroupBy(pr => pr.Nonterminal))
+				if (_rules.ContainsKey(group.Key))
+					_rules[group.Key].ExceptWith(group);
+		}
+
+		public void IntersectWith(IEnumerable<ProductionRule> other) {
+			foreach (var group in other.GroupBy(pr => pr.Nonterminal))
+				if (_rules.ContainsKey(group.Key))
+					_rules[group.Key].IntersectWith(group);
+		}
+
+		public bool IsProperSubsetOf(IEnumerable<ProductionRule> other) {
+			var arr = other.ToArray();
+			return arr.Length < Count && IsSubsetOf(arr);
+		}
+
+		public bool IsProperSupersetOf(IEnumerable<ProductionRule> other) {
+			var arr = other.ToArray();
+			return arr.Length > Count && IsSupersetOf(arr);
+		}
+
+		public bool IsSubsetOf(IEnumerable<ProductionRule> other) => other.GroupBy(pr => pr.Nonterminal).All(group => _rules.ContainsKey(group.Key) && _rules[group.Key].IsSubsetOf(group));
+
+		public bool IsSupersetOf(IEnumerable<ProductionRule> other) => other.GroupBy(pr => pr.Nonterminal).All(group => _rules.ContainsKey(group.Key) && _rules[group.Key].IsSupersetOf(group));
+
+		public bool Overlaps(IEnumerable<ProductionRule> other) => other.GroupBy(pr => pr.Nonterminal).Any(group => _rules.ContainsKey(group.Key) && _rules[group.Key].Overlaps(group));
+
+		public bool SetEquals(IEnumerable<ProductionRule> other) => other.GroupBy(pr => pr.Nonterminal).All(group => _rules.ContainsKey(group.Key) && _rules[group.Key].SetEquals(group));
+
+		public void SymmetricExceptWith(IEnumerable<ProductionRule> other) {
+			foreach (var group in other.GroupBy(pr => pr.Nonterminal))
+				if (_rules.ContainsKey(group.Key))
+					_rules[group.Key].SymmetricExceptWith(group);
+		}
+
+		public void UnionWith(IEnumerable<ProductionRule> other) {
+			foreach (var group in other.GroupBy(pr => pr.Nonterminal))
+				if (!_rules.ContainsKey(@group.Key))
+					_rules[@group.Key] = new HashSet<ProductionRule>(@group);
 				else
-					_terminals[token].Add(terminal);
-			}
+					_rules[@group.Key].UnionWith(@group);
+		}
+
+		bool ISet<ProductionRule>.Add(ProductionRule rule) {
+			if (!_rules.ContainsKey(rule.Nonterminal))
+				_rules[rule.Nonterminal] = new HashSet<ProductionRule>();
+			bool result = _rules[rule.Nonterminal].Add(rule);
+			if (result)
+				foreach (var terminal in rule.InvolvedTerminals) {
+					var token = terminal.Token;
+					if (!_terminals.ContainsKey(token))
+						_terminals[token] = new HashSet<TerminalCount>();
+					if (_terminals[token].TryGetValue(terminal, out var tc))
+						++tc.Count;
+					else
+						_terminals[token].Add(terminal);
+				}
+			return result;
 		}
 
 		public void Clear() => _rules.Clear();
@@ -76,16 +125,16 @@ namespace Parser {
 
 		public void AddProductionRule(Nonterminal nonterminal, IEnumerable<SentenceForm> productions) {
 			if (!_rules.ContainsKey(nonterminal))
-				_rules.Add(nonterminal, new List<ProductionRule>());
-			_rules[nonterminal].AddRange(productions.Select(p => new ProductionRule(nonterminal, p)));
+				_rules.Add(nonterminal, new HashSet<ProductionRule>());
+			_rules[nonterminal].UnionWith(productions.Select(p => new ProductionRule(nonterminal, p)));
 		}
 
 		public void AddProductionRule(Nonterminal nonterminal, params SentenceForm[] productions) => AddProductionRule(nonterminal, productions.AsEnumerable());
 
 		public void AddProductionRule(Nonterminal nonterminal, RegularSentenceForm regularSentenceForm) {
 			if (!_rules.ContainsKey(nonterminal))
-				_rules.Add(nonterminal, new List<ProductionRule>());
-			_rules[nonterminal].AddRange(regularSentenceForm.GenerateGrammar(nonterminal));
+				_rules.Add(nonterminal, new HashSet<ProductionRule>());
+			_rules[nonterminal].UnionWith(regularSentenceForm.GenerateGrammar(nonterminal));
 		}
 
 		public Terminal? Match(Lexeme lexeme, bool checkAmbiguity = false) {
@@ -96,10 +145,42 @@ namespace Parser {
 				: _terminals[lexeme.Token].FirstOrDefault(tc => tc.Terminal.Match(lexeme)))?.Terminal;
 		}
 
-		public void Simplify() => throw new NotImplementedException();
+		public void Simplify(bool mergeTempNonterminals = true) {
+			//Remove self productions
+			foreach (var (src, prs) in _rules)
+				prs.Where(pr => pr.Length == 1 && !pr[0].IsTerminal && pr[0].AsNonterminal == src).Each(pr => prs.Remove(pr));
+			//Remove unreachable productions
+			var queue = new Queue<Nonterminal>();
+			var unreachableNonterminals = new HashSet<Nonterminal>(SourceNonterminals);
+			queue.Enqueue(InitialState);
+			while (queue.Count > 0) {
+				var cur = queue.Dequeue();
+				unreachableNonterminals.Remove(cur);
+				foreach (var nt in _rules[cur].SelectMany(pr => pr.InvolvedNonterminals).Distinct())
+					if (!unreachableNonterminals.Contains(nt))
+						queue.Enqueue(nt);
+			}
+			foreach (var nt in unreachableNonterminals)
+				_rules.Remove(nt);
+			var srcs = SourceNonterminals.ToList();
+			do {
+				var removed = false;
+				foreach (var (src, prs) in _rules) {
+					foreach (var pr in prs.Where(pr => pr.Production.Any(s => !s.IsTerminal && !srcs.Contains(s.AsNonterminal))))
+						prs.Remove(pr);
+					if (prs.Count == 0) {
+						removed = true;
+						_rules.Remove(src);
+					}
+				}
+				if (!removed)
+					break;
+			} while (true);
+			//Remove unterminatable productions
+		}
 
 		private class TerminalCount : IEquatable<TerminalCount> {
-			public TerminalCount(Terminal terminal) => Terminal = terminal;
+			private TerminalCount(Terminal terminal) => Terminal = terminal;
 
 			public Terminal Terminal { get; }
 
