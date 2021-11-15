@@ -45,10 +45,12 @@ namespace Parser {
 			return lexeme.Token.Equals(Token) && _matcher(lexeme);
 		}
 
+		public override bool Equals(object? obj) => Equals(obj as Terminal);
+
 		public override int GetHashCode() => HashCode.Combine(_token, _matcher);
 
 		public static implicit operator Terminal(Token tokenType) => new(tokenType);
 
-		public override bool Equals(object? obj) => Equals(obj as Terminal);
+		public static SentenceForm operator +(Terminal left, Symbol right) => (SentenceForm)left + right;
 	}
 }

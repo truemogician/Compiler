@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Lexer;
 
 #nullable enable
 namespace Parser {
@@ -93,7 +94,7 @@ namespace Parser {
 
 		public static RegularSentenceForm operator *(RegularSentenceForm self, int count) => new(self) {RepeatRange = (count, count)};
 
-		public static RegularSentenceForm operator *(RegularSentenceForm self, (int, int) range) => new(self) {RepeatRange = range};
+		public static RegularSentenceForm operator *(RegularSentenceForm self, (int, int?) range) => new(self) {RepeatRange = range};
 
 		public static RegularSentenceForm operator +(RegularSentenceForm left, RegularSentenceForm right) => new(left, RegularOperator.Concatenation, right);
 
@@ -108,6 +109,18 @@ namespace Parser {
 		public static RegularSentenceForm operator |(SentenceForm left, RegularSentenceForm right) => new(left, RegularOperator.Or, right);
 
 		public static implicit operator RegularSentenceForm(SentenceForm sentenceForm) => new(sentenceForm);
+
+		public static explicit operator RegularSentenceForm(Symbol symbol) => new(symbol);
+
+		public static explicit operator RegularSentenceForm(Nonterminal nonterminal) => new(nonterminal);
+
+		public static explicit operator RegularSentenceForm(string nonterminal) => new(nonterminal);
+
+		public static explicit operator RegularSentenceForm(Enum nonterminal) => new(nonterminal);
+
+		public static explicit operator RegularSentenceForm(Terminal terminal) => new(terminal);
+
+		public static explicit operator RegularSentenceForm(Token token) => new(token);
 
 		public enum RegularOperator : byte {
 			Concatenation,

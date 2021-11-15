@@ -1,4 +1,5 @@
 ﻿using System;
+using Lexer;
 
 #nullable enable
 namespace Parser {
@@ -29,10 +30,6 @@ namespace Parser {
 
 		public override string? ToString() => IsTerminal ? AsTerminal.ToString() : AsNonterminal.ToString();
 
-		public static implicit operator Symbol(Nonterminal nonterminal) => new(nonterminal);
-
-		public static implicit operator Symbol(Terminal terminal) => new(terminal);
-
 		public override bool Equals(object? obj) {
 			if (obj is null)
 				return false;
@@ -42,5 +39,17 @@ namespace Parser {
 		}
 
 		public override int GetHashCode() => HashCode.Combine(_nonterminal, _terminal);
+
+		public static implicit operator Symbol(Nonterminal nonterminal) => new(nonterminal);
+
+		public static implicit operator Symbol(string nonterminal) => new(nonterminal);
+
+		public static implicit operator Symbol(Enum nonterminal) => new(nonterminal);
+
+		public static implicit operator Symbol(Terminal terminal) => new(terminal);
+
+		public static implicit operator Symbol(Token token) => new(token);
+
+		public static SentenceForm operator +(Symbol left, Symbol right) => (SentenceForm)left + right;
 	}
 }

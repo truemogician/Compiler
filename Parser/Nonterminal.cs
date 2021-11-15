@@ -38,5 +38,7 @@ namespace Parser {
 		public static implicit operator Nonterminal(string name) => new(name);
 
 		public static implicit operator Nonterminal(Enum @enum) => new(Enum.GetName(@enum.GetType(), @enum)!);
+
+		public static SentenceForm operator +(Nonterminal left, Symbol right) => (SentenceForm)left + right;
 	}
 }
