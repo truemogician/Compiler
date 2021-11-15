@@ -19,5 +19,7 @@ namespace Parser {
 		public bool IsEmpty => Production.Equals(SentenceForm.Empty);
 
 		public Symbol this[int index] => Production[index];
+
+		public override string ToString() => $"<{Nonterminal}> -> {Production}";
 	}
 }

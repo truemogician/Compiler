@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Lexer;
 
 namespace Parser {
@@ -63,6 +64,13 @@ namespace Parser {
 		}
 
 		public override int GetHashCode() => _list != null ? _list.GetHashCode() : 0;
+
+		public override string ToString() {
+			var builder = new StringBuilder();
+			foreach (var symbol in _list)
+				builder.Append(symbol.IsTerminal ? $"{{{symbol}}}" : $"<{symbol}>");
+			return builder.ToString();
+		}
 
 		public static implicit operator SentenceForm(Symbol symbol) => new(symbol);
 

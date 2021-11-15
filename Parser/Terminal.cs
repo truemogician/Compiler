@@ -49,6 +49,8 @@ namespace Parser {
 
 		public override int GetHashCode() => HashCode.Combine(_token, _matcher);
 
+		public override string ToString() => _token is null ? "＃" : _token.Name;
+
 		public static implicit operator Terminal(Token tokenType) => new(tokenType);
 
 		public static SentenceForm operator +(Terminal left, Symbol right) => (SentenceForm)left + right;
