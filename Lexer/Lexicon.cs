@@ -17,6 +17,11 @@ namespace Lexer {
 			set => _tokens[type] = value;
 		}
 
+		public Token this[Enum index] {
+			get => _tokens[Enum.GetName(index.GetType(), index)!];
+			set => _tokens[Enum.GetName(index.GetType(), index)!] = value;
+		}
+
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 		public IEnumerator<Token> GetEnumerator() => _tokens.Values.GetEnumerator();

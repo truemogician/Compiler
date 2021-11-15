@@ -93,5 +93,17 @@ namespace Parser {
 		public static implicit operator SentenceForm(Terminal terminal) => new(terminal);
 
 		public static SentenceForm operator +(SentenceForm left, SentenceForm right) => new(left._list.Concat(right._list).ToArray());
+
+		public static SentenceForm operator +(Symbol left, SentenceForm right) => (SentenceForm)left + right;
+
+		public static SentenceForm operator +(SentenceForm left, Symbol right) => left + (SentenceForm)right;
+
+		public static SentenceForm operator +(Nonterminal left, SentenceForm right) => (SentenceForm)left + right;
+
+		public static SentenceForm operator +(SentenceForm left, Nonterminal right) => left + (SentenceForm)right;
+
+		public static SentenceForm operator +(Terminal left, SentenceForm right) => (SentenceForm)left + right;
+
+		public static SentenceForm operator +(SentenceForm left, Terminal right) => left + (SentenceForm)right;
 	}
 }
