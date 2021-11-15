@@ -4,14 +4,12 @@ using Lexer;
 
 namespace CMinusMinus {
 	public partial class CMinusMinus {
-		public static readonly string[] Keywords = {"char", "short", "int", "long", "float", "double", "void", "if", "else", "do", "while", "return"};
-
 		public Lexer.Lexer Lexer { get; } = new();
 
 		private void InitializeLexer() {
-			var keywordToken = new Token(TokenType.Keyword, new Regex($@"{string.Join('|', Keywords)}"), Keywords.Max(k => k.Length));
+			var keywordToken = new Token(TokenType.Keyword, new Regex($@"{string.Join('|', Keywords.Select(k => k.Value))}"), Keywords.Max(k => k.Value.Length));
 			Lexer.AddToken(keywordToken);
-			var identifierPattern = new Regex($@"^@({string.Join('|', Keywords)})|^[a-zA-Z_][a-zA-Z0-9_]*", RegexOptions.Compiled);
+			var identifierPattern = new Regex($@"^@({string.Join('|', Keywords.Select(k => k.Value))})|^[a-zA-Z_][a-zA-Z0-9_]*", RegexOptions.Compiled);
 			Lexer.AddToken(
 				TokenType.Identifier,
 				code => keywordToken.Match(code) is not null ? null : identifierPattern.Match(code)
@@ -22,7 +20,7 @@ namespace CMinusMinus {
 			Lexer.AddToken(TokenType.CharacterLiteral, new Regex($@"'(?:[^\\']|{escapedCharPattern})'"), 8);
 			Lexer.AddToken(TokenType.StringLiteral, new Regex($@"L?""(?:[^\\""]|{escapedCharPattern})*"""));
 			Lexer.AddToken(TokenType.AssignmentOperator, '=');
-			Lexer.AddToken(TokenType.ArithmeticOperator, new Regex(@"[-+*/%^&|]|<<|>>>?"), 3);
+			Lexer.AddToken(TokenType.ArithmeticOperator, new Regex(@"[-+*/%]|<<|>>>?"), 3);
 			Lexer.AddToken(TokenType.ComparisonOperator, new Regex(@"[<>]|[<>=!]="), 2);
 			Lexer.AddToken(TokenType.LogicalOperator, new Regex(@"&&|\|\|"), 2);
 			Lexer.AddToken(TokenType.SentenceTerminator, ';');
