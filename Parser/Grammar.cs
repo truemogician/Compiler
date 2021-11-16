@@ -145,22 +145,22 @@ namespace Parser {
 				: _terminals[lexeme.Token].FirstOrDefault(tc => tc.Terminal.Match(lexeme)))?.Terminal;
 		}
 
-		public void Simplify(bool mergeTempNonterminals = true) {
+		public void Simplify() {
 			//Remove self productions
 			foreach (var (src, prs) in _rules)
 				prs.Where(pr => pr.Length == 1 && !pr[0].IsTerminal && pr[0].AsNonterminal == src).Each(pr => prs.Remove(pr));
 			//Remove unreachable productions
 			var queue = new Queue<Nonterminal>();
-			var unreachableNonterminals = new HashSet<Nonterminal>(SourceNonterminals);
+			var set = new HashSet<Nonterminal>(SourceNonterminals);
 			queue.Enqueue(InitialState);
 			while (queue.Count > 0) {
 				var cur = queue.Dequeue();
-				unreachableNonterminals.Remove(cur);
+				set.Remove(cur);
 				foreach (var nt in _rules[cur].SelectMany(pr => pr.InvolvedNonterminals).Distinct())
-					if (unreachableNonterminals.Contains(nt))
+					if (set.Contains(nt))
 						queue.Enqueue(nt);
 			}
-			foreach (var nt in unreachableNonterminals)
+			foreach (var nt in set)
 				_rules.Remove(nt);
 			var srcs = SourceNonterminals.ToList();
 			do {
@@ -177,6 +177,19 @@ namespace Parser {
 					break;
 			} while (true);
 			//Remove unterminatable productions
+			foreach (var (src, prs) in _rules)
+				if (prs.Any(pr => pr.IsEmpty || pr.Production.All(s => s.IsTerminal)))
+					queue.Enqueue(src);
+			set = new HashSet<Nonterminal>(SourceNonterminals);
+			while (queue.Count > 0) {
+				while (queue.Count > 0)
+					set.Remove(queue.Dequeue());
+				foreach (var nt in set.Where(nt => _rules[nt].Any(pr => pr.Production.All(s => s.IsTerminal || !set.Contains(s.AsNonterminal)))))
+					queue.Enqueue(nt);
+			}
+			set.Each(nt => _rules.Remove(nt));
+			foreach (var prs in _rules.Values)
+				prs.Where(pr => pr.Production.Any(s => !s.IsTerminal && set.Contains(s.AsNonterminal))).Each(pr => prs.Remove(pr));
 		}
 
 		private class TerminalCount : IEquatable<TerminalCount> {
