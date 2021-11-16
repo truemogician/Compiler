@@ -78,10 +78,10 @@ namespace Parser {
 
 		public void UnionWith(IEnumerable<ProductionRule> other) {
 			foreach (var group in other.GroupBy(pr => pr.Nonterminal))
-				if (!_rules.ContainsKey(@group.Key))
-					_rules[@group.Key] = new HashSet<ProductionRule>(@group);
+				if (!_rules.ContainsKey(group.Key))
+					_rules[group.Key] = new HashSet<ProductionRule>(group);
 				else
-					_rules[@group.Key].UnionWith(@group);
+					_rules[group.Key].UnionWith(group);
 		}
 
 		bool ISet<ProductionRule>.Add(ProductionRule rule) {
@@ -134,7 +134,7 @@ namespace Parser {
 		public void AddProductionRule(Nonterminal nonterminal, RegularSentenceForm regularSentenceForm) {
 			if (!_rules.ContainsKey(nonterminal))
 				_rules.Add(nonterminal, new HashSet<ProductionRule>());
-			_rules[nonterminal].UnionWith(regularSentenceForm.GenerateGrammar(nonterminal));
+			UnionWith(regularSentenceForm.GenerateGrammar(nonterminal));
 		}
 
 		public Terminal? Match(Lexeme lexeme, bool checkAmbiguity = false) {
@@ -157,7 +157,7 @@ namespace Parser {
 				var cur = queue.Dequeue();
 				unreachableNonterminals.Remove(cur);
 				foreach (var nt in _rules[cur].SelectMany(pr => pr.InvolvedNonterminals).Distinct())
-					if (!unreachableNonterminals.Contains(nt))
+					if (unreachableNonterminals.Contains(nt))
 						queue.Enqueue(nt);
 			}
 			foreach (var nt in unreachableNonterminals)
