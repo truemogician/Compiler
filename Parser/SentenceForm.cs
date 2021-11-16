@@ -24,11 +24,18 @@ namespace Parser {
 		public Symbol this[Index index] => _list[index];
 
 		public SentenceForm this[Range range] {
-			get => new(_list.ToArray()[range]);
-			//Bug: different length
-			private set {
-				for (var i = 0; i < value.Count; ++i)
-					_list[i + range.Start.Value] = value[i];
+			get {
+				int start = range.Start.IsFromEnd ? _list.Count - range.Start.Value : range.Start.Value;
+				int end = range.End.IsFromEnd ? _list.Count - range.End.Value : range.End.Value;
+				if (start < 0 || end > _list.Count || start > end)
+					throw new ArgumentOutOfRangeException(nameof(range));
+				return start == end ? Empty : new SentenceForm(_list.GetRange(start, end - start));
+			}
+			internal set {
+				int start = range.Start.IsFromEnd ? _list.Count - range.Start.Value : range.Start.Value;
+				int end = range.End.IsFromEnd ? _list.Count - range.End.Value : range.End.Value;
+				_list.RemoveRange(start, end - start);
+				_list.InsertRange(start, value);
 			}
 		}
 
