@@ -24,12 +24,7 @@ namespace Parser {
 		public Symbol this[Index index] => _list[index];
 
 		public SentenceForm this[Range range] {
-			get {
-				var arr = new Symbol[range.End.Value - range.Start.Value];
-				for (var i = 0; i < arr.Length; ++i)
-					arr[i] = _list[i + range.Start.Value];
-				return new SentenceForm(arr);
-			}
+			get => new(_list.ToArray()[range]);
 			//Bug: different length
 			private set {
 				for (var i = 0; i < value.Count; ++i)
