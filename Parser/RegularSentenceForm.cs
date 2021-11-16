@@ -51,6 +51,9 @@ namespace Parser {
 			var result = new Grammar(initial);
 			foreach (var pr in GenerateProductionRules(initial))
 				result.Add(pr);
+			foreach (var nt in result.SourceNonterminals)
+				if (nt != initial && nt.Temporary && result[nt].Count == 1)
+					result.MergeAndRemove(nt);
 			result.Simplify();
 			return result;
 		}

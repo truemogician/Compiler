@@ -187,9 +187,42 @@ namespace Parser {
 				foreach (var nt in set.Where(nt => _rules[nt].Any(pr => pr.Production.All(s => s.IsTerminal || !set.Contains(s.AsNonterminal)))))
 					queue.Enqueue(nt);
 			}
-			set.Each(nt => _rules.Remove(nt));
-			foreach (var prs in _rules.Values)
-				prs.Where(pr => pr.Production.Any(s => !s.IsTerminal && set.Contains(s.AsNonterminal))).Each(pr => prs.Remove(pr));
+			if (set.Count > 0) {
+				set.Each(nt => _rules.Remove(nt));
+				foreach (var prs in _rules.Values)
+					prs.Where(pr => pr.Production.Any(s => !s.IsTerminal && set.Contains(s.AsNonterminal))).Each(pr => prs.Remove(pr));
+			}
+		}
+
+		public void MergeAndRemove(Nonterminal nonterminal) {
+			if (!_rules.ContainsKey(nonterminal))
+				throw new KeyNotFoundException($"Nonterminal {nonterminal} not found in grammar");
+			if (nonterminal == InitialState)
+				throw new InvalidOperationException("Initial nonterminal cannot be merged");
+			foreach (var (src, prs) in _rules) {
+				if (src == nonterminal)
+					continue;
+				var targets = prs.Where(pr => pr.Production.Contains(nonterminal)).ToArray();
+				foreach (var pr in targets) {
+					prs.UnionWith(ReplaceNonterminal(nonterminal, pr.Production).Select(s => new ProductionRule(src, s)));
+					prs.Remove(pr);
+				}
+			}
+			_rules.Remove(nonterminal);
+		}
+
+		private IEnumerable<SentenceForm> ReplaceNonterminal(Nonterminal nonterminal, SentenceForm sentence, int position = 0) {
+			while (position < sentence.Count && sentence[position] is var cur && (cur.IsTerminal || cur.AsNonterminal != nonterminal))
+				++position;
+			if (position == sentence.Count) {
+				yield return sentence;
+				yield break;
+			}
+			foreach (var stc in from pr in _rules[nonterminal]
+				let newSentence = new SentenceForm(sentence) {[position..(position + 1)] = pr.Production}
+				from stc in ReplaceNonterminal(nonterminal, newSentence, position + pr.Length)
+				select stc)
+				yield return stc;
 		}
 
 		private class TerminalCount : IEquatable<TerminalCount> {
