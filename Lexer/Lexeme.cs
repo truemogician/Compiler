@@ -3,7 +3,7 @@ using Microsoft.Extensions.Primitives;
 
 #nullable enable
 namespace Lexer {
-	public class Lexeme {
+	public class Lexeme : IEquatable<Lexeme> {
 		private readonly StringSegment _segment;
 
 		public Token Token { get; init; }
@@ -25,8 +25,28 @@ namespace Lexer {
 
 		public override string ToString() => $"<{Token}>{Value}</{Token}>";
 
-		public static bool operator ==(Lexeme self, StringSegment stringSegment) => self.Segment == stringSegment;
+		public bool Equals(Lexeme? other) {
+			if (other is null)
+				return false;
+			if (ReferenceEquals(this, other))
+				return true;
+			return _segment.Equals(other._segment) && Token.Equals(other.Token);
+		}
 
-		public static bool operator !=(Lexeme self, StringSegment stringSegment) => self.Segment != stringSegment;
+		public override bool Equals(object? obj) {
+			if (obj is null)
+				return false;
+			if (ReferenceEquals(this, obj))
+				return true;
+			return obj is StringSegment seg
+				? this == seg
+				: obj.GetType() == GetType() && Equals((Lexeme)obj);
+		}
+
+		public override int GetHashCode() => HashCode.Combine(_segment, Token);
+
+		public static bool operator ==(Lexeme self, StringSegment stringSegment) => self._segment == stringSegment;
+
+		public static bool operator !=(Lexeme self, StringSegment stringSegment) => self._segment != stringSegment;
 	}
 }
