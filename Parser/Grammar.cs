@@ -17,6 +17,8 @@ namespace Parser {
 		public Grammar(Grammar grammar) {
 			foreach (var (nonterminal, rules) in grammar._rules)
 				_rules.Add(nonterminal, new HashSet<ProductionRule>(rules));
+			foreach (var (token, set) in grammar._terminals)
+				_terminals.Add(token, new HashSet<TerminalCount>(set));
 			InitialState = grammar.InitialState;
 		}
 
@@ -123,19 +125,11 @@ namespace Parser {
 			return result;
 		}
 
-		public void AddProductionRule(Nonterminal nonterminal, IEnumerable<SentenceForm> productions) {
-			if (!_rules.ContainsKey(nonterminal))
-				_rules.Add(nonterminal, new HashSet<ProductionRule>());
-			_rules[nonterminal].UnionWith(productions.Select(p => new ProductionRule(nonterminal, p)));
-		}
+		public void AddProductionRule(Nonterminal nonterminal, IEnumerable<SentenceForm> productions) => productions.Each(s => Add(new ProductionRule(nonterminal, s)));
 
 		public void AddProductionRule(Nonterminal nonterminal, params SentenceForm[] productions) => AddProductionRule(nonterminal, productions.AsEnumerable());
 
-		public void AddProductionRule(Nonterminal nonterminal, RegularSentenceForm regularSentenceForm) {
-			if (!_rules.ContainsKey(nonterminal))
-				_rules.Add(nonterminal, new HashSet<ProductionRule>());
-			UnionWith(regularSentenceForm.GenerateGrammar(nonterminal));
-		}
+		public void AddProductionRule(Nonterminal nonterminal, RegularSentenceForm regularSentenceForm) => regularSentenceForm.GenerateGrammar(nonterminal).Each(Add);
 
 		public Terminal? Match(Lexeme lexeme, bool checkAmbiguity = false) {
 			if (!_terminals.ContainsKey(lexeme.Token))

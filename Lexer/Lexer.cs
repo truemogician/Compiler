@@ -1,40 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 using Microsoft.Extensions.Primitives;
 
 #nullable enable
 namespace Lexer {
-	public class Lexer {
-		public Lexicon Lexicon { get; } = new();
+	public class Lexer : ILexer {
+		public Lexer(Lexicon lexicon) => Lexicon = lexicon;
 
-		public void AddToken(Token token) => Lexicon.Add(token);
-
-		/// <inheritdoc cref="Token(string, char)"/>
-		public void AddToken(string name, char character) => Lexicon.Add(new Token(name, character));
-
-		/// <inheritdoc cref="Token(string, string)"/>
-		public void AddToken(string name, string pattern) => Lexicon.Add(new Token(name, pattern));
-
-		/// <inheritdoc cref="Token(string, Regex, int)"/>
-		public void AddToken(string name, Regex pattern, int maxLength = 0) => Lexicon.Add(new Token(name, pattern, maxLength));
-
-		/// <inheritdoc cref="Token(string, LexemeMatcher)"/>
-		public void AddToken(string name, LexemeMatcher match) => Lexicon.Add(new Token(name, match));
-
-		/// <inheritdoc cref="Token(Enum, char)"/>
-		public void AddToken(Enum name, char character) => Lexicon.Add(new Token(name, character));
-
-		/// <inheritdoc cref="Token(Enum, string)"/>
-		public void AddToken(Enum name, string pattern) => Lexicon.Add(new Token(name, pattern));
-
-		/// <inheritdoc cref="Token(Enum, Regex, int)"/>
-		public void AddToken(Enum name, Regex pattern, int maxLength = 0) => Lexicon.Add(new Token(name, pattern, maxLength));
-
-		/// <inheritdoc cref="Token(Enum, LexemeMatcher)"/>
-		public void AddToken(Enum name, LexemeMatcher match) => Lexicon.Add(new Token(name, match));
+		public Lexicon Lexicon { get; }
 
 		public IEnumerable<Lexeme> Tokenize(string code, bool checkAmbiguity = false) {
 			var segment = new StringSegment(code);
@@ -56,6 +30,12 @@ namespace Lexer {
 					break;
 			}
 		}
+	}
+
+	public interface ILexer {
+		public Lexicon Lexicon { get; }
+
+		public IEnumerable<Lexeme> Tokenize(string code, bool checkAmbiguity = false);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool TryTokenize(string code, bool checkAmbiguity, out IEnumerable<Lexeme>? tokens) {

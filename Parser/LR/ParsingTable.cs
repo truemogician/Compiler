@@ -4,27 +4,22 @@ using TrueMogician.Exceptions;
 // ReSharper disable VirtualMemberCallInConstructor
 namespace Parser.LR {
 	public abstract class ParsingTable<TItem> where TItem : ItemBase {
+		protected readonly Grammar Grammar;
+
 		protected internal ParsingTable(Grammar grammar) {
 			Grammar = grammar;
-			ExtendedGrammar = ExtendGrammar(grammar);
-			FirstSetCollection = new FirstSetCollection(ExtendedGrammar);
-			if (!BuildTables(out var actionTable, out var gotoTable))
+			if (!Initialize(ExtendGrammar(grammar), out var itemSets, out var actionTable, out var gotoTable))
 				throw new ParserException();
+			ItemSets = itemSets;
 			ActionTable = actionTable;
 			GotoTable = gotoTable;
 		}
-
-		public Grammar Grammar { get; }
-
-		public abstract ItemSet<TItem> InitialState { get; }
 
 		public ActionTable<TItem> ActionTable { get; }
 
 		public GotoTable<TItem> GotoTable { get; }
 
-		protected Grammar ExtendedGrammar { get; }
-
-		protected FirstSetCollection FirstSetCollection { get; }
+		public ItemSetCollectionBase<TItem> ItemSets { get; }
 
 		public IAction this[ItemSet<TItem> state, Symbol symbol] {
 			get => symbol.IsTerminal
@@ -55,6 +50,6 @@ namespace Parser.LR {
 			return newGrammar;
 		}
 
-		protected abstract bool BuildTables(out ActionTable<TItem> actionTable, out GotoTable<TItem> gotoTable);
+		protected abstract bool Initialize(Grammar extendedGrammar, out ItemSetCollectionBase<TItem> itemSets, out ActionTable<TItem> actionTable, out GotoTable<TItem> gotoTable);
 	}
 }
