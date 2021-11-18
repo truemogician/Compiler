@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CMinusMinus", "CMinusMinus\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CMinusMinus.Test", "CMinusMinus.Test\CMinusMinus.Test.csproj", "{899E5FEB-DC75-4D6D-B22B-C6A48053D894}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Language", "Language\Language.csproj", "{6B466185-2AA2-42B0-95F3-1A3D1D6E24CC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Language", "Language\Language.csproj", "{6B466185-2AA2-42B0-95F3-1A3D1D6E24CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Language.Test", "Language.Test\Language.Test.csproj", "{DD4B917F-9487-4411-8381-2E321AC8FCD7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{6B466185-2AA2-42B0-95F3-1A3D1D6E24CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B466185-2AA2-42B0-95F3-1A3D1D6E24CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B466185-2AA2-42B0-95F3-1A3D1D6E24CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD4B917F-9487-4411-8381-2E321AC8FCD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD4B917F-9487-4411-8381-2E321AC8FCD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD4B917F-9487-4411-8381-2E321AC8FCD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD4B917F-9487-4411-8381-2E321AC8FCD7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
