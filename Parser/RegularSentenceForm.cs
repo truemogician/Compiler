@@ -5,6 +5,12 @@ using Lexer;
 #nullable enable
 namespace Parser {
 	public class RegularSentenceForm {
+		public enum RegularOperator : byte {
+			Concatenation,
+
+			Or
+		}
+
 		public RegularSentenceForm(SentenceForm value) => Value = value;
 
 		private RegularSentenceForm(RegularSentenceForm left, RegularOperator @operator, RegularSentenceForm right) {
@@ -14,7 +20,7 @@ namespace Parser {
 		}
 
 		/// <summary>
-		/// Copy constructor
+		///     Copy constructor
 		/// </summary>
 		/// <param name="other">Copy source</param>
 		public RegularSentenceForm(RegularSentenceForm other) {
@@ -124,11 +130,5 @@ namespace Parser {
 		public static explicit operator RegularSentenceForm(Terminal terminal) => new(terminal);
 
 		public static explicit operator RegularSentenceForm(Token token) => new(token);
-
-		public enum RegularOperator : byte {
-			Concatenation,
-
-			Or
-		}
 	}
 }

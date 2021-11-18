@@ -4,9 +4,9 @@ using System.Linq;
 
 namespace Parser.LR {
 	public abstract class ItemSetCollectionBase<TItem> : IReadOnlyCollection<ItemSet<TItem>> where TItem : ItemBase {
-		protected readonly Grammar Grammar;
-
 		protected readonly FirstSetCollection FirstSetCollection;
+
+		protected readonly Grammar Grammar;
 
 		protected readonly HashSet<ItemSet<TItem>> ItemSets = new();
 
@@ -37,9 +37,9 @@ namespace Parser.LR {
 			}
 		}
 
-		public int Count => ItemSets.Count;
-
 		public abstract ItemSet<TItem> InitialState { get; }
+
+		public int Count => ItemSets.Count;
 
 		public IEnumerator<ItemSet<TItem>> GetEnumerator() => ItemSets.GetEnumerator();
 

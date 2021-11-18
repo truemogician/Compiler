@@ -1,6 +1,6 @@
 ﻿using System;
-using Microsoft.Extensions.Primitives;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Primitives;
 using OneOf;
 
 #nullable enable
@@ -12,10 +12,8 @@ namespace Lexer {
 	public class Token {
 		private readonly LexemeMatcher _matcher;
 
-		public string Name { get; init; }
-
 		/// <summary>
-		/// Create a token that matches a specific character
+		///     Create a token that matches a specific character
 		/// </summary>
 		/// <param name="name">Type of the token</param>
 		/// <param name="character">The character to be matched</param>
@@ -24,12 +22,12 @@ namespace Lexer {
 			_matcher = code => code[0] == character ? 1 : null;
 		}
 
-		/// <inheritdoc cref="Token(string, char)"/>
+		/// <inheritdoc cref="Token(string, char)" />
 		/// <param name="name">Type of the token specified by a enum, the name of the enum value will be used</param>
 		public Token(Enum name, char character) : this(GetEnumName(name), character) { }
 
 		/// <summary>
-		/// Create a token that matches an exact string
+		///     Create a token that matches an exact string
 		/// </summary>
 		/// <param name="name">Type of the token</param>
 		/// <param name="pattern">The string to be matched</param>
@@ -39,12 +37,12 @@ namespace Lexer {
 		}
 
 		/// <param name="name">Type of the token specified by a enum, the name of the enum value will be used</param>
-		/// <inheritdoc cref="Token(string, string)"/>
+		/// <inheritdoc cref="Token(string, string)" />
 		public Token(Enum name, string pattern) : this(GetEnumName(name), pattern) { }
 
 		//TODO calculate maxLength automatically
 		/// <summary>
-		/// Create a token that matches a regex pattern
+		///     Create a token that matches a regex pattern
 		/// </summary>
 		/// <param name="name">Type of the token</param>
 		/// <param name="pattern">Pattern of the token. Beginning symbol will be automatically added.</param>
@@ -56,11 +54,11 @@ namespace Lexer {
 		}
 
 		/// <param name="name">Type of the token specified by a enum, the name of the enum value will be used</param>
-		/// <inheritdoc cref="Token(string, Regex, int)"/>
+		/// <inheritdoc cref="Token(string, Regex, int)" />
 		public Token(Enum name, Regex pattern, int maxLength = 0) : this(GetEnumName(name), pattern, maxLength) { }
 
 		/// <summary>
-		/// Create a token from a custom match function
+		///     Create a token from a custom match function
 		/// </summary>
 		/// <param name="name">Type of the token</param>
 		/// <param name="matcher">The custom match function</param>
@@ -70,8 +68,10 @@ namespace Lexer {
 		}
 
 		/// <param name="name">Type of the token specified by a enum, the name of the enum value will be used</param>
-		/// <inheritdoc cref="Token(string, LexemeMatcher)"/>
+		/// <inheritdoc cref="Token(string, LexemeMatcher)" />
 		public Token(Enum name, LexemeMatcher matcher) : this(GetEnumName(name), matcher) { }
+
+		public string Name { get; init; }
 
 		public Lexeme? Match(StringSegment input) {
 			var result = _matcher(input);

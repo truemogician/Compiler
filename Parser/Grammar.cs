@@ -125,11 +125,11 @@ namespace Parser {
 			return result;
 		}
 
-		public void AddProductionRule(Nonterminal nonterminal, IEnumerable<SentenceForm> productions) => productions.Each(s => Add(new ProductionRule(nonterminal, s)));
+		public void Add(Nonterminal nonterminal, IEnumerable<SentenceForm> productions) => productions.Each(s => Add(new ProductionRule(nonterminal, s)));
 
-		public void AddProductionRule(Nonterminal nonterminal, params SentenceForm[] productions) => AddProductionRule(nonterminal, productions.AsEnumerable());
+		public void Add(Nonterminal nonterminal, params SentenceForm[] productions) => Add(nonterminal, productions.AsEnumerable());
 
-		public void AddProductionRule(Nonterminal nonterminal, RegularSentenceForm regularSentenceForm) => regularSentenceForm.GenerateGrammar(nonterminal).Each(Add);
+		public void Add(Nonterminal nonterminal, RegularSentenceForm regularSentenceForm) => regularSentenceForm.GenerateGrammar(nonterminal).Each(Add);
 
 		public Terminal? Match(Lexeme lexeme, bool checkAmbiguity = false) {
 			if (!_terminals.ContainsKey(lexeme.Token))

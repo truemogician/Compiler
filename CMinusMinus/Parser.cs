@@ -14,7 +14,7 @@ namespace CMinusMinus {
 			var doubleTerminal = new Terminal(Lexicon[TokenType.Keyword], "double");
 			var shortTerminal = new Terminal(Lexicon[TokenType.Keyword], "short");
 			var longTerminal = new Terminal(Lexicon[TokenType.Keyword], "long");
-			grammar.AddProductionRule(NonterminalType.MainType, ((RSF)signedModifier * (0, 1) + ((RSF)charTerminal | intTerminal | (((RSF)shortTerminal | ((RSF)longTerminal * (1, 2))) + (RSF)intTerminal * (0, 1)))) | signedModifier | floatTerminal | doubleTerminal | (longTerminal + doubleTerminal));
+			grammar.Add(NonterminalType.MainType, ((RSF)signedModifier * (0, 1) + ((RSF)charTerminal | intTerminal | (((RSF)shortTerminal | ((RSF)longTerminal * (1, 2))) + (RSF)intTerminal * (0, 1)))) | signedModifier | floatTerminal | doubleTerminal | (longTerminal + doubleTerminal));
 			//grammar.AddProductionRule(NonterminalType.SourceCode, (RSF)NonterminalType.FunctionDeclaration * (1, null));
 			return grammar;
 		}

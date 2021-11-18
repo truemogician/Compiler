@@ -6,6 +6,11 @@ namespace Lexer {
 	public class Lexeme : IEquatable<Lexeme> {
 		private readonly StringSegment _segment;
 
+		public Lexeme(Token token, StringSegment segment) {
+			Token = token;
+			_segment = segment;
+		}
+
 		public Token Token { get; init; }
 
 		public StringSegment Segment => _segment;
@@ -18,13 +23,6 @@ namespace Lexer {
 
 		public string Code => _segment.Buffer;
 
-		public Lexeme(Token token, StringSegment segment) {
-			Token = token;
-			_segment = segment;
-		}
-
-		public override string ToString() => $"<{Token}>{Value}</{Token}>";
-
 		public bool Equals(Lexeme? other) {
 			if (other is null)
 				return false;
@@ -32,6 +30,8 @@ namespace Lexer {
 				return true;
 			return _segment.Equals(other._segment) && Token.Equals(other.Token);
 		}
+
+		public override string ToString() => $"<{Token}>{Value}</{Token}>";
 
 		public override bool Equals(object? obj) {
 			if (obj is null)

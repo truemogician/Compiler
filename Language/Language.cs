@@ -8,13 +8,13 @@ namespace Language {
 
 		public abstract TParser Parser { get; }
 
-		ILexer ILanguage.Lexer => Lexer;
-
-		IParser ILanguage.Parser => Parser;
-
 		public Lexicon Lexicon => Lexer.Lexicon;
 
 		public Grammar Grammar => Parser.Grammar;
+
+		ILexer ILanguage.Lexer => Lexer;
+
+		IParser ILanguage.Parser => Parser;
 
 		public IEnumerable<Lexeme> Tokenize(string code, bool checkAmbiguity = false) => Lexer.Tokenize(code, checkAmbiguity);
 

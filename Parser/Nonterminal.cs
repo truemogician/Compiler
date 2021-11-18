@@ -4,7 +4,7 @@
 namespace Parser {
 	public record Nonterminal(string Name, bool Temporary = false) {
 		/// <summary>
-		/// Create a new temporary nonterminal, whose name will be a GUID
+		///     Create a new temporary nonterminal, whose name will be a GUID
 		/// </summary>
 		public Nonterminal() : this(Guid.NewGuid().ToString("N"), true) { }
 
