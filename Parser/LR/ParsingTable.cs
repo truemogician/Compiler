@@ -8,8 +8,7 @@ namespace Parser.LR {
 
 		protected internal ParsingTable(Grammar grammar) {
 			Grammar = grammar;
-			if (!Initialize(ExtendGrammar(grammar), out var itemSets, out var actionTable, out var gotoTable))
-				throw new ParserException();
+			Initialize(ExtendGrammar(grammar), out var itemSets, out var actionTable, out var gotoTable);
 			ItemSets = itemSets;
 			ActionTable = actionTable;
 			GotoTable = gotoTable;
@@ -40,16 +39,16 @@ namespace Parser.LR {
 		}
 
 		protected static Grammar ExtendGrammar(Grammar grammar) {
-			var newGrammar = new Grammar(grammar);
-			var initial = new Nonterminal("_Start");
-			var nonterminals = newGrammar.Nonterminals.ToList();
+			var initial = new Nonterminal(grammar.InitialState.Name + "'");
+			var nonterminals = grammar.Nonterminals.ToList();
 			while (nonterminals.Contains(initial))
-				initial = new Nonterminal("_" + initial.Name);
-			newGrammar.AddProductionRule(initial, newGrammar.InitialState!);
+				initial = new Nonterminal(initial.Name + "'");
+			var newGrammar = new Grammar(grammar);
+			newGrammar.Add(initial, newGrammar.InitialState!);
 			newGrammar.InitialState = initial;
 			return newGrammar;
 		}
 
-		protected abstract bool Initialize(Grammar extendedGrammar, out ItemSetCollectionBase<TItem> itemSets, out ActionTable<TItem> actionTable, out GotoTable<TItem> gotoTable);
+		protected abstract void Initialize(Grammar extendedGrammar, out ItemSetCollectionBase<TItem> itemSets, out ActionTable<TItem> actionTable, out GotoTable<TItem> gotoTable);
 	}
 }

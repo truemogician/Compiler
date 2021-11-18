@@ -13,12 +13,12 @@ namespace Lexer {
 		public LexerException(string code, string? message = null, Exception? innerException = null) : base(message, innerException) => Code = code;
 	}
 
-	public class NoMatchException : LexerException {
+	public class TokenNotMatchedException : LexerException {
 		public int? Position { get; }
 
-		public NoMatchException() { }
+		public TokenNotMatchedException() { }
 
-		public NoMatchException(string code, int position) : base(code, $"No token match code at {position}") => Position = position;
+		public TokenNotMatchedException(string code, int position) : base(code, $"No token match code at {position}") => Position = position;
 	}
 
 	public class AmbiguityException : LexerException {

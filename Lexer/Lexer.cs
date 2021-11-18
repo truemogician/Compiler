@@ -17,13 +17,13 @@ namespace Lexer {
 				if (checkAmbiguity) {
 					var lexemes = Lexicon.MatchAll(segment).ToArray();
 					lexeme = lexemes.Length switch {
-						0 => throw new NoMatchException(code, segment.Offset),
+						0 => throw new TokenNotMatchedException(code, segment.Offset),
 						1 => lexemes[0],
 						_ => throw new AmbiguityException(code, segment.Offset, lexemes.Select(l => l.Token))
 					};
 				}
 				else
-					lexeme = Lexicon.Match(segment) ?? throw new NoMatchException(code, segment.Offset);
+					lexeme = Lexicon.Match(segment) ?? throw new TokenNotMatchedException(code, segment.Offset);
 				segment = segment.Subsegment(lexeme.Length);
 				yield return lexeme;
 				if (segment.Offset == code.Length)

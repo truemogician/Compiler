@@ -6,7 +6,7 @@ namespace Parser.LR.CLR {
 	public class ParsingTable : ParsingTable<Item> {
 		public ParsingTable(Grammar grammar) : base(grammar) { }
 
-		protected override bool Initialize(Grammar extendedGrammar, out ItemSetCollectionBase<Item> itemSets, out ActionTable<Item> actionTable, out GotoTable<Item> gotoTable) {
+		protected override void Initialize(Grammar extendedGrammar, out ItemSetCollectionBase<Item> itemSets, out ActionTable<Item> actionTable, out GotoTable<Item> gotoTable) {
 			itemSets = new ItemSetCollection(extendedGrammar);
 			actionTable = new ActionTable();
 			gotoTable = new GotoTable();
@@ -26,7 +26,6 @@ namespace Parser.LR.CLR {
 						gotoTable[state, nextSymbol.AsNonterminal] = itemSets.Go(state, nextSymbol);
 					}
 			}
-			return true;
 		}
 	}
 }
