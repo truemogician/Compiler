@@ -6,6 +6,8 @@
 
 		public static implicit operator AbstractSyntaxTree(SyntaxTreeNode node) => new(node);
 
-		public override string ToString() => Root.ToString();
+		public string ToString(bool skipTempNonterminal) => Root.ToString(0, skipTempNonterminal);
+
+		public override string ToString() => ToString(true);
 	}
 }

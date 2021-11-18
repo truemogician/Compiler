@@ -15,7 +15,7 @@ namespace Parser.LR {
 		[SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
 		public override AbstractSyntaxTree Parse(IEnumerable<Lexeme> lexemes) {
 			Stack<ItemSet<TItem>> stateStack = new();
-			Stack<SyntaxTreeNode> symbolStack = new();
+			Stack<SyntaxTreeNode> symbolStack = new(), symbolTemp = new();
 			stateStack.Push(ParsingTable.ItemSets.InitialState);
 			using var enumerator = lexemes.GetEnumerator();
 			int position = -1;
@@ -53,8 +53,10 @@ namespace Parser.LR {
 						var newNode = new SyntaxTreeNode(pr.Nonterminal);
 						for (var i = 0; i < pr.Length; ++i) {
 							stateStack.Pop();
-							symbolStack.Pop().Parent = newNode;
+							symbolTemp.Push(symbolStack.Pop());
 						}
+						while (symbolTemp.Count > 0)
+							symbolTemp.Pop().Parent = newNode;
 						stateStack.Push(ParsingTable.GotoTable[stateStack.Peek(), pr.Nonterminal] ?? throw new NotRecognizedException(lexemes, position) {CurrentStack = symbolStack, Grammar = Grammar});
 						symbolStack.Push(newNode);
 						break;
