@@ -18,19 +18,23 @@ namespace CMinusMinus {
 			const string escapedCharPattern = @"\\(?:[abefnrtv\\'""]|[0-7]{1,3}|x[\da-fA-F]{1,2}|u[\da-fA-F]{4})";
 			lexicon.Add(TokenType.CharacterLiteral, new Regex($@"'(?:[^\\']|{escapedCharPattern})'"), 8);
 			lexicon.Add(TokenType.StringLiteral, new Regex($@"L?""(?:[^\\""]|{escapedCharPattern})*"""));
-			lexicon.Add(TokenType.AssignmentOperator, '=');
-			lexicon.Add(TokenType.ArithmeticOperator, new Regex(@"[-+*/%]|<<|>>>?"), 3);
-			lexicon.Add(TokenType.ComparisonOperator, new Regex(@"[<>]|[<>=!]="), 2);
-			lexicon.Add(TokenType.LogicalOperator, new Regex(@"&&|\|\|"), 2);
-			lexicon.Add(TokenType.SentenceTerminator, ';');
+			lexicon.Add(TokenType.ArithmeticOperator, new Regex(@"[-+*/%]"), 1);
+			lexicon.Add(TokenType.BitwiseOperator, new Regex(@"[&|^~]|<<|>>"), 2);
+			lexicon.Add(TokenType.AssignmentOperator, new Regex(@"(?:[-+*/%&|^~]|<<|>>)?="), 3);
+			lexicon.Add(TokenType.RelationalOperator, new Regex(@"[<>]|[<>=!]="), 2);
+			lexicon.Add(TokenType.LogicalOperator, new Regex(@"!|&&|\|\|"), 2);
+			lexicon.Add(TokenType.MembershipOperator, '.');
+			lexicon.Add(TokenType.Delimiter, ';');
 			lexicon.Add(TokenType.Separator, ',');
-			lexicon.Add(TokenType.SingleLineCommentStartSymbol, "//");
-			lexicon.Add(TokenType.CommentBlockStartSymbol, "/*");
-			lexicon.Add(TokenType.CommentBlockEndSymbol, "*/");
+			lexicon.Add(TokenType.Colon, ':');
 			lexicon.Add(TokenType.LeftParenthesis, '(');
 			lexicon.Add(TokenType.RightParenthesis, ')');
+			lexicon.Add(TokenType.IndexStartSymbol, '[');
+			lexicon.Add(TokenType.IndexEndSymbol, ']');
 			lexicon.Add(TokenType.BlockStartSymbol, '{');
 			lexicon.Add(TokenType.BlockEndSymbol, '}');
+			lexicon.Add(TokenType.LineComment, new Regex(@"\/\/[^\n\r]*"));
+			lexicon.Add(TokenType.BlockComment, new Regex(@"\/\*.*\*/"));
 			lexicon.Add(TokenType.LineBreak, new Regex(@"\n|\r\n?"), 2);
 			lexicon.Add(TokenType.WhiteSpace, new Regex(@"[^\S\n\r]+"));
 			return lexicon;
@@ -54,27 +58,35 @@ namespace CMinusMinus {
 
 		ArithmeticOperator,
 
-		ComparisonOperator,
+		BitwiseOperator,
+
+		RelationalOperator,
 
 		LogicalOperator,
 
-		SentenceTerminator,
+		MembershipOperator,
+
+		Delimiter,
 
 		Separator,
 
-		SingleLineCommentStartSymbol,
-
-		CommentBlockStartSymbol,
-
-		CommentBlockEndSymbol,
+		Colon,
 
 		LeftParenthesis,
 
 		RightParenthesis,
 
+		IndexStartSymbol,
+
+		IndexEndSymbol,
+
 		BlockStartSymbol,
 
 		BlockEndSymbol,
+
+		LineComment,
+
+		BlockComment,
 
 		LineBreak,
 
