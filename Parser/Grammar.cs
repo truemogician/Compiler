@@ -32,6 +32,8 @@ namespace Parser {
 
 		public IReadOnlySet<ProductionRule> this[Nonterminal index] => _rules.ContainsKey(index) ? _rules[index] : throw new KeyNotFoundException();
 
+		internal Dictionary<Nonterminal, HashSet<ProductionRule>> ProductionRules => _rules;
+
 		public int Count => _rules.Sum(pair => pair.Value.Count);
 
 		public bool IsReadOnly => false;
@@ -131,6 +133,8 @@ namespace Parser {
 
 		public void Add(Nonterminal nonterminal, RegularSentenceForm regularSentenceForm) => regularSentenceForm.GenerateGrammar(nonterminal).Each(Add);
 
+		public bool Remove(Nonterminal nonterminal) => _rules.Remove(nonterminal);
+
 		public Terminal? Match(Lexeme lexeme, bool checkAmbiguity = false) {
 			if (!_terminals.ContainsKey(lexeme.Token))
 				return null;
@@ -198,14 +202,21 @@ namespace Parser {
 					continue;
 				var targets = prs.Where(pr => pr.Production.Contains(nonterminal)).ToArray();
 				foreach (var pr in targets) {
-					prs.UnionWith(ReplaceNonterminal(nonterminal, pr.Production).Select(s => new ProductionRule(src, s)));
+					prs.UnionWith(Substitute(pr.Production, nonterminal).Select(s => new ProductionRule(src, s)));
 					prs.Remove(pr);
 				}
 			}
 			_rules.Remove(nonterminal);
 		}
 
-		private IEnumerable<SentenceForm> ReplaceNonterminal(Nonterminal nonterminal, SentenceForm sentence, int position = 0) {
+		public void Replace(Nonterminal oldNonterminal, Nonterminal newNonterminal) {
+			foreach (var rule in this)
+				for (var i = 0; i < rule.Length; ++i)
+					if (rule[i] == oldNonterminal)
+						rule[i] = newNonterminal;
+		}
+
+		private IEnumerable<SentenceForm> Substitute(SentenceForm sentence, Nonterminal nonterminal, int position = 0) {
 			while (position < sentence.Count && sentence[position] is var cur && (cur.IsTerminal || cur.AsNonterminal != nonterminal))
 				++position;
 			if (position == sentence.Count) {
@@ -214,7 +225,7 @@ namespace Parser {
 			}
 			foreach (var stc in from pr in _rules[nonterminal]
 				let newSentence = new SentenceForm(sentence) {[position..(position + 1)] = pr.Production}
-				from stc in ReplaceNonterminal(nonterminal, newSentence, position + pr.Length)
+				from stc in Substitute(newSentence, nonterminal, position + pr.Length)
 				select stc)
 				yield return stc;
 		}

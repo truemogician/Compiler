@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Lexer;
+using TrueMogician.Extensions.Enumerable;
 
 #nullable enable
 namespace Parser {
@@ -66,6 +67,18 @@ namespace Parser {
 			foreach (var nt in result.SourceNonterminals)
 				if (nt != initial && nt.Temporary && result.Count(pr => pr.Production.Count(s => s == nt) == 1) == 1)
 					result.MergeAndRemove(nt);
+			//Merge equivalent nonterminals
+			var comparer = new HashSetEqualityComparer<ProductionRule>();
+			foreach (var group in result.ProductionRules.GroupBy(pair => pair.Value, pair => pair.Key, comparer)) {
+				var arr = group.ToArray();
+				if (arr.Length > 1) {
+					var @new = arr.FirstOrDefault(nt => !nt.Temporary) ?? arr[0];
+					foreach (var old in arr.Where(nt => nt.Temporary && nt != @new)) {
+						result.Remove(old);
+						result.Replace(old, @new);
+					}
+				}
+			}
 			result.Simplify();
 			return result;
 		}
@@ -136,5 +149,17 @@ namespace Parser {
 		public static explicit operator RegularSentenceForm(Terminal terminal) => new(terminal);
 
 		public static explicit operator RegularSentenceForm(Token token) => new(token);
+
+		private class HashSetEqualityComparer<T> : IEqualityComparer<HashSet<T>> {
+			public bool Equals(HashSet<T>? x, HashSet<T>? y) {
+				if (ReferenceEquals(x, y) || x is null && y is null)
+					return true;
+				if (x is null || y is null)
+					return false;
+				return x.SetEquals(y);
+			}
+
+			public int GetHashCode(HashSet<T> obj) => obj.GetHashCode();
+		}
 	}
 }
