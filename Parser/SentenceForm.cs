@@ -21,7 +21,10 @@ namespace Parser {
 
 		public IEnumerable<Nonterminal> Nonterminals => _list.Where(s => !s.IsTerminal).Select(s => s.AsNonterminal).Distinct();
 
-		public Symbol this[Index index] => _list[index];
+		public Symbol this[Index index] {
+			get => _list[index];
+			internal set => _list[index] = value;
+		}
 
 		public SentenceForm this[Range range] {
 			get {
@@ -51,7 +54,10 @@ namespace Parser {
 
 		public int Count => _list.Count;
 
-		public Symbol this[int index] => _list[index];
+		public Symbol this[int index] {
+			get => _list[index];
+			internal set => _list[index] = value;
+		}
 
 		public IEnumerator<Symbol> GetEnumerator() => _list.GetEnumerator();
 
