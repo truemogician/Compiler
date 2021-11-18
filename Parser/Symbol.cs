@@ -28,7 +28,7 @@ namespace Parser {
 			return IsTerminal ? _terminal!.Equals(other._terminal) : _nonterminal!.Equals(other._nonterminal);
 		}
 
-		public override string? ToString() => IsTerminal ? AsTerminal.ToString() : AsNonterminal.ToString();
+		public override string ToString() => IsTerminal ? AsTerminal.ToString() : AsNonterminal.ToString();
 
 		public override bool Equals(object? obj) {
 			if (obj is null)
@@ -39,6 +39,14 @@ namespace Parser {
 		}
 
 		public override int GetHashCode() => HashCode.Combine(_nonterminal, _terminal);
+
+		public static bool operator ==(Symbol self, Terminal terminal) => self._terminal?.Equals(terminal) == true;
+
+		public static bool operator !=(Symbol self, Terminal terminal) => !(self == terminal);
+
+		public static bool operator ==(Symbol self, Nonterminal nonterminal) => self._nonterminal?.Equals(nonterminal) == true;
+
+		public static bool operator !=(Symbol self, Nonterminal nonterminal) => !(self == nonterminal);
 
 		public static implicit operator Symbol(Nonterminal nonterminal) => new(nonterminal);
 
