@@ -16,6 +16,13 @@ namespace CMinusMinus {
 
 		public override CLRParser Parser { get; }
 
-		public override IEnumerable<Lexeme> Format(IEnumerable<Lexeme> lexemes) => lexemes.Where(l => l.Token.Name is not (nameof(TokenType.WhiteSpace) or nameof(TokenType.LineBreak)));
+		public override IEnumerable<Lexeme> Format(IEnumerable<Lexeme> lexemes)
+			=> lexemes.Where(
+				l => l.Token.Name is not (
+					nameof(TokenType.WhiteSpace) or
+					nameof(TokenType.LineBreak) or
+					nameof(TokenType.LineComment) or
+					nameof(TokenType.BlockComment))
+			);
 	}
 }
