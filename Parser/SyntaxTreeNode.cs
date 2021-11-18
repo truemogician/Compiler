@@ -58,7 +58,7 @@ namespace Parser {
 
 		public string ToString(int indentation) {
 			if (IsLeaf)
-				return Value.AsTerminalInstance.ToString();
+				return new string('\t', indentation) + Value.AsTerminalInstance;
 			var builder = new StringBuilder();
 			if (!Value.IsTerminal && Value.AsNonterminal.Temporary)
 				foreach (var child in Children)
