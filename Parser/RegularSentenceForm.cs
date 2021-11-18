@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Lexer;
 
 #nullable enable
@@ -57,8 +58,13 @@ namespace Parser {
 			var result = new Grammar(initial);
 			foreach (var pr in GenerateProductionRules(initial))
 				result.Add(pr);
+			//Chain concatenation operation
 			foreach (var nt in result.SourceNonterminals)
 				if (nt != initial && nt.Temporary && result[nt].Count == 1)
+					result.MergeAndRemove(nt);
+			//Chain or operation
+			foreach (var nt in result.SourceNonterminals)
+				if (nt != initial && nt.Temporary && result.Count(pr => pr.Production.Count(s => s == nt) == 1) == 1)
 					result.MergeAndRemove(nt);
 			result.Simplify();
 			return result;
