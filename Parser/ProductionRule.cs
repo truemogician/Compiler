@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 #nullable enable
 namespace Parser {
@@ -18,7 +19,20 @@ namespace Parser {
 
 		public bool IsEmpty => Production.Equals(SentenceForm.Empty);
 
-		public Symbol this[int index] => Production[index];
+		public Symbol this[int index] {
+			get => Production[index];
+			internal set => Production[index] = value;
+		}
+
+		public Symbol this[Index index] {
+			get => Production[index];
+			internal set => Production[index] = value;
+		}
+
+		public SentenceForm this[Range range] {
+			get => Production[range];
+			internal set => Production[range] = value;
+		}
 
 		public override string ToString() => $"<{Nonterminal}> -> {Production}";
 	}
