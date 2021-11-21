@@ -27,6 +27,7 @@ namespace CMinusMinus {
 			lexicon.Add(TokenType.Delimiter, ';');
 			lexicon.Add(TokenType.Separator, ',');
 			lexicon.Add(TokenType.Colon, ':');
+			lexicon.Add(TokenType.QuestionMark, '?');
 			lexicon.Add(TokenType.LeftParenthesis, '(');
 			lexicon.Add(TokenType.RightParenthesis, ')');
 			lexicon.Add(TokenType.IndexStartSymbol, '[');
@@ -71,6 +72,8 @@ namespace CMinusMinus {
 		Separator,
 
 		Colon,
+
+		QuestionMark,
 
 		LeftParenthesis,
 
