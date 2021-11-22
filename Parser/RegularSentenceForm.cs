@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Lexer;
-using TrueMogician.Extensions.Enumerable;
 
 #nullable enable
 namespace Parser {
@@ -84,34 +83,37 @@ namespace Parser {
 		}
 
 		private IEnumerable<ProductionRule> GenerateProductionRules(Nonterminal source) {
-			if (IsLeaf) {
-				if (RepeatRange == (1, 1))
-					yield return new ProductionRule(source, Value!);
-				else {
-					if (RepeatRange.Min == 0)
-						yield return new ProductionRule(source, SentenceForm.Empty);
-					int min = Math.Min(1, RepeatRange.Min);
-					if (RepeatRange.Max is not null) {
-						var sentence = min == 1 ? Value! : Value * min;
-						for (int i = min; i <= RepeatRange.Max; ++i, sentence += Value)
-							yield return new ProductionRule(source, sentence);
-					}
-					else {
-						var rpt = new Nonterminal();
-						yield return new ProductionRule(source, min == 1 ? rpt : Value! * (min - 1) + rpt);
-						yield return new ProductionRule(rpt, Value!);
-						yield return new ProductionRule(rpt, Value! + rpt);
-					}
-				}
+			var src = source;
+			if (RepeatRange == (1, 1)) {
+				if (IsLeaf)
+					yield return new ProductionRule(src, Value!);
 			}
 			else {
+				src = new Nonterminal();
+				var value = Value ?? src;
+				if (RepeatRange.Min == 0)
+					yield return new ProductionRule(source, SentenceForm.Empty);
+				int min = Math.Max(1, RepeatRange.Min);
+				if (RepeatRange.Max is not null) {
+					var sentence = min == 1 ? value : value * min;
+					for (int i = min; i <= RepeatRange.Max; ++i, sentence += value)
+						yield return new ProductionRule(source, sentence);
+				}
+				else {
+					var rpt = new Nonterminal();
+					yield return new ProductionRule(source, min == 1 ? rpt : value * (min - 1) + rpt);
+					yield return new ProductionRule(rpt, value);
+					yield return new ProductionRule(rpt, value + rpt);
+				}
+			}
+			if (!IsLeaf) {
 				var left = new Nonterminal();
 				var right = new Nonterminal();
 				if (Operator == RegularOperator.Concatenation)
-					yield return new ProductionRule(source, (SentenceForm)left + right);
+					yield return new ProductionRule(src, (SentenceForm)left + right);
 				else {
-					yield return new ProductionRule(source, left);
-					yield return new ProductionRule(source, right);
+					yield return new ProductionRule(src, left);
+					yield return new ProductionRule(src, right);
 				}
 				foreach (var pr in LeftOperand!.GenerateProductionRules(left))
 					yield return pr;
