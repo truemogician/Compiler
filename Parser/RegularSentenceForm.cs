@@ -122,7 +122,16 @@ namespace Parser {
 
 		public static RegularSentenceForm operator *(RegularSentenceForm self, int count) => new(self) {RepeatRange = (count, count)};
 
-		public static RegularSentenceForm operator *(RegularSentenceForm self, (int, int?) range) => new(self) {RepeatRange = range};
+		public static RegularSentenceForm operator *(RegularSentenceForm self, (int Min, int? Max) range) => new(self) {RepeatRange = range};
+
+		public static RegularSentenceForm operator *(RegularSentenceForm self, char ch)
+			=> self *
+				ch switch {
+					'?' => (0, 1),
+					'*' => (0, null),
+					'+' => (1, null),
+					_   => throw new ArgumentOutOfRangeException(nameof(ch))
+				};
 
 		public static RegularSentenceForm operator +(RegularSentenceForm left, RegularSentenceForm right) => new(left, RegularOperator.Concatenation, right);
 
