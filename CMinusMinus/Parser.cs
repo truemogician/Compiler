@@ -35,6 +35,10 @@ namespace CMinusMinus {
 			#endregion
 
 			var tIdentifier = NewTerminal(TokenType.Identifier);
+			var tCharacterLiteral = NewTerminal(TokenType.CharacterLiteral);
+			var tStringLiteral = NewTerminal(TokenType.StringLiteral);
+			var tIntegerLiteral = NewTerminal(TokenType.IntegerLiteral);
+			var tFloatLiteral = NewTerminal(TokenType.FloatLiteral);
 			var tLeftParenthesis = NewTerminal(TokenType.LeftParenthesis);
 			var tRightParenthesis = NewTerminal(TokenType.RightParenthesis);
 			var tSeparator = NewTerminal(TokenType.Separator);
@@ -87,7 +91,7 @@ namespace CMinusMinus {
 				((RSF)tVoid | NonterminalType.MainType) +
 				tIdentifier +
 				tLeftParenthesis +
-				((RSF)SentenceForm.Empty | (nQualifier + NonterminalType.MainType + tIdentifier + (RSF)(tSeparator + NonterminalType.MainType + tIdentifier) * '*')) +
+				((RSF)SentenceForm.Empty | (nQualifier + NonterminalType.MainType + tIdentifier + ((RSF)tSeparator + nQualifier + NonterminalType.MainType + tIdentifier) * '*')) +
 				tRightParenthesis +
 				nFunctionBody
 			);
@@ -119,7 +123,7 @@ namespace CMinusMinus {
 			);
 			grammar.Add(
 				NonterminalType.DeclarationStatement,
-				(RSF)NonterminalType.MainType + (tIdentifier + ((RSF)tAssignmentOperator + NonterminalType.Expression) * '?') * '+'
+				(RSF)nQualifier + NonterminalType.MainType + (tIdentifier + ((RSF)tAssignmentOperator + NonterminalType.Expression) * '?') * '+'
 			);
 			grammar.Add(
 				NonterminalType.GotoStatement,
@@ -225,7 +229,7 @@ namespace CMinusMinus {
 			);
 			grammar.Add(
 				NonterminalType.Literal,
-				(RSF)TokenType.CharacterLiteral | TokenType.FloatLiteral | TokenType.IntegerLiteral | TokenType.StringLiteral
+				(RSF)tCharacterLiteral | tStringLiteral | tIntegerLiteral | tFloatLiteral
 			);
 			grammar.Add(
 				NonterminalType.Expression,
@@ -303,6 +307,7 @@ namespace CMinusMinus {
 			#endregion
 			#endregion
 
+			grammar.RemoveEmptyProductionRules();
 			grammar.Simplify();
 			return grammar;
 		}
