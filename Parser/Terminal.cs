@@ -10,6 +10,8 @@ namespace Parser {
 	public delegate bool TerminalMatcher(Lexeme lexeme);
 
 	public class Terminal : IEquatable<Terminal> {
+		private readonly string? _pattern;
+
 		private readonly TerminalMatcher? _matcher;
 
 		private readonly Token? _token;
@@ -23,9 +25,9 @@ namespace Parser {
 			_matcher = matcher;
 		}
 
-		public Terminal(Token token, string pattern) : this(token, lexeme => lexeme == pattern) { }
+		public Terminal(Token token, string pattern) : this(token, lexeme => lexeme == pattern) => _pattern = pattern;
 
-		public Terminal(Token token, Regex pattern) : this(token, lexeme => pattern.IsMatch(lexeme.Value)) { }
+		public Terminal(Token token, Regex pattern) : this(token, lexeme => pattern.IsMatch(lexeme.Value)) => _pattern = pattern.ToString();
 
 		public static Terminal Terminator { get; } = new();
 
@@ -49,7 +51,7 @@ namespace Parser {
 
 		public override int GetHashCode() => HashCode.Combine(_token, _matcher);
 
-		public override string ToString() => _token is null ? "＃" : _token.Name;
+		public override string ToString() => _token is null ? "＃" : _pattern is null ? _token.Name : $"{_token.Name}/{_pattern}/";
 
 		public static implicit operator Terminal(Token tokenType) => new(tokenType);
 
