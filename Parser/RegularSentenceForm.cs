@@ -78,7 +78,6 @@ namespace Parser {
 					}
 				}
 			}
-			result.Simplify();
 			return result;
 		}
 

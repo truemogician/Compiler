@@ -303,6 +303,7 @@ namespace CMinusMinus {
 			#endregion
 			#endregion
 
+			grammar.Simplify();
 			return grammar;
 		}
 
