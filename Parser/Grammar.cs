@@ -192,6 +192,21 @@ namespace Parser {
 			}
 		}
 
+		public void RemoveEmptyProductionRules() {
+			foreach (var (src, rules) in _rules) {
+				if (src.Equals(InitialState))
+					continue;
+				var merged = false;
+				foreach (var rule in rules.Where(pr => pr.IsEmpty)) {
+					if (!merged) {
+						MergeAndRemove(rule);
+						merged = true;
+					}
+					rules.Remove(rule);
+				}
+			}
+		}
+
 		public void MergeAndRemove(Nonterminal nonterminal) {
 			if (!_rules.ContainsKey(nonterminal))
 				throw new KeyNotFoundException($"Nonterminal {nonterminal} not found in grammar");
@@ -207,6 +222,20 @@ namespace Parser {
 				}
 			}
 			_rules.Remove(nonterminal);
+		}
+
+		public void MergeAndRemove(ProductionRule productionRule) {
+			var nt = productionRule.Nonterminal;
+			if (!Contains(productionRule))
+				throw new KeyNotFoundException($"Production rule {productionRule} not found in grammar");
+			foreach (var (src, rules) in _rules) {
+				if (src.Equals(nt))
+					continue;
+				var targets = rules.Where(pr => pr.Production.Any(s => s == nt)).ToArray();
+				foreach (var rule in targets)
+					rules.UnionWith(Substitute(rule.Production, productionRule).Select(s => new ProductionRule(src, s)));
+			}
+			_rules[nt].Remove(productionRule);
 		}
 
 		public void Replace(Nonterminal oldNonterminal, Nonterminal newNonterminal) {
@@ -227,6 +256,21 @@ namespace Parser {
 				let newSentence = new SentenceForm(sentence) {[position..(position + 1)] = pr.Production}
 				from stc in Substitute(newSentence, nonterminal, position + pr.Length)
 				select stc)
+				yield return stc;
+		}
+
+		private IEnumerable<SentenceForm> Substitute(SentenceForm sentence, ProductionRule pr, int position = 0, bool changed = false) {
+			var nt = pr.Nonterminal;
+			while (position < sentence.Count && sentence[position] is var cur && (cur.IsTerminal || cur.AsNonterminal != nt))
+				++position;
+			if (position == sentence.Count) {
+				if (changed)
+					yield return sentence;
+				yield break;
+			}
+			foreach (var stc in Substitute(sentence, pr, position + 1, changed))
+				yield return stc;
+			foreach (var stc in Substitute(new SentenceForm(sentence) {[position..(position + 1)] = pr.Production}, pr, position + pr.Length, true))
 				yield return stc;
 		}
 
