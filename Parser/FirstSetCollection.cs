@@ -78,6 +78,8 @@ namespace Parser {
 					else
 						for (var i = 0; i < pr.Length && !pr[i].IsTerminal; ++i) {
 							var nt = pr[i].AsNonterminal;
+							if (nonterminal.Equals(nt))
+								continue;
 							if (caller.Contains(nt))
 								throw new InfiniteLoopException();
 							if (_firstSets.ContainsKey(nt))
