@@ -1,14 +1,17 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Parser.LR {
+	using static Utilities;
+
 	public abstract class ItemSetCollectionBase<TItem> : IReadOnlyCollection<ItemSet<TItem>> where TItem : ItemBase {
 		protected readonly FirstSetCollection FirstSetCollection;
 
 		protected readonly Grammar Grammar;
 
-		protected readonly HashSet<ItemSet<TItem>> ItemSets = new();
+		protected readonly HashSet<ItemSet<TItem>> ItemSets = new(SetEqualityComparer<TItem>.Comparer);
 
 		protected readonly Dictionary<ItemSet<TItem>, Dictionary<Symbol, ItemSet<TItem>>> Transform = new();
 
@@ -45,11 +48,7 @@ namespace Parser.LR {
 
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-		public ItemSet<TItem> Closure(IEnumerable<TItem> items) {
-			if (ItemSets.SingleOrDefault(@is => @is.IsSupersetOf(items)) is { } result)
-				return result;
-			return CalculateClosure(items);
-		}
+		public ItemSet<TItem> Closure(IEnumerable<TItem> items) => CalculateClosure(items);
 
 		public ItemSet<TItem> Closure(params TItem[] items) => Closure(items.AsEnumerable());
 

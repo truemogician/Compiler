@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Parser.LR.CLR {
@@ -7,7 +8,12 @@ namespace Parser.LR.CLR {
 	public class ItemSetCollection : ItemSetCollectionBase<Item> {
 		public ItemSetCollection(Grammar grammar) : base(grammar) { }
 
-		public override ItemSet InitialState => Closure(new Item(InitialProductionRule, 0, Terminal.Terminator));
+		public override ItemSet InitialState {
+			get {
+				var closure = Closure(new Item(InitialProductionRule, 0, Terminal.Terminator));
+				return ItemSets.TryGetValue(closure, out var result) ? result : closure;
+			}
+		}
 
 		private ProductionRule InitialProductionRule => Grammar[Grammar.InitialState].Single();
 
