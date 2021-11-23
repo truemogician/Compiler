@@ -8,12 +8,7 @@ namespace Parser.LR.CLR {
 	public class ItemSetCollection : ItemSetCollectionBase<Item> {
 		public ItemSetCollection(Grammar grammar) : base(grammar) { }
 
-		public override ItemSet InitialState {
-			get {
-				var closure = Closure(new Item(InitialProductionRule, 0, Terminal.Terminator));
-				return ItemSets.TryGetValue(closure, out var result) ? result : closure;
-			}
-		}
+		public override ItemSet InitialState => Closure(new Item(InitialProductionRule, 0, Terminal.Terminator));
 
 		private ProductionRule InitialProductionRule => Grammar[Grammar.InitialState].Single();
 

@@ -48,7 +48,10 @@ namespace Parser.LR {
 
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-		public ItemSet<TItem> Closure(IEnumerable<TItem> items) => CalculateClosure(items);
+		public ItemSet<TItem> Closure(IEnumerable<TItem> items) {
+			var closure = CalculateClosure(items);
+			return ItemSets.TryGetValue(closure, out var result) ? result : closure;
+		}
 
 		public ItemSet<TItem> Closure(params TItem[] items) => Closure(items.AsEnumerable());
 
