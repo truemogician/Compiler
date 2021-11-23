@@ -13,7 +13,7 @@ namespace Parser {
 
 		public Grammar Grammar { get; }
 
-		public abstract AbstractSyntaxTree Parse(IEnumerable<Lexeme> lexemes);
+		public abstract AbstractSyntaxTree Parse(IEnumerable<Token> tokens);
 
 		protected abstract void Initialize(Grammar grammar);
 	}
@@ -21,12 +21,12 @@ namespace Parser {
 	public interface IParser {
 		public Grammar Grammar { get; }
 
-		public AbstractSyntaxTree Parse(IEnumerable<Lexeme> lexemes);
+		public AbstractSyntaxTree Parse(IEnumerable<Token> tokens);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool TryParse(IEnumerable<Lexeme> lexemes, out AbstractSyntaxTree? ast) {
+		public bool TryParse(IEnumerable<Token> tokens, out AbstractSyntaxTree? ast) {
 			try {
-				ast = Parse(lexemes);
+				ast = Parse(tokens);
 				return true;
 			}
 			catch {

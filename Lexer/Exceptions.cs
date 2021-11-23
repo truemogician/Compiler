@@ -13,10 +13,10 @@ namespace Lexer {
 		public string? Code { get; }
 	}
 
-	public class TokenNotMatchedException : LexerException {
-		public TokenNotMatchedException() { }
+	public class LexemeNotMatchedException : LexerException {
+		public LexemeNotMatchedException() { }
 
-		public TokenNotMatchedException(string code, int position) : base(code, $"No token match code at {position}") => Position = position;
+		public LexemeNotMatchedException(string code, int position) : base(code, $"No lexeme matches code at {position}") => Position = position;
 
 		public int? Position { get; }
 	}
@@ -24,13 +24,13 @@ namespace Lexer {
 	public class AmbiguityException : LexerException {
 		public AmbiguityException() { }
 
-		public AmbiguityException(string code, int position, IEnumerable<Token> tokens) : base(code, $"Multiple tokens match code at {position}") {
+		public AmbiguityException(string code, int position, IEnumerable<Lexeme> tokens) : base(code, $"Multiple tokens match code at {position}") {
 			Position = position;
 			Tokens = tokens;
 		}
 
 		public int? Position { get; }
 
-		public IEnumerable<Token>? Tokens { get; }
+		public IEnumerable<Lexeme>? Tokens { get; }
 	}
 }

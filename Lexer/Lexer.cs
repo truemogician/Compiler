@@ -10,22 +10,22 @@ namespace Lexer {
 
 		public Lexicon Lexicon { get; }
 
-		public IEnumerable<Lexeme> Tokenize(string code, bool checkAmbiguity = false) {
+		public IEnumerable<Token> Tokenize(string code, bool checkAmbiguity = false) {
 			var segment = new StringSegment(code);
 			while (true) {
-				Lexeme lexeme;
+				Token token;
 				if (checkAmbiguity) {
-					var lexemes = Lexicon.MatchAll(segment).ToArray();
-					lexeme = lexemes.Length switch {
-						0 => throw new TokenNotMatchedException(code, segment.Offset),
-						1 => lexemes[0],
-						_ => throw new AmbiguityException(code, segment.Offset, lexemes.Select(l => l.Token))
+					var tokens = Lexicon.MatchAll(segment).ToArray();
+					token = tokens.Length switch {
+						0 => throw new LexemeNotMatchedException(code, segment.Offset),
+						1 => tokens[0],
+						_ => throw new AmbiguityException(code, segment.Offset, tokens.Select(l => l.Lexeme))
 					};
 				}
 				else
-					lexeme = Lexicon.Match(segment) ?? throw new TokenNotMatchedException(code, segment.Offset);
-				segment = segment.Subsegment(lexeme.Length);
-				yield return lexeme;
+					token = Lexicon.Match(segment) ?? throw new LexemeNotMatchedException(code, segment.Offset);
+				segment = segment.Subsegment(token.Length);
+				yield return token;
 				if (segment.Offset == code.Length)
 					break;
 			}
@@ -35,10 +35,10 @@ namespace Lexer {
 	public interface ILexer {
 		public Lexicon Lexicon { get; }
 
-		public IEnumerable<Lexeme> Tokenize(string code, bool checkAmbiguity = false);
+		public IEnumerable<Token> Tokenize(string code, bool checkAmbiguity = false);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool TryTokenize(string code, bool checkAmbiguity, out IEnumerable<Lexeme>? tokens) {
+		public bool TryTokenize(string code, bool checkAmbiguity, out IEnumerable<Token>? tokens) {
 			try {
 				tokens = Tokenize(code);
 				return true;
@@ -50,6 +50,6 @@ namespace Lexer {
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool TryTokenize(string code, out IEnumerable<Lexeme>? tokens) => TryTokenize(code, false, out tokens);
+		public bool TryTokenize(string code, out IEnumerable<Token>? tokens) => TryTokenize(code, false, out tokens);
 	}
 }

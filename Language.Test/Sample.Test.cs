@@ -21,7 +21,7 @@ namespace Language.Test {
 		[SuppressMessage("ReSharper", "StringLiteralTypo")]
 		[TestCase("abab", ExpectedResult = null)]
 		[TestCase("aba", ExpectedResult = typeof(NotRecognizedException))]
-		[TestCase("ac", ExpectedResult = typeof(TokenNotMatchedException))]
+		[TestCase("ac", ExpectedResult = typeof(LexemeNotMatchedException))]
 		public Type? ParseTest(string code) {
 			try {
 				Console.Write(Language.Parse(code).ToString());

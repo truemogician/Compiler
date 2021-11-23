@@ -11,9 +11,9 @@ namespace CMinusMinus.Test {
 		[TestCase(@"'\'", ExpectedResult = false)]
 		public bool LiteralTest(string code, bool checkAmbiguity = false) {
 			try {
-				var lexemes = Lexer.Tokenize(code, checkAmbiguity);
-				foreach (var lexeme in lexemes)
-					Console.WriteLine(lexeme.ToString());
+				var tokens = Lexer.Tokenize(code, checkAmbiguity);
+				foreach (var token in tokens)
+					Console.WriteLine(token.ToString());
 				return true;
 			}
 			catch (LexerException) {

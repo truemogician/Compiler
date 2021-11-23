@@ -6,7 +6,7 @@ namespace CMinusMinus {
 	public partial class CMinusMinus {
 		private static Lexicon InitializeLexicon() {
 			var lexicon = new Lexicon();
-			var keywordToken = new Token(TokenType.Keyword, new Regex($@"(?:{string.Join('|', Keywords.Select(k => k.Value))})\b"), Keywords.Max(k => k.Value.Length) + 1);
+			var keywordToken = new Lexeme(TokenType.Keyword, new Regex($@"(?:{string.Join('|', Keywords.Select(k => k.Value))})\b"), Keywords.Max(k => k.Value.Length) + 1);
 			lexicon.Add(keywordToken);
 			var identifierPattern = new Regex($@"^@({string.Join('|', Keywords.Select(k => k.Value))})|^[a-zA-Z_][a-zA-Z0-9_]*", RegexOptions.Compiled);
 			lexicon.Add(

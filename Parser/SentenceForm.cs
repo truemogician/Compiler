@@ -90,7 +90,7 @@ namespace Parser {
 
 		public static implicit operator SentenceForm(Terminal terminal) => new(terminal);
 
-		public static implicit operator SentenceForm(Token token) => new(token);
+		public static implicit operator SentenceForm(Lexeme lexeme) => new(lexeme);
 
 		public static SentenceForm operator +(SentenceForm left, SentenceForm right) => new(left._list.Concat(right._list).ToArray());
 

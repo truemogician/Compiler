@@ -56,7 +56,7 @@ namespace Parser {
 
 		public static implicit operator Symbol(Terminal terminal) => new(terminal);
 
-		public static implicit operator Symbol(Token token) => new(token);
+		public static implicit operator Symbol(Lexeme lexeme) => new(lexeme);
 
 		public static SentenceForm operator +(Symbol left, Symbol right) => (SentenceForm)left + right;
 	}

@@ -13,13 +13,13 @@ namespace Parser.LR {
 		public virtual ParsingTable<TItem> ParsingTable { get; private set; }
 
 		[SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
-		public override AbstractSyntaxTree Parse(IEnumerable<Lexeme> lexemes) {
+		public override AbstractSyntaxTree Parse(IEnumerable<Token> tokens) {
 			Stack<ItemSet<TItem>> stateStack = new();
 			Stack<SyntaxTreeNode> symbolStack = new(), symbolTemp = new();
 			stateStack.Push(ParsingTable.ItemSets.InitialState);
-			using var enumerator = lexemes.GetEnumerator();
+			using var enumerator = tokens.GetEnumerator();
 			int position = -1;
-			Lexeme? lexeme = null;
+			Token? token = null;
 			Terminal? terminal = null;
 			var finished = false;
 			bool MoveNext() {
@@ -27,13 +27,13 @@ namespace Parser.LR {
 					return false;
 				if (!enumerator.MoveNext()) {
 					finished = true;
-					lexeme = null;
+					token = null;
 					terminal = Terminal.Terminator;
 				}
 				else {
 					++position;
-					lexeme = enumerator.Current;
-					terminal = Grammar.Match(lexeme) ?? throw new TerminalNotMatchedException(lexemes, position) {CurrentStack = symbolStack, Grammar = Grammar};
+					token = enumerator.Current;
+					terminal = Grammar.Match(token) ?? throw new TerminalNotMatchedException(tokens, position) {CurrentStack = symbolStack, Grammar = Grammar};
 				}
 				return true;
 			}
@@ -42,11 +42,11 @@ namespace Parser.LR {
 			do {
 				action = ParsingTable.ActionTable[stateStack.Peek(), terminal!];
 				switch (action) {
-					case ErrorAction:  throw new NotRecognizedException(lexemes, position) {CurrentStack = symbolStack, Grammar = Grammar};
+					case ErrorAction:  throw new NotRecognizedException(tokens, position) {CurrentStack = symbolStack, Grammar = Grammar};
 					case AcceptAction: return symbolStack.Single();
 					case ShiftAction<TItem> shiftAction:
 						stateStack.Push(shiftAction.NextState);
-						symbolStack.Push(new SyntaxTreeValue(terminal!, lexeme ?? throw new UnexpectedActionException<TItem>(ParsingTable, lexemes, position)));
+						symbolStack.Push(new SyntaxTreeValue(terminal!, token ?? throw new UnexpectedActionException<TItem>(ParsingTable, tokens, position)));
 						break;
 					case ReduceAction reduceAction:
 						var pr = reduceAction.ProductionRule;
@@ -57,12 +57,12 @@ namespace Parser.LR {
 						}
 						while (symbolTemp.Count > 0)
 							symbolTemp.Pop().Parent = newNode;
-						stateStack.Push(ParsingTable.GotoTable[stateStack.Peek(), pr.Nonterminal] ?? throw new NotRecognizedException(lexemes, position) {CurrentStack = symbolStack, Grammar = Grammar});
+						stateStack.Push(ParsingTable.GotoTable[stateStack.Peek(), pr.Nonterminal] ?? throw new NotRecognizedException(tokens, position) {CurrentStack = symbolStack, Grammar = Grammar});
 						symbolStack.Push(newNode);
 						break;
 				}
 			} while (action.Type != ActionType.Shift || MoveNext());
-			throw new UnexpectedActionException<TItem>(ParsingTable, lexemes, position);
+			throw new UnexpectedActionException<TItem>(ParsingTable, tokens, position);
 		}
 
 		protected override void Initialize(Grammar grammar) => ParsingTable = GenerateParsingTable(grammar);

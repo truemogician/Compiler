@@ -159,6 +159,6 @@ namespace Parser {
 
 		public static explicit operator RegularSentenceForm(Terminal terminal) => new(terminal);
 
-		public static explicit operator RegularSentenceForm(Token token) => new(token);
+		public static explicit operator RegularSentenceForm(Lexeme lexeme) => new(lexeme);
 	}
 }

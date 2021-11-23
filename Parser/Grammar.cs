@@ -10,7 +10,7 @@ namespace Parser {
 	public class Grammar : ISet<ProductionRule> {
 		private readonly Dictionary<Nonterminal, HashSet<ProductionRule>> _rules = new();
 
-		private readonly Dictionary<Token, HashSet<TerminalCount>> _terminals = new();
+		private readonly Dictionary<Lexeme, HashSet<TerminalCount>> _terminals = new();
 
 		public Grammar(Nonterminal initialState) => InitialState = initialState;
 
@@ -94,7 +94,7 @@ namespace Parser {
 			bool result = _rules[rule.Nonterminal].Add(rule);
 			if (result)
 				foreach (var terminal in rule.InvolvedTerminals) {
-					var token = terminal.Token;
+					var token = terminal.Lexeme;
 					if (!_terminals.ContainsKey(token))
 						_terminals[token] = new HashSet<TerminalCount>();
 					if (_terminals[token].TryGetValue(terminal, out var tc))
@@ -117,7 +117,7 @@ namespace Parser {
 				if (_rules[rule.Nonterminal].Count == 0)
 					_rules.Remove(rule.Nonterminal);
 				foreach (var terminal in rule.InvolvedTerminals) {
-					var token = terminal.Token;
+					var token = terminal.Lexeme;
 					_terminals[token].TryGetValue(terminal, out var tc);
 					--tc!.Count;
 					if (tc.Count == 0)
@@ -135,12 +135,12 @@ namespace Parser {
 
 		public bool Remove(Nonterminal nonterminal) => _rules.Remove(nonterminal);
 
-		public Terminal? Match(Lexeme lexeme, bool checkAmbiguity = false) {
-			if (!_terminals.ContainsKey(lexeme.Token))
+		public Terminal? Match(Token token, bool checkAmbiguity = false) {
+			if (!_terminals.ContainsKey(token.Lexeme))
 				return null;
 			return (checkAmbiguity
-				? _terminals[lexeme.Token].SingleOrDefault(tc => tc.Terminal.Match(lexeme))
-				: _terminals[lexeme.Token].FirstOrDefault(tc => tc.Terminal.Match(lexeme)))?.Terminal;
+				? _terminals[token.Lexeme].SingleOrDefault(tc => tc.Terminal.Match(token))
+				: _terminals[token.Lexeme].FirstOrDefault(tc => tc.Terminal.Match(token)))?.Terminal;
 		}
 
 		public void Simplify() {

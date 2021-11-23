@@ -15,7 +15,7 @@ namespace Parser.LR {
 	public class UnexpectedActionException<TItem> : ParsingException where TItem : ItemBase {
 		public UnexpectedActionException(ParsingTable<TItem> parsingTable, string? message = null, Exception? innerException = null) : base(message, innerException) => ParsingTable = parsingTable;
 
-		public UnexpectedActionException(ParsingTable<TItem> parsingTable, IEnumerable<Lexeme> lexemes, int? position = null, string? message = null, Exception? innerException = null) : base(lexemes, position, message, innerException) => ParsingTable = parsingTable;
+		public UnexpectedActionException(ParsingTable<TItem> parsingTable, IEnumerable<Token> tokens, int? position = null, string? message = null, Exception? innerException = null) : base(tokens, position, message, innerException) => ParsingTable = parsingTable;
 
 		public ParsingTable<TItem> ParsingTable { get; }
 

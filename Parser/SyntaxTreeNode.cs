@@ -78,10 +78,10 @@ namespace Parser {
 		public static implicit operator SyntaxTreeNode(SyntaxTreeValue value) => new(value);
 	}
 
-	public record TerminalInstance(Terminal Terminal, Lexeme Lexeme) {
+	public record TerminalInstance(Terminal Terminal, Token Lexeme) {
 		public override string ToString() => Lexeme.ToString();
 
-		public static implicit operator TerminalInstance((Terminal, Lexeme) tuple) => new(tuple.Item1, tuple.Item2);
+		public static implicit operator TerminalInstance((Terminal, Token) tuple) => new(tuple.Item1, tuple.Item2);
 	}
 
 	public class SyntaxTreeValue {
@@ -93,7 +93,7 @@ namespace Parser {
 
 		public SyntaxTreeValue(TerminalInstance terminalInstance) => _terminalInstance = terminalInstance;
 
-		public SyntaxTreeValue(Terminal terminal, Lexeme lexeme) : this(new TerminalInstance(terminal, lexeme)) { }
+		public SyntaxTreeValue(Terminal terminal, Token token) : this(new TerminalInstance(terminal, token)) { }
 
 		public bool IsTerminal => _terminalInstance is not null;
 

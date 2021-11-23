@@ -16,11 +16,11 @@ namespace Language {
 
 		IParser ILanguage.Parser => Parser;
 
-		public IEnumerable<Lexeme> Tokenize(string code, bool checkAmbiguity = false) => Lexer.Tokenize(code, checkAmbiguity);
+		public IEnumerable<Token> Tokenize(string code, bool checkAmbiguity = false) => Lexer.Tokenize(code, checkAmbiguity);
 
-		public bool TryTokenize(string code, bool checkAmbiguity, out IEnumerable<Lexeme> lexeme) => Lexer.TryTokenize(code, checkAmbiguity, out lexeme);
+		public bool TryTokenize(string code, bool checkAmbiguity, out IEnumerable<Token> tokens) => Lexer.TryTokenize(code, checkAmbiguity, out tokens);
 
-		public virtual IEnumerable<Lexeme> Format(IEnumerable<Lexeme> lexemes) => lexemes;
+		public virtual IEnumerable<Token> Format(IEnumerable<Token> tokens) => tokens;
 
 		public AbstractSyntaxTree Parse(string code) => Parser.Parse(Format(Tokenize(code)));
 
@@ -32,11 +32,11 @@ namespace Language {
 
 		public IParser Parser { get; }
 
-		public IEnumerable<Lexeme> Tokenize(string code, bool checkAmbiguity = false) => Lexer.Tokenize(code, checkAmbiguity);
+		public IEnumerable<Token> Tokenize(string code, bool checkAmbiguity = false) => Lexer.Tokenize(code, checkAmbiguity);
 
-		public bool TryTokenize(string code, bool checkAmbiguity, out IEnumerable<Lexeme> lexeme) => Lexer.TryTokenize(code, checkAmbiguity, out lexeme);
+		public bool TryTokenize(string code, bool checkAmbiguity, out IEnumerable<Token> tokens) => Lexer.TryTokenize(code, checkAmbiguity, out tokens);
 
-		public virtual IEnumerable<Lexeme> Format(IEnumerable<Lexeme> lexemes) => lexemes;
+		public virtual IEnumerable<Token> Format(IEnumerable<Token> tokens) => tokens;
 
 		public AbstractSyntaxTree Parse(string code) => Parser.Parse(Format(Tokenize(code)));
 

@@ -19,12 +19,12 @@ namespace Parser {
 	public class ParsingException : ParserException {
 		public ParsingException(string? message = null, Exception? innerException = null) : base(message, innerException) { }
 
-		public ParsingException(IEnumerable<Lexeme> lexemes, int? position = null, string? message = null, Exception? innerException = null) : base(message, innerException) {
-			Lexemes = lexemes;
+		public ParsingException(IEnumerable<Token> tokens, int? position = null, string? message = null, Exception? innerException = null) : base(message, innerException) {
+			Tokens = tokens;
 			Position = position;
 		}
 
-		public IEnumerable<Lexeme>? Lexemes { get; }
+		public IEnumerable<Token>? Tokens { get; }
 
 		public int? Position { get; }
 
@@ -32,19 +32,19 @@ namespace Parser {
 
 		public Stack<SyntaxTreeNode>? CurrentStack { get; init; }
 
-		protected override string DefaultMessage => $"Error occurred{(Position is null ? "" : $" at {Position}")} when parsing lexemes";
+		protected override string DefaultMessage => $"Error occurred{(Position is null ? "" : $" at {Position}")} when parsing tokens";
 	}
 
 	public class TerminalNotMatchedException : ParsingException {
-		public TerminalNotMatchedException(IEnumerable<Lexeme> lexemes, int position, string? message = null, Exception? innerException = null) : base(lexemes, position, message, innerException) { }
+		public TerminalNotMatchedException(IEnumerable<Token> tokens, int position, string? message = null, Exception? innerException = null) : base(tokens, position, message, innerException) { }
 
-		public Lexeme NotMatchedLexeme => Lexemes!.ElementAt(Position!.Value);
+		public Token NotMatchedLexeme => Tokens!.ElementAt(Position!.Value);
 
 		protected override string DefaultMessage => $"Lexeme \"{NotMatchedLexeme}\"(position: {Position}) matches no terminal in grammar";
 	}
 
 	public class NotRecognizedException : ParsingException {
-		public NotRecognizedException(IEnumerable<Lexeme> lexemes, int? position = null, string? message = null, Exception? innerException = null) : base(lexemes, position, message, innerException) { }
+		public NotRecognizedException(IEnumerable<Token> tokens, int? position = null, string? message = null, Exception? innerException = null) : base(tokens, position, message, innerException) { }
 
 		protected override string DefaultMessage => "Code cannot be recognized by grammar";
 	}
