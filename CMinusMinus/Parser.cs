@@ -31,35 +31,35 @@ namespace CMinusMinus {
 			var tFor = NewKeywordTerminal("for");
 			var tWhile = NewKeywordTerminal("while");
 			var tDo = NewKeywordTerminal("do");
-			var tSignModifier = NewTerminal(TokenType.Keyword, new Regex(@"(?:un)?signed"));
+			var tSignModifier = NewTerminal(LexemeType.Keyword, new Regex(@"(?:un)?signed"));
 			#endregion
 
-			var tIdentifier = NewTerminal(TokenType.Identifier);
-			var tCharacterLiteral = NewTerminal(TokenType.CharacterLiteral);
-			var tStringLiteral = NewTerminal(TokenType.StringLiteral);
-			var tIntegerLiteral = NewTerminal(TokenType.IntegerLiteral);
-			var tFloatLiteral = NewTerminal(TokenType.FloatLiteral);
-			var tLeftParenthesis = NewTerminal(TokenType.LeftParenthesis);
-			var tRightParenthesis = NewTerminal(TokenType.RightParenthesis);
-			var tSeparator = NewTerminal(TokenType.Separator);
-			var tQuestionMark = NewTerminal(TokenType.QuestionMark);
-			var tBlockStart = NewTerminal(TokenType.BlockStartSymbol);
-			var tBlockEnd = NewTerminal(TokenType.BlockEndSymbol);
-			var tDelimiter = NewTerminal(TokenType.Delimiter);
-			var tColon = NewTerminal(TokenType.Colon);
+			var tIdentifier = NewTerminal(LexemeType.Identifier);
+			var tCharacterLiteral = NewTerminal(LexemeType.CharacterLiteral);
+			var tStringLiteral = NewTerminal(LexemeType.StringLiteral);
+			var tIntegerLiteral = NewTerminal(LexemeType.IntegerLiteral);
+			var tFloatLiteral = NewTerminal(LexemeType.FloatLiteral);
+			var tLeftParenthesis = NewTerminal(LexemeType.LeftParenthesis);
+			var tRightParenthesis = NewTerminal(LexemeType.RightParenthesis);
+			var tSeparator = NewTerminal(LexemeType.Separator);
+			var tQuestionMark = NewTerminal(LexemeType.QuestionMark);
+			var tBlockStart = NewTerminal(LexemeType.BlockStartSymbol);
+			var tBlockEnd = NewTerminal(LexemeType.BlockEndSymbol);
+			var tDelimiter = NewTerminal(LexemeType.Delimiter);
+			var tColon = NewTerminal(LexemeType.Colon);
 
 			#region Operators
-			var tAssignmentOperator = NewTerminal(TokenType.AssignmentOperator);
-			var tLogicalOrOperator = NewTerminal(TokenType.LogicalOperator, "||");
-			var tLogicalAndOperator = NewTerminal(TokenType.LogicalOperator, "&&");
-			var tBitwiseOrOperator = NewTerminal(TokenType.BitwiseOperator, "|");
-			var tBitwiseXorOperator = NewTerminal(TokenType.BitwiseOperator, "^");
-			var tBitwiseAndOperator = NewTerminal(TokenType.BitwiseOperator, "&");
-			var tRelationalOperator = NewTerminal(TokenType.RelationalOperator, new Regex(@"[<>]=?"));
-			var tShiftOperator = NewTerminal(TokenType.BitwiseOperator, new Regex(@"<<|>>"));
-			var tAdditiveOperator = NewTerminal(TokenType.ArithmeticOperator, new Regex(@"[-+]"));
-			var tMultiplicativeOperator = NewTerminal(TokenType.ArithmeticOperator, new Regex(@"[*\/%]"));
-			var tEqualityOperator = NewTerminal(TokenType.RelationalOperator, new Regex(@"[=!]="));
+			var tAssignmentOperator = NewTerminal(LexemeType.AssignmentOperator);
+			var tLogicalOrOperator = NewTerminal(LexemeType.LogicalOperator, "||");
+			var tLogicalAndOperator = NewTerminal(LexemeType.LogicalOperator, "&&");
+			var tBitwiseOrOperator = NewTerminal(LexemeType.BitwiseOperator, "|");
+			var tBitwiseXorOperator = NewTerminal(LexemeType.BitwiseOperator, "^");
+			var tBitwiseAndOperator = NewTerminal(LexemeType.BitwiseOperator, "&");
+			var tRelationalOperator = NewTerminal(LexemeType.RelationalOperator, new Regex(@"[<>]=?"));
+			var tShiftOperator = NewTerminal(LexemeType.BitwiseOperator, new Regex(@"<<|>>"));
+			var tAdditiveOperator = NewTerminal(LexemeType.ArithmeticOperator, new Regex(@"[-+]"));
+			var tMultiplicativeOperator = NewTerminal(LexemeType.ArithmeticOperator, new Regex(@"[*\/%]"));
+			var tEqualityOperator = NewTerminal(LexemeType.RelationalOperator, new Regex(@"[=!]="));
 			#endregion
 			#endregion
 
@@ -312,13 +312,13 @@ namespace CMinusMinus {
 			return grammar;
 		}
 
-		private Terminal NewTerminal(TokenType type) => new(Lexicon[type]);
+		private Terminal NewTerminal(LexemeType type) => new(Lexicon[type]);
 
-		private Terminal NewKeywordTerminal(string keyword) => new(Lexicon[TokenType.Keyword], keyword);
+		private Terminal NewKeywordTerminal(string keyword) => new(Lexicon[LexemeType.Keyword], keyword);
 
-		private Terminal NewTerminal(TokenType type, string pattern) => new(Lexicon[type], pattern);
+		private Terminal NewTerminal(LexemeType type, string pattern) => new(Lexicon[type], pattern);
 
-		private Terminal NewTerminal(TokenType type, Regex pattern) => new(Lexicon[type], pattern);
+		private Terminal NewTerminal(LexemeType type, Regex pattern) => new(Lexicon[type], pattern);
 	}
 
 	public enum NonterminalType : byte {

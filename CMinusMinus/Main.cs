@@ -19,10 +19,10 @@ namespace CMinusMinus {
 		public override IEnumerable<Token> Format(IEnumerable<Token> tokens)
 			=> tokens.Where(
 				l => l.Lexeme.Name is not (
-					nameof(TokenType.WhiteSpace) or
-					nameof(TokenType.LineBreak) or
-					nameof(TokenType.LineComment) or
-					nameof(TokenType.BlockComment))
+					nameof(LexemeType.WhiteSpace) or
+					nameof(LexemeType.LineBreak) or
+					nameof(LexemeType.LineComment) or
+					nameof(LexemeType.BlockComment))
 			);
 	}
 }
