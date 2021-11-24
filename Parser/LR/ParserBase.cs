@@ -40,7 +40,7 @@ namespace Parser.LR {
 			MoveNext();
 			IAction action;
 			do {
-				action = ParsingTable.ActionTable[stateStack.Peek(), terminal!];
+				action = ParsingTable[stateStack.Peek(), terminal!];
 				switch (action) {
 					case ErrorAction:  throw new NotRecognizedException(tokens, position) {CurrentStack = symbolStack, Grammar = Grammar};
 					case AcceptAction: return symbolStack.Single();
@@ -57,7 +57,7 @@ namespace Parser.LR {
 						}
 						while (symbolTemp.Count > 0)
 							symbolTemp.Pop().Parent = newNode;
-						stateStack.Push(ParsingTable.GotoTable[stateStack.Peek(), pr.Nonterminal] ?? throw new NotRecognizedException(tokens, position) {CurrentStack = symbolStack, Grammar = Grammar});
+						stateStack.Push(ParsingTable[stateStack.Peek(), pr.Nonterminal] ?? throw new NotRecognizedException(tokens, position) {CurrentStack = symbolStack, Grammar = Grammar});
 						symbolStack.Push(newNode);
 						break;
 				}

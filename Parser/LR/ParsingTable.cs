@@ -20,22 +20,14 @@ namespace Parser.LR {
 
 		public ItemSetCollectionBase<TItem> ItemSets { get; }
 
-		public IAction this[ItemSet<TItem> state, Symbol symbol] {
-			get => symbol.IsTerminal
-				? ActionTable[state, symbol.AsTerminal]
-				: GotoTable[state, symbol.AsNonterminal] is { } nextState
-					? new ShiftAction<TItem>(nextState)
-					: ActionFactory<TItem>.ErrorAction;
-			set {
-				if (symbol.IsTerminal)
-					ActionTable[state, symbol.AsTerminal] = value;
-				else
-					GotoTable[state, symbol.AsNonterminal] = value switch {
-						ShiftAction<TItem> shiftAction => shiftAction.NextState,
-						ErrorAction                    => null,
-						_                              => throw new InvariantTypeException(typeof(ShiftAction<TItem>), value.GetType())
-					};
-			}
+		public IAction this[ItemSet<TItem> state, Terminal terminal] {
+			get => ActionTable[state, terminal];
+			set => ActionTable[state, terminal] = value;
+		}
+
+		public ItemSet<TItem> this[ItemSet<TItem> state, Nonterminal nonterminal] {
+			get => GotoTable[state, nonterminal];
+			set => GotoTable[state, nonterminal] = value;
 		}
 
 		protected static Grammar ExtendGrammar(Grammar grammar) {
