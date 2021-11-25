@@ -44,10 +44,7 @@ namespace Lexer {
 		public void Add(string name, string pattern) => Add(new Lexeme(name, pattern));
 
 		/// <inheritdoc cref="Lexeme(string, Regex, int)" />
-		public void Add(string name, Regex pattern, int maxLength = 0) => Add(new Lexeme(name, pattern, maxLength));
-
-		/// <inheritdoc cref="Lexeme(string, LexemeMatcher)" />
-		public void Add(string name, LexemeMatcher match) => Add(new Lexeme(name, match));
+		public void Add(string name, Regex pattern) => Add(new Lexeme(name, pattern));
 
 		/// <inheritdoc cref="Lexeme(Enum, char)" />
 		public void Add(Enum name, char character) => Add(new Lexeme(name, character));
@@ -56,10 +53,7 @@ namespace Lexer {
 		public void Add(Enum name, string pattern) => Add(new Lexeme(name, pattern));
 
 		/// <inheritdoc cref="Lexeme(Enum, Regex, int)" />
-		public void Add(Enum name, Regex pattern, int maxLength = 0) => Add(new Lexeme(name, pattern, maxLength));
-
-		/// <inheritdoc cref="Lexeme(Enum, LexemeMatcher)" />
-		public void Add(Enum name, LexemeMatcher match) => Add(new Lexeme(name, match));
+		public void Add(Enum name, Regex pattern) => Add(new Lexeme(name, pattern));
 
 		public Token? Match(StringSegment code) {
 			foreach (var (_, lexeme) in _lexemes)

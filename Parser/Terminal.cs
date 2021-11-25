@@ -4,54 +4,51 @@ using Lexer;
 
 #nullable enable
 namespace Parser {
-	/// <summary>
-	///     Determine whether a <paramref name="token" /> belongs to a terminal
-	/// </summary>
-	public delegate bool TerminalMatcher(Token token);
-
 	public class Terminal : IEquatable<Terminal> {
+		private readonly Lexeme? _lexeme;
+
 		private readonly string? _pattern;
 
-		private readonly TerminalMatcher? _matcher;
-
-		private readonly Lexeme? _lexeme;
+		private readonly Regex? _regex;
 
 		private Terminal() { }
 
-		public Terminal(Lexeme lexeme) : this(lexeme, _ => true) { }
+		public Terminal(Lexeme lexeme) => _lexeme = lexeme;
 
-		public Terminal(Lexeme lexeme, TerminalMatcher matcher) {
-			_lexeme = lexeme;
-			_matcher = matcher;
+		public Terminal(Lexeme lexeme, string pattern) : this(lexeme) => _pattern = pattern;
+
+		public Terminal(Lexeme lexeme, Regex pattern) : this(lexeme) {
+			_pattern = pattern.ToString();
+			_regex = new Regex(_pattern, pattern.Options | RegexOptions.Compiled);
 		}
-
-		public Terminal(Lexeme lexeme, string pattern) : this(lexeme, token => token == pattern) => _pattern = pattern;
-
-		public Terminal(Lexeme lexeme, Regex pattern) : this(lexeme, token => pattern.IsMatch(token.Value)) => _pattern = pattern.ToString();
 
 		public static Terminal Terminator { get; } = new();
 
-		public Lexeme Lexeme => _lexeme ?? throw new NullReferenceException();
+		public Lexeme Lexeme => _lexeme ?? throw new NullReferenceException("Terminator has no lexeme");
+
+		public string? Pattern => _lexeme is not null ? _pattern : throw new NullReferenceException("Terminator has no pattern");
+
+		public bool UseRegex => _regex is not null;
 
 		public bool Equals(Terminal? other) {
 			if (other is null)
 				return false;
 			if (ReferenceEquals(this, other))
 				return true;
-			return _lexeme == other._lexeme && Equals(_matcher, other._matcher);
+			return _lexeme == other._lexeme && Equals(_pattern, other._pattern) && UseRegex == other.UseRegex;
 		}
 
 		public bool Match(Token token) {
-			if (_lexeme is null || _matcher is null)
+			if (Equals(Terminator))
 				throw new InvalidOperationException("Terminator cannot match");
-			return token.Lexeme.Equals(Lexeme) && _matcher(token);
+			return token.Lexeme.Equals(Lexeme) && (UseRegex ? _regex!.Match(token.Segment).Success : _pattern == token.Segment);
 		}
 
 		public override bool Equals(object? obj) => Equals(obj as Terminal);
 
-		public override int GetHashCode() => HashCode.Combine(_lexeme, _matcher);
+		public override int GetHashCode() => HashCode.Combine(_lexeme, _pattern, UseRegex);
 
-		public override string ToString() => _lexeme is null ? "＃" : _pattern is null ? _lexeme.Name : $"{_lexeme.Name}/{_pattern}/";
+		public override string ToString() => Equals(Terminator) ? "＃" : _pattern is null ? _lexeme!.Name : $"{_lexeme!.Name}{(UseRegex ? $"/{_pattern}/" : $"({_pattern})")}";
 
 		public static implicit operator Terminal(Lexeme lexeme) => new(lexeme);
 
