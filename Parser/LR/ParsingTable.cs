@@ -1,11 +1,8 @@
 ﻿using System.Linq;
-using TrueMogician.Exceptions;
 
 // ReSharper disable VirtualMemberCallInConstructor
 namespace Parser.LR {
 	public abstract class ParsingTable<TItem> where TItem : ItemBase {
-		protected readonly Grammar Grammar;
-
 		protected internal ParsingTable(Grammar grammar) {
 			Grammar = grammar;
 			Initialize(ExtendGrammar(grammar), out var itemSets, out var actionTable, out var gotoTable);
@@ -13,6 +10,8 @@ namespace Parser.LR {
 			ActionTable = actionTable;
 			GotoTable = gotoTable;
 		}
+
+		public Grammar Grammar { get; }
 
 		public ActionTable<TItem> ActionTable { get; }
 
@@ -29,6 +28,8 @@ namespace Parser.LR {
 			get => GotoTable[state, nonterminal];
 			set => GotoTable[state, nonterminal] = value;
 		}
+
+		public CompiledParsingTable Compile() => CompiledParsingTable.FromParsingTable(this);
 
 		protected static Grammar ExtendGrammar(Grammar grammar) {
 			var initial = new Nonterminal(grammar.InitialState.Name + "'");

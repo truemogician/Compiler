@@ -65,6 +65,8 @@ namespace Parser.LR {
 			throw new UnexpectedActionException<TItem>(ParsingTable, tokens, position);
 		}
 
+		public CompiledParser Compile() => new(ParsingTable.Compile());
+
 		protected override void Initialize(Grammar grammar) => ParsingTable = GenerateParsingTable(grammar);
 
 		protected abstract ParsingTable<TItem> GenerateParsingTable(Grammar grammar);

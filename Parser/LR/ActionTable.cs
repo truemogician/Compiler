@@ -3,7 +3,7 @@
 #nullable enable
 namespace Parser.LR {
 	public abstract class ActionTable<TItem> where TItem : ItemBase {
-		protected readonly Dictionary<ItemSet<TItem>, Dictionary<Terminal, IAction>> Table = new();
+		internal readonly Dictionary<ItemSet<TItem>, Dictionary<Terminal, IAction>> Table = new();
 
 		public virtual IAction this[ItemSet<TItem> state, Terminal terminal] {
 			get => Table[state][terminal];
@@ -17,13 +17,13 @@ namespace Parser.LR {
 	}
 
 	public enum ActionType : byte {
+		Error,
+
 		Shift,
 
 		Reduce,
 
-		Accept,
-
-		Error
+		Accept
 	}
 
 	public interface IAction {
