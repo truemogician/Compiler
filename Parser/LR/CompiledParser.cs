@@ -29,7 +29,7 @@ namespace Parser.LR {
 				if (!enumerator.MoveNext()) {
 					finished = true;
 					token = null;
-					terminalIndex = _table.Terminals.Count - 1;
+					terminalIndex = _table.Terminals.Count - 1;//Index of terminator
 				}
 				else {
 					++position;
@@ -65,5 +65,9 @@ namespace Parser.LR {
 			} while (action.Action != ActionType.Shift || MoveNext());
 			throw new Exception();
 		}
+
+		public static CompiledParser Load(string path) => new(CompiledParsingTable.Load(path));
+
+		public void Save(string path) => _table.Save(path);
 	}
 }
