@@ -5,16 +5,13 @@ using Microsoft.Extensions.Primitives;
 #nullable enable
 namespace Lexer {
 	public static class Utility {
-		/// <returns>A match object using <paramref name="input" />'s value as base string</returns>
-		public static Match Match(this Regex regex, StringSegment input) => regex.Match(input.Value);
+		/// <returns>A match object using <paramref name="input" />'s buffer as base string</returns>
+		public static Match Match(this Regex regex, StringSegment input) => regex.Match(input.Buffer, input.Offset, input.Length);
 
 		/// <inheritdoc cref="Match(Regex, StringSegment)" />
-		public static Match Match(this Regex regex, StringSegment input, int startAt) => regex.Match(input.Value, startAt);
+		public static Match Match(this Regex regex, StringSegment input, int startAt) => regex.Match(input.Buffer, startAt + input.Offset, input.Length);
 
 		/// <inheritdoc cref="Match(Regex, StringSegment)" />
-		public static Match Match(this Regex regex, StringSegment input, int beginning, int length) {
-			string? substr = input.Value;
-			return regex.Match(substr, beginning, Math.Min(length, substr.Length - beginning));
-		}
+		public static Match Match(this Regex regex, StringSegment input, int beginning, int length) => regex.Match(input.Buffer, beginning + input.Offset, Math.Min(length, input.Length));
 	}
 }
