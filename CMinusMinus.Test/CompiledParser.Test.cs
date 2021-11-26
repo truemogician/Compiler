@@ -2,7 +2,6 @@
 using System.IO;
 using NUnit.Framework;
 using Parser;
-using Parser.LR;
 
 #nullable enable
 namespace CMinusMinus.Test {
@@ -10,17 +9,15 @@ namespace CMinusMinus.Test {
 		[Test]
 		public void SaveTest() {
 			var language = new CMinusMinus();
-			var compiled = language.Parser.Compile();
+			var compiled = language.RawParser!.Compile();
 			compiled.Save("cmm.ptb");
 		}
 
 		[TestCase("int main(){}", ExpectedResult = null)]
 		public Type? LiteralTest(string code) {
-			var lexer = new Lexer.Lexer(CMinusMinus.Lexicon);
-			var parser = CompiledParser.Load("cmm.ptb");
+			var language = new CMinusMinus("cmm.ptb");
 			try {
-				var tokens = lexer.Tokenize(code);
-				Console.WriteLine(parser.Parse(tokens).ToString());
+				Console.WriteLine(language.Parse(code).ToString());
 				return null;
 			}
 			catch (ParserException ex) {

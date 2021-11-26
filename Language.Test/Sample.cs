@@ -3,9 +3,9 @@ using Parser;
 
 namespace Language.Test {
 	public class Sample : Language<Lexer.Lexer, Parser.LR.CLR.Parser, SampleFactory> {
-		protected override Lexer.Lexer CreateLexer(Lexicon lexicon) => new(lexicon);
+		public override Lexer.Lexer Lexer { get; } = new(Lexicon);
 
-		protected override Parser.LR.CLR.Parser CreateParser(Grammar grammar) => new(grammar);
+		public override Parser.LR.CLR.Parser Parser { get; } = new(Grammar);
 	}
 
 	public class SampleFactory : LanguageFactoryBase {
