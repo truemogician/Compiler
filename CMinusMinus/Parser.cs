@@ -1,11 +1,12 @@
 ﻿using System.Text.RegularExpressions;
 using Parser;
 
+#nullable enable
 namespace CMinusMinus {
 	using RSF = RegularSentenceForm;
 
-	public partial class CMinusMinus {
-		private Grammar InitializeGrammar() {
+	public partial class CMinusMinusFactory {
+		public override Grammar CreateGrammar() {
 			var grammar = new Grammar(NonterminalType.SourceCode);
 
 			#region Terminals

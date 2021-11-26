@@ -25,8 +25,8 @@
 		TypeQualifier
 	}
 
-	public partial class CMinusMinus {
-		public static readonly Keyword[] Keywords = {
+	public partial class CMinusMinusFactory {
+		public Keyword[] Keywords { get; } = {
 			("auto", KeywordCategory.StorageModifier),
 			("break", KeywordCategory.ControlFlow),
 			("case", KeywordCategory.ControlFlow),

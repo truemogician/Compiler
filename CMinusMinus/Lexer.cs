@@ -2,9 +2,10 @@
 using System.Text.RegularExpressions;
 using Lexer;
 
+#nullable enable
 namespace CMinusMinus {
-	public partial class CMinusMinus {
-		private static Lexicon InitializeLexicon() {
+	public partial class CMinusMinusFactory {
+		public override Lexicon CreateLexicon() {
 			var lexicon = new Lexicon();
 			lexicon.Add(LexemeType.Keyword, new Regex($@"(?:{string.Join('|', Keywords.Select(k => k.Value))})\b"));
 			lexicon.Add(LexemeType.Identifier, new Regex(@"[a-zA-Z_][a-zA-Z0-9_]*"));

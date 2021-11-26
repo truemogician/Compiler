@@ -2,21 +2,20 @@
 using System.Linq;
 using Language;
 using Lexer;
+using Parser;
 
 namespace CMinusMinus {
 	using CLRParser = Parser.LR.CLR.Parser;
+	using RegexLexer = Lexer.Lexer;
 
-	public partial class CMinusMinus : Language<Lexer.Lexer, CLRParser> {
-		public CMinusMinus() {
-			Lexer = new Lexer.Lexer(InitializeLexicon());
-			Parser = new CLRParser(InitializeGrammar());
-		}
+	public class CMinusMinus : Language<RegexLexer, CLRParser, CMinusMinusFactory> {
+		public static Keyword[] Keywords => Factory.Keywords;
 
-		public override Lexer.Lexer Lexer { get; }
+		protected override RegexLexer CreateLexer(Lexicon lexicon) => new(lexicon);
 
-		public override CLRParser Parser { get; }
+		protected override CLRParser CreateParser(Grammar grammar) => new(grammar);
 
-		public override IEnumerable<Token> Format(IEnumerable<Token> tokens)
+		public override IEnumerable<Token> Filter(IEnumerable<Token> tokens)
 			=> tokens.Where(
 				l => l.Lexeme.Name is not (
 					nameof(LexemeType.WhiteSpace) or
@@ -25,4 +24,6 @@ namespace CMinusMinus {
 					nameof(LexemeType.BlockComment))
 			);
 	}
+
+	public partial class CMinusMinusFactory : LanguageFactoryBase { }
 }
