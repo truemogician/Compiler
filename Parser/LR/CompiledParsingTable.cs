@@ -22,12 +22,6 @@ namespace Parser.LR {
 
 		private CompiledParsingTable(IEnumerable<Terminal> terminals, IEnumerable<Nonterminal> nonterminals, IEnumerable<(int, int)> productionRules, int[,] table) {
 			_terminals = terminals.AsList();
-			int idx = _terminals.FindIndex(t => t.Equals(Terminal.Terminator));
-			if (idx == -1)
-				throw new Exception("Terminator not found in terminals");
-			var tmp = _terminals[^1];
-			_terminals[^1] = Terminal.Terminator;
-			_terminals[idx] = tmp;
 			_groupedTerminals = new Dictionary<Lexeme, List<(Terminal, int)>>();
 			for (var i = 0; i < _terminals.Count; ++i) {
 				var t = _terminals[i];
@@ -41,22 +35,21 @@ namespace Parser.LR {
 		}
 
 		private CompiledParsingTable(ICollection<Terminal> terminals, ICollection<Nonterminal> nonterminals, IEnumerable<(int, int)> productionRules, int stateCount)
-			: this(terminals, nonterminals, productionRules, new int[stateCount, terminals.Count + nonterminals.Count]) { }
+			: this(terminals, nonterminals, productionRules, new int[stateCount, terminals.Count + nonterminals.Count + 1]) { }
 
-		/// <summary>
-		/// List of terminals. Terminator is always the last element.
-		/// </summary>
 		public IReadOnlyList<Terminal> Terminals => _terminals;
 
-		/// <summary>
-		/// List of nonterminals.
-		/// </summary>
 		public IReadOnlyList<Nonterminal> Nonterminals => _nonterminals;
 
 		public IReadOnlyList<(int NonterminalIndex, int Length)> ProductionRules => _productionRules;
 
 		/// <param name="stateIndex">Index of the state</param>
-		/// <param name="symbolIndex">Index of the symbol. When less than Terminal.Count, the index indicate a terminal; Otherwise a nonterminal.</param>
+		/// <param name="symbolIndex">
+		/// Index of the symbol.
+		/// When less than or equal to Terminal.Count, the index indicate a terminal
+		/// (specifically, when equal to Terminal.Count, it indicate the Terminator);
+		/// Otherwise a nonterminal.
+		/// </param>
 		/// <returns>
 		/// <para>If <paramref name="symbolIndex"/> indicates a terminal,
 		/// the first item of return value will indicate the action type,
@@ -72,16 +65,18 @@ namespace Parser.LR {
 			get {
 				if (stateIndex < 0 || stateIndex > _table.GetLength(0))
 					throw new ArgumentOutOfRangeException(nameof(stateIndex));
-				if (symbolIndex < 0 || symbolIndex > _terminals.Count + _nonterminals.Count)
+				if (symbolIndex < 0 || symbolIndex > _terminals.Count + _nonterminals.Count + 1)
 					throw new ArgumentOutOfRangeException(nameof(symbolIndex));
 				int value = _table[stateIndex, symbolIndex];
-				return symbolIndex >= _terminals.Count ? (null, value - 1) : ((ActionType)(value & 0b11)!, value >> 2);
+				return symbolIndex > _terminals.Count ? (null, value - 1) : ((ActionType)(value & 0b11)!, value >> 2);
 			}
 			private set => _table[stateIndex, symbolIndex] = value.Action is null ? value.Index < 0 ? 0 : value.Index + 1 : (value.Index << 2) | (int)value.Action.Value;
 		}
 
 		public static CompiledParsingTable FromParsingTable<TItem>(ParsingTable<TItem> parsingTable) where TItem : ItemBase {
 			var terminals = parsingTable.Grammar.Terminals.ToList();
+			if (terminals.Contains(Terminal.Terminator))
+				throw new ArgumentException("Terminator should not present in terminal collection");
 			var tIndices = terminals.ToIndexDictionary();
 			var nonterminals = parsingTable.Grammar.SourceNonterminals.ToList();
 			var ntIndices = nonterminals.ToIndexDictionary();
@@ -93,16 +88,18 @@ namespace Parser.LR {
 			stateIndices[parsingTable.ItemSets.First()] = tmp;
 			var result = new CompiledParsingTable(terminals, nonterminals, productionRules, parsingTable.ItemSets.Count);
 			foreach (var (state, actions) in parsingTable.ActionTable.Table) {
-				foreach (var (terminal, action) in actions)
-					result[stateIndices[state], tIndices[terminal]] = (action.Type, action switch {
+				foreach (var (terminal, action) in actions) {
+					int idx = terminal.Equals(Terminal.Terminator) ? terminals.Count : tIndices[terminal];
+					result[stateIndices[state], idx] = (action.Type, action switch {
 						ShiftAction<TItem> sa => stateIndices[sa.NextState],
 						ReduceAction ra       => prIndices[ra.ProductionRule],
 						_                     => 0
 					});
+				}
 			}
 			foreach (var (state, states) in parsingTable.GotoTable.Table) {
 				foreach (var (nt, st) in states)
-					result[stateIndices[state], ntIndices[nt] + terminals.Count] = (null, st is null ? -1 : stateIndices[st]);
+					result[stateIndices[state], ntIndices[nt] + terminals.Count + 1] = (null, st is null ? -1 : stateIndices[st]);
 			}
 			return result;
 		}
@@ -117,7 +114,7 @@ namespace Parser.LR {
 				var counts = reader.ReadLine()!.Split(' ').Select(int.Parse).ToArray();
 				string line;
 				var separatorMatcher = new Regex(@"(?<!\\),", RegexOptions.Compiled);
-				var lexemes = new List<Lexeme>(counts[0]);
+				var lexemes = new Lexeme[counts[0]];
 				for (var i = 0; i < counts[0]; ++i) {
 					bool useRegex = ReadBool();
 					line = reader.ReadLine()!;
@@ -125,8 +122,8 @@ namespace Parser.LR {
 					var name = line[..idx].Replace(@"\,", ",");
 					lexemes[i] = useRegex ? new Lexeme(name, new Regex(line[(idx + 1)..])) : new Lexeme(name, line[(idx + 1)..]);
 				}
-				var terminals = new List<Terminal>(counts[1]);
-				for (var i = 0; i < counts[1] - 1; ++i) {
+				var terminals = new Terminal[counts[1]];
+				for (var i = 0; i < counts[1]; ++i) {
 					int idx = reader.ReadInteger()!.Value;
 					if (reader.Peek() == ',') {
 						reader.Read();
@@ -139,13 +136,12 @@ namespace Parser.LR {
 						reader.ReadLine();
 					}
 				}
-				terminals[^1] = Terminal.Terminator;
-				var nonterminals = new List<Nonterminal>(counts[2]);
+				var nonterminals = new Nonterminal[counts[2]];
 				for (var i = 0; i < counts[2]; ++i) {
 					bool tmp = ReadBool();
 					nonterminals[i] = new Nonterminal(reader.ReadLine()!, tmp);
 				}
-				var productionRules = new List<(int NonterminalIndex, int Length)>(counts[3]);
+				var productionRules = new (int NonterminalIndex, int Length)[counts[3]];
 				for (var i = 0; i < counts[3]; ++i) {
 					int idx = reader.ReadInteger()!.Value;
 					if (reader.Read() != ',')
@@ -154,7 +150,7 @@ namespace Parser.LR {
 					productionRules[i] = (idx, length);
 					reader.ReadLine();
 				}
-				var table = new int[counts[4], counts[1] + counts[2]];
+				var table = new int[counts[4], counts[1] + counts[2] + 1];
 				for (var i = 0; i < counts[4]; ++i) {
 					for (var j = 0; j < counts[1] + counts[2]; ++j) {
 						table[i, j] = reader.Peek() == ',' ? 0 : reader.ReadInteger()!.Value;
@@ -176,10 +172,10 @@ namespace Parser.LR {
 				builder.Append(lexeme.UseRegex ? '1' : '0');
 				builder.Append(lexeme.Name.Replace(",", @"\,"));
 				builder.Append(',');
-				builder.AppendLine(lexeme.Pattern);
+				builder.AppendLine(lexeme.UseRegex ? lexeme.Pattern[4..^1] : lexeme.Pattern);
 			}
 			var lexemeIndices = _groupedTerminals.Keys.ToIndexDictionary();
-			foreach (var terminal in _terminals.Take(_terminals.Count - 1)) {
+			foreach (var terminal in _terminals) {
 				builder.Append(lexemeIndices[terminal.Lexeme]);
 				if (terminal.Pattern is not null) {
 					builder.Append(',');
@@ -206,6 +202,7 @@ namespace Parser.LR {
 		}
 
 		public int? Match(Token token, bool checkAmbiguity = false) {
+			var lexemes = _groupedTerminals.Keys.ToArray();
 			if (!_groupedTerminals.ContainsKey(token.Lexeme))
 				return null;
 			return (checkAmbiguity

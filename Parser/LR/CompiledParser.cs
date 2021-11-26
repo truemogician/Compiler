@@ -29,7 +29,7 @@ namespace Parser.LR {
 				if (!enumerator.MoveNext()) {
 					finished = true;
 					token = null;
-					terminalIndex = _table.Terminals.Count - 1;//Index of terminator
+					terminalIndex = _table.Terminals.Count;//Index of terminator
 				}
 				else {
 					++position;
@@ -58,7 +58,7 @@ namespace Parser.LR {
 						}
 						while (symbolTemp.Count > 0)
 							symbolTemp.Pop().Parent = newNode;
-						stateStack.Push(_table[stateStack.Peek(), nonterminalIndex + _table.Terminals.Count] is {Index: >= 0} idx ? idx.Index : throw new NotRecognizedException(tokens, position) {CurrentStack = symbolStack});
+						stateStack.Push(_table[stateStack.Peek(), nonterminalIndex + _table.Terminals.Count + 1] is {Index: >= 0} idx ? idx.Index : throw new NotRecognizedException(tokens, position) {CurrentStack = symbolStack});
 						symbolStack.Push(newNode);
 						break;
 				}

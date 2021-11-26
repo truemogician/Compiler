@@ -4,10 +4,10 @@ using Microsoft.Extensions.Primitives;
 
 #nullable enable
 namespace Lexer {
-	public class Lexeme {
-		private readonly Regex? _regex;
-
+	public class Lexeme : IEquatable<Lexeme> {
 		private readonly int? _maxLength;
+
+		private readonly Regex? _regex;
 
 		private Lexeme(string name, string pattern, int? maxLength) {
 			if (name.Contains(Environment.NewLine))
@@ -57,6 +57,14 @@ namespace Lexer {
 
 		public bool UseRegex => _regex is not null;
 
+		public bool Equals(Lexeme? other) {
+			if (other is null)
+				return false;
+			if (ReferenceEquals(this, other))
+				return true;
+			return Name == other.Name && UseRegex == other.UseRegex && Pattern == other.Pattern;
+		}
+
 		public Token? Match(StringSegment input) {
 			if (_regex is null)
 				return Pattern == input ? new Token(this, input.Subsegment(0, Pattern.Length)) : null;
@@ -67,5 +75,15 @@ namespace Lexer {
 		private static string GetEnumName(Enum value) => Enum.GetName(value.GetType(), value) ?? throw new Exception();
 
 		public override string ToString() => Name;
+
+		public override bool Equals(object? obj) {
+			if (obj is null)
+				return false;
+			if (ReferenceEquals(this, obj))
+				return true;
+			return obj.GetType() == GetType() && Equals(obj as Lexeme);
+		}
+
+		public override int GetHashCode() => HashCode.Combine(Name, Pattern, UseRegex);
 	}
 }
