@@ -114,7 +114,7 @@ namespace Parser.LR {
 				return ch != '0' && (ch == '1' ? true : throw new Exception());
 			}
 			try {
-				int[]? counts = reader.ReadLine()!.Split(' ').Select(int.Parse).ToArray();
+				int[] counts = reader.ReadLine()!.Split(' ').Select(int.Parse).ToArray();
 				string line;
 				var separatorMatcher = new Regex(@"(?<!\\),", RegexOptions.Compiled);
 				var lexemes = new Lexeme[counts[0]];
@@ -122,7 +122,7 @@ namespace Parser.LR {
 					bool useRegex = ReadBool();
 					line = reader.ReadLine()!;
 					int idx = separatorMatcher.Match(line).Index;
-					string? name = line[..idx].Replace(@"\,", ",");
+					string name = line[..idx].Replace(@"\,", ",");
 					lexemes[i] = useRegex ? new Lexeme(name, new Regex(line[(idx + 1)..])) : new Lexeme(name, line[(idx + 1)..]);
 				}
 				var terminals = new Terminal[counts[1]];
@@ -155,7 +155,7 @@ namespace Parser.LR {
 				}
 				var table = new int[counts[4], counts[1] + counts[2] + 1];
 				for (var i = 0; i < counts[4]; ++i) {
-					for (var j = 0; j < counts[1] + counts[2]; ++j) {
+					for (var j = 0; j < counts[1] + counts[2] + 1; ++j) {
 						table[i, j] = reader.Peek() == ',' ? 0 : reader.ReadInteger()!.Value;
 						reader.Read();
 					}
