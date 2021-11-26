@@ -11,8 +11,6 @@ namespace Parser.LR {
 
 		public CompiledParser(CompiledParsingTable table) => _table = table;
 
-		public Grammar Grammar => throw new NotSupportedException("Compiled parser doesn't contains an instance of Grammar");
-
 		[SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
 		public AbstractSyntaxTree Parse(IEnumerable<Token> tokens) {
 			Stack<int> stateStack = new();

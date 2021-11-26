@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Primitives;
 
 #nullable enable
@@ -30,26 +29,5 @@ namespace Lexer {
 					break;
 			}
 		}
-	}
-
-	public interface ILexer {
-		public Lexicon Lexicon { get; }
-
-		public IEnumerable<Token> Tokenize(string code, bool checkAmbiguity = false);
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool TryTokenize(string code, bool checkAmbiguity, out IEnumerable<Token>? tokens) {
-			try {
-				tokens = Tokenize(code);
-				return true;
-			}
-			catch (LexerException) {
-				tokens = null;
-				return false;
-			}
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool TryTokenize(string code, out IEnumerable<Token>? tokens) => TryTokenize(code, false, out tokens);
 	}
 }
