@@ -158,11 +158,11 @@ namespace CMinusMinus {
 				(RSF)tIf +
 				nIfCommonPart +
 				((RSF)tElse + tIf + nIfCommonPart) * '*' +
-				((RSF)tElse + nIfCommonPart) * '?'
+				((RSF)tElse + ((RSF)nEmbeddedStatement | nFunctionBody)) * '?'
 			);
 			grammar.Add(
 				nIfCommonPart,
-				((RSF)nExpressionWithParenthesis + nEmbeddedStatement) | nFunctionBody
+				nExpressionWithParenthesis + ((RSF)nEmbeddedStatement | nFunctionBody)
 			);
 			grammar.Add(
 				nExpressionWithParenthesis,
