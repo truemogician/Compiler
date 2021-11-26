@@ -34,13 +34,17 @@ namespace Parser {
 				return false;
 			if (ReferenceEquals(this, other))
 				return true;
-			return _lexeme == other._lexeme && Equals(_pattern, other._pattern) && UseRegex == other.UseRegex;
+			return Equals(_lexeme, other._lexeme) && Equals(_pattern, other._pattern) && UseRegex == other.UseRegex;
 		}
 
 		public bool Match(Token token) {
 			if (Equals(Terminator))
 				throw new InvalidOperationException("Terminator cannot match");
-			return token.Lexeme.Equals(Lexeme) && (UseRegex ? _regex!.Match(token.Segment).Success : _pattern == token.Segment);
+			if (!Lexeme.Equals(token.Lexeme))
+				return false;
+			return UseRegex
+				? _regex!.Match(token.Segment).Success
+				: _pattern is null || token.Segment.Equals(_pattern);
 		}
 
 		public override bool Equals(object? obj) => Equals(obj as Terminal);
