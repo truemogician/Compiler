@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Language;
 using Lexer;
@@ -13,25 +14,32 @@ namespace CMinusMinus {
 	public partial class CMinusMinusFactory : LanguageFactoryBase { }
 
 	public class CMinusMinus : Language<RegexLexer, IParser, CMinusMinusFactory> {
-		public CMinusMinus() {
-			Lexer = new RegexLexer(Lexicon);
-			Parser = new CLRParser(Grammar);
-		}
+		private bool _useCompiled;
 
-		public CMinusMinus(string compiledTablePath) {
-			Lexer = new RegexLexer(Lexicon);
-			Parser = CompiledParser.Load(compiledTablePath);
-		}
+		public CMinusMinus() => RawParser = new CLRParser(Grammar);
+
+		public CMinusMinus(string compiledTablePath) => CompiledParser = CompiledParser.Load(compiledTablePath);
 
 		public static Keyword[] Keywords => Factory.Keywords;
 
-		public override RegexLexer Lexer { get; }
+		public override RegexLexer Lexer { get; } = new(Lexicon);
 
-		public override IParser Parser { get; }
+		public override IParser Parser => RawParser is not null && !_useCompiled ? RawParser : CompiledParser!;
 
-		public CLRParser? RawParser => Parser as CLRParser;
+		public CLRParser? RawParser { get; }
 
-		public CompiledParser? CompiledParser => Parser as CompiledParser;
+		public CompiledParser? CompiledParser { get; private set; }
+
+		public void UseCompiledParser() {
+			CompiledParser ??= RawParser!.Compile();
+			_useCompiled = true;
+		}
+
+		public void UseRawParser() {
+			if (RawParser is null)
+				throw new InvalidOperationException("Table file loaded instance doesn't have a raw parser");
+			_useCompiled = false;
+		}
 
 		public override IEnumerable<Token> Filter(IEnumerable<Token> tokens)
 			=> tokens.Where(
