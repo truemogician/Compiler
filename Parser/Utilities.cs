@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 
-#nullable enable
 namespace Parser {
 	public static class Utilities {
 		public class SetEqualityComparer<T> : IEqualityComparer<ISet<T>> {

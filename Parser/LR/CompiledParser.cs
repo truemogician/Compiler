@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Lexer;
 
-#nullable enable
 namespace Parser.LR {
 	public class CompiledParser : IParser {
 		private readonly CompiledParsingTable _table;

@@ -3,15 +3,11 @@ using System.IO;
 using NUnit.Framework;
 using Parser;
 
-#nullable enable
 namespace CMinusMinus.Test {
 	public class ParserTests {
 		public static readonly CMinusMinus Language = new();
 
-		[TestCase(@"long long int", ExpectedResult = null)]
-		[TestCase(@"unsigned long long", ExpectedResult = null)]
-		[TestCase(@"long double", ExpectedResult = null)]
-		[TestCase(@"signed", ExpectedResult = null)]
+		[TestCase(@"int main(){}", ExpectedResult = null)]
 		public Type? LiteralTest(string code) {
 			try {
 				Console.WriteLine(Language.Parse(code).ToString());

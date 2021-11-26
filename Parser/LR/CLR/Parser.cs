@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Parser.LR.CLR {
+﻿namespace Parser.LR.CLR {
 	public class Parser : ParserBase<Item> {
 		public Parser(Grammar grammar) : base(grammar) { }
 

@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Parser.LR.CLR {
+﻿namespace Parser.LR.CLR {
 	using ItemSet = ItemSet<Item>;
 
 	public class GotoTable : GotoTable<Item> {

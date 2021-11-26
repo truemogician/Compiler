@@ -2,7 +2,6 @@
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Primitives;
 
-#nullable enable
 namespace Lexer {
 	public static class Utility {
 		/// <returns>A match object using <paramref name="input" />'s buffer as base string</returns>

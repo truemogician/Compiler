@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Lexer;
 
-#nullable enable
 namespace Parser.LR {
 	public class ParsingTableConstructingException : ParserConstructingException {
 		public ParsingTableConstructingException(Grammar grammar, string? message = null, Exception? innerException = null) : base(message, innerException) => Grammar = grammar;

@@ -3,7 +3,6 @@ using System.IO;
 using NUnit.Framework;
 using Parser;
 
-#nullable enable
 namespace CMinusMinus.Test {
 	public class CompiledParserTests {
 		[Test]

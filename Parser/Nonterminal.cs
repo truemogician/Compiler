@@ -1,6 +1,5 @@
 ﻿using System;
 
-#nullable enable
 namespace Parser {
 	public record Nonterminal(string Name, bool Temporary = false) {
 		/// <summary>

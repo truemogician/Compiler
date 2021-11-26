@@ -24,7 +24,7 @@ namespace Parser.LR {
 			set => ActionTable[state, terminal] = value;
 		}
 
-		public ItemSet<TItem> this[ItemSet<TItem> state, Nonterminal nonterminal] {
+		public ItemSet<TItem>? this[ItemSet<TItem> state, Nonterminal nonterminal] {
 			get => GotoTable[state, nonterminal];
 			set => GotoTable[state, nonterminal] = value;
 		}

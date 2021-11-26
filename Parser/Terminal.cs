@@ -2,7 +2,6 @@
 using System.Text.RegularExpressions;
 using Lexer;
 
-#nullable enable
 namespace Parser {
 	public class Terminal : IEquatable<Terminal> {
 		private readonly Lexeme? _lexeme;

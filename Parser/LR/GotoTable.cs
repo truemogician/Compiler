@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 
-#nullable enable
 namespace Parser.LR {
 	public abstract class GotoTable<TItem> where TItem : ItemBase {
 		internal readonly Dictionary<ItemSet<TItem>, Dictionary<Nonterminal, ItemSet<TItem>?>> Table = new();

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using TrueMogician.Exceptions;
 
-#nullable enable
 namespace Parser {
 	public class FirstSetCollection : IReadOnlyDictionary<Nonterminal, HashSet<Terminal?>> {
 		private readonly HashSet<Nonterminal> _emptiableNonterminals = new();

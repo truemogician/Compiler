@@ -7,11 +7,8 @@ using System.Text.RegularExpressions;
 using Lexer;
 using TrueMogician.Extensions.Enumerable;
 
-#nullable enable
 namespace Parser.LR {
 	public class CompiledParsingTable {
-		private readonly List<Terminal> _terminals;
-
 		private readonly Dictionary<Lexeme, List<(Terminal, int)>> _groupedTerminals;
 
 		private readonly List<Nonterminal> _nonterminals;
@@ -19,6 +16,8 @@ namespace Parser.LR {
 		private readonly List<(int NonterminalIndex, int Length)> _productionRules;
 
 		private readonly int[,] _table;
+
+		private readonly List<Terminal> _terminals;
 
 		private CompiledParsingTable(IEnumerable<Terminal> terminals, IEnumerable<Nonterminal> nonterminals, IEnumerable<(int, int)> productionRules, int[,] table) {
 			_terminals = terminals.AsList();
@@ -45,21 +44,25 @@ namespace Parser.LR {
 
 		/// <param name="stateIndex">Index of the state</param>
 		/// <param name="symbolIndex">
-		/// Index of the symbol.
-		/// When less than or equal to Terminal.Count, the index indicate a terminal
-		/// (specifically, when equal to Terminal.Count, it indicate the Terminator);
-		/// Otherwise a nonterminal.
+		///     Index of the symbol.
+		///     When less than or equal to Terminal.Count, the index indicate a terminal
+		///     (specifically, when equal to Terminal.Count, it indicate the Terminator);
+		///     Otherwise a nonterminal.
 		/// </param>
 		/// <returns>
-		/// <para>If <paramref name="symbolIndex"/> indicates a terminal,
-		/// the first item of return value will indicate the action type,
-		/// and the second item stores the index of action-related content,
-		/// which means the next state of a shift action, or the production rule to use of a reduce action.
-		/// The second item of an accept action or error action should be 0, but it is not guaranteed.</para>
-		/// <para>If <paramref name="symbolIndex"/> indicates a nonterminal,
-		/// the first item of return value will always be null,
-		/// while the second item stores the index of the state to go to.
-		/// If no goto-state presents, the second item will be -1</para>
+		///     <para>
+		///         If <paramref name="symbolIndex" /> indicates a terminal,
+		///         the first item of return value will indicate the action type,
+		///         and the second item stores the index of action-related content,
+		///         which means the next state of a shift action, or the production rule to use of a reduce action.
+		///         The second item of an accept action or error action should be 0, but it is not guaranteed.
+		///     </para>
+		///     <para>
+		///         If <paramref name="symbolIndex" /> indicates a nonterminal,
+		///         the first item of return value will always be null,
+		///         while the second item stores the index of the state to go to.
+		///         If no goto-state presents, the second item will be -1
+		///     </para>
 		/// </returns>
 		public (ActionType? Action, int Index) this[int stateIndex, int symbolIndex] {
 			get {
@@ -111,7 +114,7 @@ namespace Parser.LR {
 				return ch != '0' && (ch == '1' ? true : throw new Exception());
 			}
 			try {
-				var counts = reader.ReadLine()!.Split(' ').Select(int.Parse).ToArray();
+				int[]? counts = reader.ReadLine()!.Split(' ').Select(int.Parse).ToArray();
 				string line;
 				var separatorMatcher = new Regex(@"(?<!\\),", RegexOptions.Compiled);
 				var lexemes = new Lexeme[counts[0]];
@@ -119,7 +122,7 @@ namespace Parser.LR {
 					bool useRegex = ReadBool();
 					line = reader.ReadLine()!;
 					int idx = separatorMatcher.Match(line).Index;
-					var name = line[..idx].Replace(@"\,", ",");
+					string? name = line[..idx].Replace(@"\,", ",");
 					lexemes[i] = useRegex ? new Lexeme(name, new Regex(line[(idx + 1)..])) : new Lexeme(name, line[(idx + 1)..]);
 				}
 				var terminals = new Terminal[counts[1]];
@@ -202,7 +205,6 @@ namespace Parser.LR {
 		}
 
 		public int? Match(Token token, bool checkAmbiguity = false) {
-			var lexemes = _groupedTerminals.Keys.ToArray();
 			if (!_groupedTerminals.ContainsKey(token.Lexeme))
 				return null;
 			return (checkAmbiguity

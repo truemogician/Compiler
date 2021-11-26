@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Lexer;
 
-#nullable enable
 namespace Parser.LR {
 	public abstract class ParserBase<TItem> : ParserBase where TItem : ItemBase {
 		#pragma warning disable 8618

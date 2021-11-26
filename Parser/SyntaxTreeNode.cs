@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using Lexer;
 
-#nullable enable
 namespace Parser {
 	public class SyntaxTreeNode {
 		private readonly ObservableCollection<SyntaxTreeNode> _children = new();

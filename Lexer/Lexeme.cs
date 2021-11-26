@@ -2,7 +2,6 @@
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Primitives;
 
-#nullable enable
 namespace Lexer {
 	public class Lexeme : IEquatable<Lexeme> {
 		private readonly int? _maxLength;

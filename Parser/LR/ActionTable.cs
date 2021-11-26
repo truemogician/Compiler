@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 
-#nullable enable
 namespace Parser.LR {
 	public abstract class ActionTable<TItem> where TItem : ItemBase {
 		internal readonly Dictionary<ItemSet<TItem>, Dictionary<Terminal, IAction>> Table = new();

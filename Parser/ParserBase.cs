@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Lexer;
 
-#nullable enable
 namespace Parser {
 	public abstract class ParserBase : IParser {
 		// ReSharper disable once VirtualMemberCallInConstructor

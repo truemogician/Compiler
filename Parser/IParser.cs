@@ -2,7 +2,6 @@
 using System.Runtime.CompilerServices;
 using Lexer;
 
-#nullable enable
 namespace Parser {
 	public interface IParser {
 		public AbstractSyntaxTree Parse(IEnumerable<Token> tokens);

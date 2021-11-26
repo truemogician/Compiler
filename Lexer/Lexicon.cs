@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Primitives;
 
-#nullable enable
 namespace Lexer {
 	public class Lexicon : ICollection<Lexeme> {
 		private readonly Dictionary<string, Lexeme> _lexemes = new();

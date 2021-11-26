@@ -4,7 +4,6 @@ using System.Linq;
 using Lexer;
 using TrueMogician.Exceptions;
 
-#nullable enable
 namespace Parser {
 	public abstract class ParserException : ExceptionWithDefaultMessage {
 		protected ParserException(string? message = null, Exception? innerException = null) : base(message, innerException) { }

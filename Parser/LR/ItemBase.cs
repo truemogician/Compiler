@@ -1,6 +1,5 @@
 ﻿using System;
 
-#nullable enable
 namespace Parser.LR {
 	public abstract record ItemBase {
 		protected ItemBase(ProductionRule productionRule, int marker) {

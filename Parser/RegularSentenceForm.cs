@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Lexer;
 
-#nullable enable
 namespace Parser {
 	using static Utilities;
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 
-#nullable enable
 namespace Parser {
 	public record ProductionRule(Nonterminal Nonterminal, SentenceForm Production) {
 		public IEnumerable<Nonterminal> InvolvedNonterminals {

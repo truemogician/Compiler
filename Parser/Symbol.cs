@@ -1,7 +1,6 @@
 ﻿using System;
 using Lexer;
 
-#nullable enable
 namespace Parser {
 	public class Symbol : IEquatable<Symbol> {
 		private readonly Nonterminal? _nonterminal;
