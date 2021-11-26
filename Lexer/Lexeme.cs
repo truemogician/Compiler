@@ -66,8 +66,10 @@ namespace Lexer {
 		}
 
 		public Token? Match(StringSegment input) {
-			if (_regex is null)
-				return Pattern == input ? new Token(this, input.Subsegment(0, Pattern.Length)) : null;
+			if (_regex is null) {
+				var seg = input.Subsegment(0, Pattern.Length);
+				return Pattern == seg ? new Token(this, seg) : null;
+			}
 			var result = _maxLength is null ? _regex.Match(input) : _regex.Match(input, 0, _maxLength.Value);
 			return result.Success ? new Token(this, input.Subsegment(0, result.Length)) : null;
 		}
