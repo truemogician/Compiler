@@ -17,7 +17,7 @@ namespace CMinusMinus {
 			lexicon.Add(LexemeType.ArithmeticOperator, new Regex(@"[-+*/%]"));
 			lexicon.Add(LexemeType.BitwiseOperator, new Regex(@"[&|^~]|<<|>>"));
 			lexicon.Add(LexemeType.AssignmentOperator, new Regex(@"(?:[-+*/%&|^~]|<<|>>)?="));
-			lexicon.Add(LexemeType.RelationalOperator, new Regex(@"[<>]|[<>=!]="));
+			lexicon.Add(LexemeType.RelationalOperator, new Regex(@"[<>=!]=|[<>]"));
 			lexicon.Add(LexemeType.LogicalOperator, new Regex(@"!|&&|\|\|"));
 			lexicon.Add(LexemeType.MembershipOperator, '.');
 			lexicon.Add(LexemeType.Delimiter, ';');
