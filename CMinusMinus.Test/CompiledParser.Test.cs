@@ -29,6 +29,7 @@ namespace CMinusMinus.Test {
 		[TestCase(@"samples/a+b.cmm", ExpectedResult = null)]
 		[TestCase(@"samples/hello.cmm", ExpectedResult = null)]
 		[TestCase(@"samples/literal.cmm", ExpectedResult = null)]
+		[TestCase(@"samples/full.cmm", ExpectedResult = null)]
 		public Type? CompileAndRunFileTest(string filePath) => CompileAndRunLiteralTest(File.ReadAllText(filePath));
 
 		[TestCase("int main(){}", ExpectedResult = null)]
@@ -47,6 +48,7 @@ namespace CMinusMinus.Test {
 		[TestCase(@"samples/a+b.cmm", ExpectedResult = null)]
 		[TestCase(@"samples/hello.cmm", ExpectedResult = null)]
 		[TestCase(@"samples/literal.cmm", ExpectedResult = null)]
+		[TestCase(@"samples/full.cmm", ExpectedResult = null)]
 		public Type? LoadAndRunFileTest(string filePath) => LoadAndRunLiteralTest(File.ReadAllText(filePath));
 	}
 }

@@ -1,0 +1,36 @@
+int global = 0;
+unsigned long long foo(const unsigned long long l) {
+	char c = 'c', d;
+	if (l & 1)
+		return l;
+	else if (l == 0)
+		return l - 1;
+	else {
+		d = c + 1;
+		return l + 1;
+	}
+}
+//line comment 
+void bar(volatile /*block comment*/ char ch, short sh) {
+	switch (ch) {
+	case 'a':
+	case 'b':
+		ch = 'a';
+	Label1:
+		break;
+	default:
+		break;
+	}
+	int a = 1 ? 0 : 1 ? 2 ? 3 : 4 : 5 ? 6 : 7;
+Label2:
+	{}
+	for (; 0; sh += 1) {}
+	while (sh + 1 << 2 != 0) {
+		float f = 12.2e2;
+		return;
+	}
+	do {
+		if (foo(sh % 9 - 2))
+			break;
+	} while (0 + 2 / 3);
+}
