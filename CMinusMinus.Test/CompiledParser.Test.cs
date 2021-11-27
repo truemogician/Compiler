@@ -2,14 +2,27 @@
 using System.IO;
 using NUnit.Framework;
 using Parser;
+using Microsoft.Toolkit.Uwp.Notifications;
 
 namespace CMinusMinus.Test {
 	public class CompiledParserTests {
+		[TestCase("Title", "line1", "line2")]
+		public void SendNotification(string title, params string[] contents) {
+			var builder = new ToastContentBuilder().AddText(title);
+			foreach (var content in contents)
+				builder.AddText(content);
+			builder.Show();
+		}
+
 		[Test]
 		public void SaveTest() {
+			var startTime = DateTime.Now;
+			Console.WriteLine($"Time started: {startTime}");
 			var language = new CMinusMinus();
 			var compiled = language.RawParser!.Compile();
 			compiled.Save("cmm.ptb");
+			Console.WriteLine($"Time cost: {DateTime.Now - startTime}");
+			SendNotification("Parsing Table Compiled and Saved!", $"Time cost: {DateTime.Now - startTime}");
 		}
 
 		[TestCase("int main(){}", ExpectedResult = null)]
