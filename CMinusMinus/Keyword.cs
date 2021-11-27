@@ -57,7 +57,8 @@
 			("union", KeywordCategory.TypeDefinition),
 			("unsigned", KeywordCategory.TypeModifier),
 			("void", KeywordCategory.Special),
-			("volatile", KeywordCategory.TypeQualifier)
+			("volatile", KeywordCategory.TypeQualifier),
+			("while", KeywordCategory.ControlFlow)
 		};
 	}
 }
