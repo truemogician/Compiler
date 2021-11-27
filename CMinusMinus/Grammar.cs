@@ -124,7 +124,7 @@ namespace CMinusMinus {
 			);
 			grammar.Add(
 				NonterminalType.DeclarationStatement,
-				(RSF)nQualifier + NonterminalType.MainType + (tIdentifier + ((RSF)tAssignmentOperator + NonterminalType.Expression) * '?') * '+'
+				(RSF)nQualifier + NonterminalType.MainType + (tIdentifier + ((RSF)tAssignmentOperator + NonterminalType.Expression) * '?') * '+' + tDelimiter
 			);
 			grammar.Add(
 				NonterminalType.GotoStatement,
@@ -221,18 +221,6 @@ namespace CMinusMinus {
 
 			#region Expressions
 			grammar.Add(
-				nAtomExpression,
-				(RSF)NonterminalType.FunctionCall | NonterminalType.Literal | tIdentifier | (tLeftParenthesis + NonterminalType.Expression + tRightParenthesis)
-			);
-			grammar.Add(
-				NonterminalType.FunctionCall,
-				(RSF)tIdentifier + tLeftParenthesis + (RSF)NonterminalType.CommaExpression * '?' + tRightParenthesis
-			);
-			grammar.Add(
-				NonterminalType.Literal,
-				(RSF)tCharacterLiteral | tStringLiteral | tIntegerLiteral | tFloatLiteral
-			);
-			grammar.Add(
 				NonterminalType.Expression,
 				(RSF)NonterminalType.CommaExpression |
 				NonterminalType.AssignmentExpression |
@@ -244,6 +232,18 @@ namespace CMinusMinus {
 				NonterminalType.AdditiveExpression |
 				NonterminalType.AdditiveExpression |
 				nAtomExpression
+			);
+			grammar.Add(
+				nAtomExpression,
+				(RSF)NonterminalType.FunctionCall | NonterminalType.Literal | tIdentifier | (tLeftParenthesis + NonterminalType.Expression + tRightParenthesis)
+			);
+			grammar.Add(
+				NonterminalType.FunctionCall,
+				(RSF)tIdentifier + tLeftParenthesis + (RSF)NonterminalType.CommaExpression * '?' + tRightParenthesis
+			);
+			grammar.Add(
+				NonterminalType.Literal,
+				(RSF)tCharacterLiteral | tStringLiteral | tIntegerLiteral | tFloatLiteral
 			);
 			grammar.Add(
 				NonterminalType.CommaExpression,
