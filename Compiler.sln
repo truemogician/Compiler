@@ -13,7 +13,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CMinusMinus.Test", "CMinusM
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Language", "Language\Language.csproj", "{6B466185-2AA2-42B0-95F3-1A3D1D6E24CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Language.Test", "Language.Test\Language.Test.csproj", "{DD4B917F-9487-4411-8381-2E321AC8FCD7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Language.Test", "Language.Test\Language.Test.csproj", "{DD4B917F-9487-4411-8381-2E321AC8FCD7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0035FA0A-575C-4385-8F74-3C3F868F5AD3}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

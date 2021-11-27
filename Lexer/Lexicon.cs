@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Primitives;
 
@@ -54,17 +56,64 @@ namespace Lexer {
 		/// <inheritdoc cref="Lexeme(Enum, Regex, int)" />
 		public void Add(Enum name, Regex pattern) => Add(new Lexeme(name, pattern));
 
-		public Token? Match(StringSegment code) {
-			foreach (var (_, lexeme) in _lexemes)
-				if (lexeme.Match(code) is { } result)
-					return result;
-			return null;
+		public Token? Match(StringSegment code, MatchStrategy strategy = MatchStrategy.Longest) {
+			var pStrategy = (MatchStrategy)Math.Max((byte)strategy & 0b111, 1);
+			var lStrategy = (MatchStrategy)Math.Max((byte)strategy & 0b111000, 8);
+			for (byte count = 0, tmp = (byte)pStrategy; tmp > 0; tmp >>= 1)
+				if ((tmp & 1) == 1)
+					count = count == 0 ? (byte)1 : throw new ArgumentException("Invalid combination of strategies", nameof(strategy));
+			for (byte count = 0, tmp = (byte)lStrategy; tmp > 0; tmp >>= 1)
+				if ((tmp & 1) == 1)
+					count = count == 0 ? (byte)1 : throw new ArgumentException("Invalid combination of strategies", nameof(strategy));
+			var matches = _lexemes.Values.Select(l => l.Match(code)).Where(t => t is not null);
+			return (lStrategy, pStrategy) switch {
+				(MatchStrategy.AnyLength, MatchStrategy.First)  => matches.FirstOrDefault(),
+				(MatchStrategy.AnyLength, MatchStrategy.Last)   => matches.LastOrDefault(),
+				(MatchStrategy.AnyLength, MatchStrategy.Single) => matches.SingleOrDefault(),
+				(MatchStrategy.Longest, _) => matches.Aggregate<Token?, Token?>(
+					null,
+					(result, token) => {
+						if (result is null || token!.Length > result.Length)
+							return token;
+						if (token.Length == result.Length)
+							return pStrategy switch {
+								MatchStrategy.First  => result,
+								MatchStrategy.Last   => token,
+								MatchStrategy.Single => throw new AmbiguousMatchException()
+							};
+						return result;
+					}
+				),
+				(MatchStrategy.Shortest, _) => matches.Aggregate<Token?, Token?>(
+					null,
+					(result, token) => {
+						if (result is null || token!.Length < result.Length)
+							return token;
+						if (token.Length == result.Length)
+							return pStrategy switch {
+								MatchStrategy.First  => result,
+								MatchStrategy.Last   => token,
+								MatchStrategy.Single => throw new AmbiguousMatchException()
+							};
+						return result;
+					}
+				)
+			};
 		}
+	}
 
-		public IEnumerable<Token> MatchAll(StringSegment code) {
-			foreach (var (_, lexeme) in _lexemes)
-				if (lexeme.Match(code) is { } result)
-					yield return result;
-		}
+	[Flags]
+	public enum MatchStrategy : byte {
+		First = 1,
+
+		Last = 2,
+
+		Single = 4,
+
+		AnyLength = 8,
+
+		Longest = 16,
+
+		Shortest = 32
 	}
 }

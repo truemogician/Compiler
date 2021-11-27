@@ -4,10 +4,10 @@ using System.Runtime.CompilerServices;
 #nullable enable
 namespace Lexer {
 	public interface ILexer {
-		public IEnumerable<Token> Tokenize(string code, bool checkAmbiguity = false);
+		public IEnumerable<Token> Tokenize(string code);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool TryTokenize(string code, bool checkAmbiguity, out IEnumerable<Token>? tokens) {
+		public bool TryTokenize(string code, out IEnumerable<Token>? tokens) {
 			try {
 				tokens = Tokenize(code);
 				return true;
@@ -17,8 +17,5 @@ namespace Lexer {
 				return false;
 			}
 		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool TryTokenize(string code, out IEnumerable<Token>? tokens) => TryTokenize(code, false, out tokens);
 	}
 }

@@ -19,9 +19,9 @@ namespace Language {
 
 		IParser ILanguage.Parser => Parser;
 
-		public IEnumerable<Token> Tokenize(string code, bool checkAmbiguity = false) => Lexer.Tokenize(code, checkAmbiguity);
+		public IEnumerable<Token> Tokenize(string code) => Lexer.Tokenize(code);
 
-		public bool TryTokenize(string code, bool checkAmbiguity, out IEnumerable<Token>? tokens) => Lexer.TryTokenize(code, checkAmbiguity, out tokens);
+		public bool TryTokenize(string code, out IEnumerable<Token>? tokens) => Lexer.TryTokenize(code, out tokens);
 
 		public virtual IEnumerable<Token> Filter(IEnumerable<Token> tokens) => tokens;
 
@@ -35,9 +35,9 @@ namespace Language {
 
 		public IParser Parser { get; }
 
-		public IEnumerable<Token> Tokenize(string code, bool checkAmbiguity = false) => Lexer.Tokenize(code, checkAmbiguity);
+		public IEnumerable<Token> Tokenize(string code) => Lexer.Tokenize(code);
 
-		public bool TryTokenize(string code, bool checkAmbiguity, out IEnumerable<Token>? tokens) => Lexer.TryTokenize(code, checkAmbiguity, out tokens);
+		public bool TryTokenize(string code, out IEnumerable<Token>? tokens) => Lexer.TryTokenize(code, out tokens);
 
 		public virtual IEnumerable<Token> Filter(IEnumerable<Token> tokens) => tokens;
 

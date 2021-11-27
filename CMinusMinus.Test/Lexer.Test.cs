@@ -9,9 +9,9 @@ namespace CMinusMinus.Test {
 
 		[TestCase(@"int func(){}", ExpectedResult = true)]
 		[TestCase(@"'\'", ExpectedResult = false)]
-		public bool LiteralTest(string code, bool checkAmbiguity = false) {
+		public bool LiteralTest(string code) {
 			try {
-				var tokens = Lexer.Tokenize(code, checkAmbiguity);
+				var tokens = Lexer.Tokenize(code);
 				foreach (var token in tokens)
 					Console.WriteLine(token.ToString());
 				return true;
@@ -25,6 +25,6 @@ namespace CMinusMinus.Test {
 		[TestCase(@"samples/a+b.cmm", ExpectedResult = true)]
 		[TestCase(@"samples/hello.cmm", ExpectedResult = true)]
 		[TestCase(@"samples/literal.cmm", ExpectedResult = true)]
-		public bool FileTest(string filePath, bool checkAmbiguity = false) => LiteralTest(File.ReadAllText(filePath), checkAmbiguity);
+		public bool FileTest(string filePath) => LiteralTest(File.ReadAllText(filePath));
 	}
 }
