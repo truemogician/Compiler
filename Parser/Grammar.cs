@@ -152,7 +152,7 @@ namespace Parser {
 				var cur = queue.Dequeue();
 				set.Remove(cur);
 				foreach (var nt in ProductionRules[cur].SelectMany(pr => pr.InvolvedNonterminals).Distinct())
-					if (set.Contains(nt))
+					if (set.Contains(nt) && !queue.Contains(nt))
 						queue.Enqueue(nt);
 			}
 			foreach (var nt in set)
