@@ -31,7 +31,7 @@ namespace Lexer {
 			return _segment.Equals(other._segment) && Lexeme.Equals(other.Lexeme);
 		}
 
-		public override string ToString() => $"<{Lexeme}>{Value}</{Lexeme}>";
+		public override string ToString() => $"<{Lexeme} Value=\"{Value.Replace(@"\", @"\\").Replace("\"", "\\\"")}\" />";
 
 		public override bool Equals(object? obj) {
 			if (obj is null)
