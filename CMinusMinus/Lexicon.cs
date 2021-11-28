@@ -10,7 +10,7 @@ namespace CMinusMinus {
 			lexicon.Add(LexemeType.Keyword, new Regex($@"(?:{string.Join('|', Keywords.Select(k => k.Value))})\b"));
 			lexicon.Add(LexemeType.Identifier, new Regex(@"[a-zA-Z_][a-zA-Z0-9_]*"));
 			lexicon.Add(LexemeType.FloatLiteral, new Regex(@"[-+]?\d+(?:(?:\.\d+)?[eE][-+]?\d+|\.\d+)"));
-			lexicon.Add(LexemeType.IntegerLiteral, new Regex(@"[-+]?(?:\d+(?![-+\.eE])|0b[01]+|0x[\da-fA-F])"));
+			lexicon.Add(LexemeType.IntegerLiteral, new Regex(@"[-+]?(?:0b[01]+|0x[\da-fA-F]+|\d+(?![-+\.eE]))"));
 			const string escapedCharPattern = @"\\(?:[abefnrtv\\'""]|[0-7]{1,3}|x[\da-fA-F]{1,2}|u[\da-fA-F]{4})";
 			lexicon.Add(LexemeType.CharacterLiteral, new Regex($@"'(?:[^\\']|{escapedCharPattern})'"));
 			lexicon.Add(LexemeType.StringLiteral, new Regex($@"L?""(?:[^\\""]|{escapedCharPattern})*"""));
