@@ -5,7 +5,7 @@ using NUnit.Framework;
 using Parser;
 using Parser.LR;
 
-#nullable enable
+#pragma warning disable IDE0079// Remove unnecessary suppression
 namespace Language.Test {
 	public class SampleTests {
 		public Sample Language { get; } = new();
