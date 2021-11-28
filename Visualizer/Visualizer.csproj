@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net5.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="AutomaticGraphLayout.WpfGraphControl" Version="1.1.12" />
+		<PackageReference Include="SharpVectors" Version="1.7.6" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\CMinusMinus\CMinusMinus.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="Images\*">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+</Project>

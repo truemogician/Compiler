@@ -1,0 +1,77 @@
+﻿<Window x:Class="Visualizer.MainWindow"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:local="clr-namespace:Visualizer"
+		xmlns:converters="clr-namespace:Visualizer.Converters"
+		xmlns:wpfGraphControl="http://mlsagl"
+		xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+		mc:Ignorable="d"
+		Title="MainWindow" Height="450" Width="800">
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*" />
+			<ColumnDefinition Width="2" />
+			<ColumnDefinition Width="*" />
+		</Grid.ColumnDefinitions>
+		<Grid Column="0">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="24" />
+				<RowDefinition Height="*" />
+			</Grid.RowDefinitions>
+			<ToolBarTray Grid.Row="0" IsLocked="True">
+				<ToolBar MaxHeight="24">
+					<Button x:Name="OpenSourceButton" ToolTip="打开源文件">
+						<svgc:SvgViewbox Source="/Images/OpenSource.svg" />
+					</Button>
+					<Button x:Name="SaveSourceButton" ToolTip="保存源文件">
+						<svgc:SvgViewbox Source="/Images/SaveSource.svg" />
+					</Button>
+					<Separator />
+					<Button x:Name="UndoButton" ToolTip="撤销">
+						<svgc:SvgViewbox Source="/Images/Undo.svg" />
+					</Button>
+					<Button x:Name="RedoButton" ToolTip="重做">
+						<svgc:SvgViewbox Source="/Images/Redo.svg" />
+					</Button>
+					<Separator />
+					<ToggleButton x:Name="HighlightButton" ToolTip="高亮显示">
+						<svgc:SvgViewbox Source="/Images/Highlight.svg" />
+					</ToggleButton>
+					<Button x:Name="ParseButton" ToolTip="分析">
+						<svgc:SvgViewbox Source="/Images/Parse.svg" />
+					</Button>
+					<Button x:Name="StartParsingButton" ToolTip="开始逐步分析">
+						<svgc:SvgViewbox Source="/Images/StartParsing.svg" />
+					</Button>
+				</ToolBar>
+			</ToolBarTray>
+			<RichTextBox Grid.Row="1" x:Name="CodeTextBox" />
+		</Grid>
+		<GridSplitter Grid.Column="1" Width="2" HorizontalAlignment="Stretch" />
+		<TabControl Grid.Column="2">
+			<TabItem Header="语法树">
+				<wpfGraphControl:AutomaticGraphLayoutControl x:Name="GraphControl" />
+			</TabItem>
+			<TabItem Header="XML">
+				<TextBlock x:Name="XmlTextBlock" />
+			</TabItem>
+		</TabControl>
+	</Grid>
+	<Window.Resources>
+		<converters:TabItemHeaderConverter x:Key="TabItemHeaderConverter" />
+		<Style TargetType="{x:Type TabItem}">
+			<Setter Property="Width">
+				<Setter.Value>
+					<MultiBinding Converter="{StaticResource TabItemHeaderConverter}">
+						<Binding RelativeSource="{RelativeSource Mode=FindAncestor,
+			AncestorType={x:Type TabControl}}" />
+						<Binding RelativeSource="{RelativeSource Mode=FindAncestor,
+			AncestorType={x:Type TabControl}}" Path="ActualWidth" />
+					</MultiBinding>
+				</Setter.Value>
+			</Setter>
+		</Style>
+	</Window.Resources>
+</Window>
