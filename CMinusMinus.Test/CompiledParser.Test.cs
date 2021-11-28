@@ -23,7 +23,7 @@ namespace CMinusMinus.Test {
 			catch { }
 		}
 
-		[TestCase(20)]
+		[TestCase(5)]
 		public void SaveTest(int reportPeriod) {
 			var startTime = DateTime.Now;
 			Console.WriteLine($"Time started: {startTime}");

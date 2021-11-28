@@ -9,7 +9,7 @@ namespace Parser.LR {
 		// ReSharper disable once VirtualMemberCallInConstructor
 		protected ParserBase(Grammar grammar) : base(grammar) => ParsingTable = CreateParsingTable();
 
-		public virtual ParsingTable<TItem> ParsingTable { get; private set; }
+		public virtual ParsingTable<TItem> ParsingTable { get; }
 
 		public event EventHandler StartItemSetsCalculation {
 			add => ParsingTable.StartItemSetsCalculation += value;

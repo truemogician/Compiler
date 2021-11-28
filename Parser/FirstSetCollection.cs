@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using TrueMogician.Exceptions;
 
 namespace Parser {
 	public class FirstSetCollection : IReadOnlyDictionary<Nonterminal, HashSet<Terminal?>> {
