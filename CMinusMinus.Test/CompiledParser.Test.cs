@@ -1,8 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+using System.Timers;
+using Microsoft.Toolkit.Uwp.Notifications;
 using NUnit.Framework;
 using Parser;
-using Microsoft.Toolkit.Uwp.Notifications;
+using Parser.LR;
+using Parser.LR.CLR;
 
 namespace CMinusMinus.Test {
 	public class CompiledParserTests {
@@ -11,14 +17,44 @@ namespace CMinusMinus.Test {
 			var builder = new ToastContentBuilder().AddText(title);
 			foreach (var content in contents)
 				builder.AddText(content);
-			builder.Show();
+			try {
+				builder.Show();
+			}
+			catch { }
 		}
 
-		[Test]
-		public void SaveTest() {
+		[TestCase(20)]
+		public void SaveTest(int reportPeriod) {
 			var startTime = DateTime.Now;
 			Console.WriteLine($"Time started: {startTime}");
 			var language = new CMinusMinus();
+			static void Log(string message) => Debug.WriteLine($"{DateTime.Now:s} {message}");
+			var itemSetsTimer = new Timer(reportPeriod * 1000) {AutoReset = true};
+			var itemSetsCount = 0;
+			Dictionary<ItemSet<Item>, Dictionary<Terminal, IAction>>? table = null;
+			itemSetsTimer.Elapsed += (_, _) => Log($"Calculated item sets: {language.RawParser?.ParsingTable.ItemSets?.Count}");
+			language.RawParser!.StartItemSetsCalculation += (_, _) => {
+				Log("Item sets calculation started");
+				itemSetsTimer.Start();
+			};
+			language.RawParser!.CompleteItemSetsCalculation += (_, _) => {
+				itemSetsTimer.Stop();
+				Log("Item sets calculation completed");
+				itemSetsCount = language.RawParser!.ParsingTable.ItemSets!.Count;
+			};
+			var tableTimer = new Timer(reportPeriod * 1000) {AutoReset = true};
+			tableTimer.Elapsed += (_, _) => Log($"Table calculation progress: {table!.Count}/{itemSetsCount}({100 * table!.Count / (decimal)itemSetsCount:##.00}%)");
+			language.RawParser!.StartTableCalculation += (_, _) => {
+				var actionTable = language.RawParser!.ParsingTable.ActionTable!;
+				table = actionTable.GetType().GetField("Table", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(actionTable) as Dictionary<ItemSet<Item>, Dictionary<Terminal, IAction>>;
+				Log("Table calculation started");
+				tableTimer.Start();
+			};
+			language.RawParser!.CompleteTableCalculation += (_, _) => {
+				tableTimer.Stop();
+				Log("Table calculation completed");
+			};
+			language.InitializeRawParser();
 			var compiled = language.RawParser!.Compile();
 			compiled.Save("cmm.ptb");
 			Console.WriteLine($"Time cost: {DateTime.Now - startTime}");
