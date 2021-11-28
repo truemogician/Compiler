@@ -6,6 +6,8 @@ namespace Parser.LR {
 	using static Utilities;
 
 	public abstract class ItemSetCollectionBase<TItem> : IReadOnlyCollection<ItemSet<TItem>> where TItem : ItemBase {
+		private readonly Dictionary<HashSet<TItem>, ItemSet<TItem>> _closures = new(SetEqualityComparer<TItem>.Comparer);
+
 		protected readonly FirstSetCollection FirstSetCollection;
 
 		protected readonly Grammar Grammar;
@@ -18,6 +20,17 @@ namespace Parser.LR {
 		protected ItemSetCollectionBase(Grammar grammar) {
 			Grammar = grammar;
 			FirstSetCollection = new FirstSetCollection(grammar);
+		}
+
+		public abstract ItemSet<TItem> InitialState { get; }
+
+		public int Count => ItemSets.Count;
+
+		public IEnumerator<ItemSet<TItem>> GetEnumerator() => ItemSets.GetEnumerator();
+
+		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+		public void Initialize() {
 			var queue = new Queue<ItemSet<TItem>>();
 			var first = InitialState;
 			queue.Enqueue(first);
@@ -39,17 +52,13 @@ namespace Parser.LR {
 			}
 		}
 
-		public abstract ItemSet<TItem> InitialState { get; }
-
-		public int Count => ItemSets.Count;
-
-		public IEnumerator<ItemSet<TItem>> GetEnumerator() => ItemSets.GetEnumerator();
-
-		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
 		public ItemSet<TItem> Closure(IEnumerable<TItem> items) {
-			var closure = CalculateClosure(items);
-			return ItemSets.TryGetValue(closure, out var result) ? result : closure;
+			var arr = items.ToArray();
+			var set = new HashSet<TItem>(arr);
+			if (_closures.ContainsKey(set))
+				return _closures[set];
+			var closure = CalculateClosure(arr);
+			return _closures[set] = ItemSets.TryGetValue(closure, out var result) ? result : closure;
 		}
 
 		public ItemSet<TItem> Closure(params TItem[] items) => Closure(items.AsEnumerable());
