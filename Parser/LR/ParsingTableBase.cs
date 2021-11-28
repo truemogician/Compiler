@@ -2,8 +2,8 @@
 using System.Linq;
 
 namespace Parser.LR {
-	public abstract class ParsingTable<TItem> where TItem : ItemBase {
-		protected internal ParsingTable(Grammar grammar) => Grammar = grammar;
+	public abstract class ParsingTableBase<TItem> where TItem : ItemBase {
+		protected internal ParsingTableBase(Grammar grammar) => Grammar = grammar;
 
 		public Grammar Grammar { get; }
 

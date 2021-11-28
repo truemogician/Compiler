@@ -76,7 +76,7 @@ namespace Parser.LR {
 			private set => _table[stateIndex, symbolIndex] = value.Action is null ? value.Index < 0 ? 0 : value.Index + 1 : (value.Index << 2) | (int)value.Action.Value;
 		}
 
-		public static CompiledParsingTable FromParsingTable<TItem>(ParsingTable<TItem> parsingTable) where TItem : ItemBase {
+		public static CompiledParsingTable FromParsingTable<TItem>(ParsingTableBase<TItem> parsingTable) where TItem : ItemBase {
 			if (parsingTable.ItemSets is null || parsingTable.ActionTable is null || parsingTable.GotoTable is null)
 				throw new ArgumentException("Parsing table not initialized", nameof(parsingTable));
 			var terminals = parsingTable.Grammar.Terminals.ToList();

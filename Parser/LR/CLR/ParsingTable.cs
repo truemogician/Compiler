@@ -3,7 +3,7 @@
 namespace Parser.LR.CLR {
 	using ActionFactory = ActionFactory<Item>;
 
-	public class ParsingTable : ParsingTable<Item> {
+	public class ParsingTable : ParsingTableBase<Item> {
 		public ParsingTable(Grammar grammar) : base(grammar) { }
 
 		protected override void Initialize(Grammar extendedGrammar) {
