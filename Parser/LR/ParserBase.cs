@@ -4,7 +4,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Lexer;
 
+#pragma warning disable IDE0079// Remove unnecessary suppression
 namespace Parser.LR {
+	using static Utilities;
+
 	public abstract class ParserBase<TItem> : ParserBase where TItem : ItemBase {
 		// ReSharper disable once VirtualMemberCallInConstructor
 		protected ParserBase(Grammar grammar) : base(grammar) => ParsingTable = CreateParsingTable();
@@ -18,7 +21,7 @@ namespace Parser.LR {
 			remove => ParsingTable.StartItemSetsCalculation -= value;
 		}
 
-		public event EventHandler CompleteItemSetsCalculation {
+		public event EventHandler<EventArgs<ItemSetCollectionBase<TItem>>> CompleteItemSetsCalculation {
 			add => ParsingTable.CompleteItemSetsCalculation += value;
 			remove => ParsingTable.CompleteItemSetsCalculation -= value;
 		}

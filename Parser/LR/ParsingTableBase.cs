@@ -3,6 +3,8 @@ using System.Linq;
 using TrueMogician.Exceptions;
 
 namespace Parser.LR {
+	using static Utilities;
+
 	public abstract class ParsingTableBase<TItem> where TItem : ItemBase {
 		protected internal ParsingTableBase(Grammar grammar) => Grammar = grammar;
 
@@ -37,7 +39,7 @@ namespace Parser.LR {
 
 		public event EventHandler StartItemSetsCalculation = delegate { };
 
-		public event EventHandler CompleteItemSetsCalculation = delegate { };
+		public event EventHandler<EventArgs<ItemSetCollectionBase<TItem>>> CompleteItemSetsCalculation = delegate { };
 
 		public event EventHandler StartTableCalculation = delegate { };
 
@@ -70,7 +72,7 @@ namespace Parser.LR {
 
 		protected void OnStartItemSetsCalculation() => StartItemSetsCalculation(this, EventArgs.Empty);
 
-		protected void OnCompleteItemSetsCalculation() => CompleteItemSetsCalculation(this, EventArgs.Empty);
+		protected void OnCompleteItemSetsCalculation() => CompleteItemSetsCalculation(this, ItemSets ?? throw new BadImplementationException());
 
 		protected void OnStartTableCalculation() => StartTableCalculation(this, EventArgs.Empty);
 

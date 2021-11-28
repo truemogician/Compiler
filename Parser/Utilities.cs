@@ -21,5 +21,19 @@ namespace Parser {
 				return hashCodes.Aggregate(0, HashCode.Combine);
 			}
 		}
+
+		public class EventArgs<T> : EventArgs {
+			private EventArgs() { }
+
+			public EventArgs(T value) => Value = value;
+
+			public new static EventArgs<T> Empty { get; } = new();
+
+			public T? Value { get; }
+
+			public static implicit operator EventArgs<T>(T value) => new(value);
+
+			public static implicit operator T?(EventArgs<T> args) => args.Value;
+		}
 	}
 }
