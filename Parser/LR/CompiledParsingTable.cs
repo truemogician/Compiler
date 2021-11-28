@@ -92,7 +92,7 @@ namespace Parser.LR {
 			stateIndices[parsingTable.ItemSets.InitialState] = 0;
 			stateIndices[parsingTable.ItemSets.First()] = tmp;
 			var result = new CompiledParsingTable(terminals, nonterminals, productionRules, parsingTable.ItemSets.Count);
-			foreach (var (state, actions) in parsingTable.ActionTable!.Table) {
+			foreach (var (state, actions) in parsingTable.ActionTable!.RawTable) {
 				foreach (var (terminal, action) in actions) {
 					int idx = terminal.Equals(Terminal.Terminator) ? terminals.Count : tIndices[terminal];
 					result[stateIndices[state], idx] = (action.Type, action switch {
@@ -102,7 +102,7 @@ namespace Parser.LR {
 					});
 				}
 			}
-			foreach (var (state, states) in parsingTable.GotoTable!.Table) {
+			foreach (var (state, states) in parsingTable.GotoTable!.RawTable) {
 				foreach (var (nt, st) in states)
 					result[stateIndices[state], ntIndices[nt] + terminals.Count + 1] = (null, st is null ? -1 : stateIndices[st]);
 			}

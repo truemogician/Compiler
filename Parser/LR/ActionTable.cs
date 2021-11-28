@@ -2,7 +2,9 @@
 
 namespace Parser.LR {
 	public abstract class ActionTable<TItem> where TItem : ItemBase {
-		internal readonly Dictionary<ItemSet<TItem>, Dictionary<Terminal, IAction>> Table = new();
+		protected readonly Dictionary<ItemSet<TItem>, Dictionary<Terminal, IAction>> Table = new();
+
+		public IReadOnlyDictionary<ItemSet<TItem>, Dictionary<Terminal, IAction>> RawTable => Table;
 
 		public virtual IAction this[ItemSet<TItem> state, Terminal terminal] {
 			get => Table[state][terminal];
