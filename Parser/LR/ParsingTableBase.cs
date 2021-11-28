@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using TrueMogician.Exceptions;
 
 namespace Parser.LR {
 	public abstract class ParsingTableBase<TItem> where TItem : ItemBase {
@@ -13,20 +14,22 @@ namespace Parser.LR {
 
 		public ItemSetCollectionBase<TItem>? ItemSets { get; protected set; }
 
+		public bool Initialized => ActionTable is not null && GotoTable is not null && ItemSets is not null;
+
 		public IAction this[ItemSet<TItem> state, Terminal terminal] {
-			get => ActionTable?[state, terminal] ?? throw new Exception("Action table not initialized");
+			get => ActionTable?[state, terminal] ?? throw new ParserNotInitializedException("Action table not initialized");
 			set {
 				if (ActionTable is null)
-					throw new Exception("Action table not initialized");
+					throw new ParserNotInitializedException("Action table not initialized");
 				ActionTable[state, terminal] = value;
 			}
 		}
 
 		public ItemSet<TItem>? this[ItemSet<TItem> state, Nonterminal nonterminal] {
-			get => GotoTable?[state, nonterminal] ?? throw new Exception("Goto table not initialized");
+			get => GotoTable?[state, nonterminal] ?? throw new ParserNotInitializedException("Goto table not initialized");
 			set {
 				if (GotoTable is null)
-					throw new Exception("Goto table not initialized");
+					throw new ParserNotInitializedException("Goto table not initialized");
 				GotoTable[state, nonterminal] = value;
 				GotoTable[state, nonterminal] = value;
 			}
@@ -40,7 +43,11 @@ namespace Parser.LR {
 
 		public event EventHandler CompleteTableCalculation = delegate { };
 
-		public void Initialize() => Initialize(ExtendGrammar(Grammar));
+		public void Initialize() {
+			Initialize(ExtendGrammar(Grammar));
+			if (!Initialized)
+				throw new BadImplementationException(nameof(Initialize), null, null);
+		}
 
 		public CompiledParsingTable Compile() => CompiledParsingTable.FromParsingTable(this);
 

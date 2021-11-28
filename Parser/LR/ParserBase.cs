@@ -9,7 +9,9 @@ namespace Parser.LR {
 		// ReSharper disable once VirtualMemberCallInConstructor
 		protected ParserBase(Grammar grammar) : base(grammar) => ParsingTable = CreateParsingTable();
 
-		public virtual ParsingTable<TItem> ParsingTable { get; }
+		public virtual ParsingTableBase<TItem> ParsingTable { get; }
+
+		public override bool Initialized { get; protected set; } = false;
 
 		public event EventHandler StartItemSetsCalculation {
 			add => ParsingTable.StartItemSetsCalculation += value;
@@ -34,7 +36,7 @@ namespace Parser.LR {
 		[SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
 		public override AbstractSyntaxTree Parse(IEnumerable<Token> tokens) {
 			if (ParsingTable.ItemSets is null)
-				throw new Exception("Parsing table not initialized");
+				throw new ParserNotInitializedException();
 			Stack<ItemSet<TItem>> stateStack = new();
 			Stack<SyntaxTreeNode> symbolStack = new(), symbolTemp = new();
 			stateStack.Push(ParsingTable.ItemSets.InitialState);
@@ -88,12 +90,16 @@ namespace Parser.LR {
 
 		public CompiledParser Compile() => new(ParsingTable.Compile());
 
-		public override void Initialize() => ParsingTable.Initialize();
+		public override void Initialize() {
+			if (!Initialized)
+				ParsingTable.Initialize();
+			Initialized = true;
+		}
 
 		/// <summary>
 		///     Create a parsing table, but don't initialize it
 		/// </summary>
 		/// <returns></returns>
-		protected abstract ParsingTable<TItem> CreateParsingTable();
+		protected abstract ParsingTableBase<TItem> CreateParsingTable();
 	}
 }

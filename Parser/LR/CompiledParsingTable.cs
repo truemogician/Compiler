@@ -77,7 +77,7 @@ namespace Parser.LR {
 		}
 
 		public static CompiledParsingTable FromParsingTable<TItem>(ParsingTableBase<TItem> parsingTable) where TItem : ItemBase {
-			if (parsingTable.ItemSets is null || parsingTable.ActionTable is null || parsingTable.GotoTable is null)
+			if (!parsingTable.Initialized)
 				throw new ArgumentException("Parsing table not initialized", nameof(parsingTable));
 			var terminals = parsingTable.Grammar.Terminals.ToList();
 			if (terminals.Contains(Terminal.Terminator))
@@ -87,12 +87,12 @@ namespace Parser.LR {
 			var ntIndices = nonterminals.ToIndexDictionary();
 			var productionRules = parsingTable.Grammar.Select(pr => (ntIndices[pr.Nonterminal], pr.Length)).ToList();
 			var prIndices = parsingTable.Grammar.ToIndexDictionary();
-			var stateIndices = parsingTable.ItemSets.ToIndexDictionary();
-			int tmp = stateIndices[parsingTable.ItemSets.InitialState];
+			var stateIndices = parsingTable.ItemSets!.ToIndexDictionary();
+			int tmp = stateIndices[parsingTable.ItemSets!.InitialState];
 			stateIndices[parsingTable.ItemSets.InitialState] = 0;
 			stateIndices[parsingTable.ItemSets.First()] = tmp;
 			var result = new CompiledParsingTable(terminals, nonterminals, productionRules, parsingTable.ItemSets.Count);
-			foreach (var (state, actions) in parsingTable.ActionTable.Table) {
+			foreach (var (state, actions) in parsingTable.ActionTable!.Table) {
 				foreach (var (terminal, action) in actions) {
 					int idx = terminal.Equals(Terminal.Terminator) ? terminals.Count : tIndices[terminal];
 					result[stateIndices[state], idx] = (action.Type, action switch {
@@ -102,7 +102,7 @@ namespace Parser.LR {
 					});
 				}
 			}
-			foreach (var (state, states) in parsingTable.GotoTable.Table) {
+			foreach (var (state, states) in parsingTable.GotoTable!.Table) {
 				foreach (var (nt, st) in states)
 					result[stateIndices[state], ntIndices[nt] + terminals.Count + 1] = (null, st is null ? -1 : stateIndices[st]);
 			}

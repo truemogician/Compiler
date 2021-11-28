@@ -9,6 +9,12 @@ namespace Parser {
 		protected ParserException(string? message = null, Exception? innerException = null) : base(message, innerException) { }
 	}
 
+	public class ParserNotInitializedException : ParserException {
+		public ParserNotInitializedException(string? message = null, Exception? innerException = null) : base(message, innerException) { }
+
+		protected override string DefaultMessage => "Parser not initialized";
+	}
+
 	public class ParserConstructingException : ParserException {
 		public ParserConstructingException(string? message = null, Exception? innerException = null) : base(message, innerException) { }
 
