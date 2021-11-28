@@ -13,7 +13,7 @@ namespace Language.Test {
 		[Test]
 		public void ParsingTableTest() {
 			var table = Language.Parser.ParsingTable;
-			Assert.AreEqual(table.ItemSets.InitialState.Count, 6);
+			Assert.AreEqual(table.ItemSets!.InitialState.Count, 6);
 			Assert.AreEqual(table.ItemSets.Count, 10);
 			Assert.AreEqual(table[table[table.ItemSets.InitialState, "S"]!, Terminal.Terminator]!.Type, ActionType.Accept);
 		}

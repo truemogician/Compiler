@@ -1,18 +1,40 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Lexer;
 
 namespace Parser.LR {
 	public abstract class ParserBase<TItem> : ParserBase where TItem : ItemBase {
-		#pragma warning disable 8618
-		protected ParserBase(Grammar grammar) : base(grammar) { }
-		#pragma warning restore 8618
+		// ReSharper disable once VirtualMemberCallInConstructor
+		protected ParserBase(Grammar grammar) : base(grammar) => ParsingTable = CreateParsingTable();
 
 		public virtual ParsingTable<TItem> ParsingTable { get; private set; }
 
+		public event EventHandler StartItemSetsCalculation {
+			add => ParsingTable.StartItemSetsCalculation += value;
+			remove => ParsingTable.StartItemSetsCalculation -= value;
+		}
+
+		public event EventHandler CompleteItemSetsCalculation {
+			add => ParsingTable.CompleteItemSetsCalculation += value;
+			remove => ParsingTable.CompleteItemSetsCalculation -= value;
+		}
+
+		public event EventHandler StartTableCalculation {
+			add => ParsingTable.StartTableCalculation += value;
+			remove => ParsingTable.StartTableCalculation -= value;
+		}
+
+		public event EventHandler CompleteTableCalculation {
+			add => ParsingTable.CompleteTableCalculation += value;
+			remove => ParsingTable.CompleteTableCalculation -= value;
+		}
+
 		[SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
 		public override AbstractSyntaxTree Parse(IEnumerable<Token> tokens) {
+			if (ParsingTable.ItemSets is null)
+				throw new Exception("Parsing table not initialized");
 			Stack<ItemSet<TItem>> stateStack = new();
 			Stack<SyntaxTreeNode> symbolStack = new(), symbolTemp = new();
 			stateStack.Push(ParsingTable.ItemSets.InitialState);
@@ -66,8 +88,12 @@ namespace Parser.LR {
 
 		public CompiledParser Compile() => new(ParsingTable.Compile());
 
-		protected override void Initialize(Grammar grammar) => ParsingTable = GenerateParsingTable(grammar);
+		public override void Initialize() => ParsingTable.Initialize();
 
-		protected abstract ParsingTable<TItem> GenerateParsingTable(Grammar grammar);
+		/// <summary>
+		///     Create a parsing table, but don't initialize it
+		/// </summary>
+		/// <returns></returns>
+		protected abstract ParsingTable<TItem> CreateParsingTable();
 	}
 }

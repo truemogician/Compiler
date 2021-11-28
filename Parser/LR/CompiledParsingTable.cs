@@ -77,6 +77,8 @@ namespace Parser.LR {
 		}
 
 		public static CompiledParsingTable FromParsingTable<TItem>(ParsingTable<TItem> parsingTable) where TItem : ItemBase {
+			if (parsingTable.ItemSets is null || parsingTable.ActionTable is null || parsingTable.GotoTable is null)
+				throw new ArgumentException("Parsing table not initialized", nameof(parsingTable));
 			var terminals = parsingTable.Grammar.Terminals.ToList();
 			if (terminals.Contains(Terminal.Terminator))
 				throw new ArgumentException("Terminator should not present in terminal collection");

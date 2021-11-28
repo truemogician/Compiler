@@ -41,6 +41,12 @@ namespace CMinusMinus {
 			_useCompiled = false;
 		}
 
+		public void InitializeRawParser() {
+			if (RawParser is null)
+				throw new InvalidOperationException("Table file loaded instance doesn't have a raw parser");
+			RawParser.Initialize();
+		}
+
 		public override IEnumerable<Token> Filter(IEnumerable<Token> tokens)
 			=> tokens.Where(
 				l => l.Lexeme.Name is not (

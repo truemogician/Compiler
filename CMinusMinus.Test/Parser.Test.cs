@@ -5,7 +5,17 @@ using Parser;
 
 namespace CMinusMinus.Test {
 	public class ParserTests {
-		public static readonly CMinusMinus Language = new();
+		private static CMinusMinus? _language;
+
+		public static CMinusMinus Language {
+			get {
+				if (_language is null) {
+					_language = new CMinusMinus();
+					_language.InitializeRawParser();
+				}
+				return _language;
+			}
+		}
 
 		[TestCase(@"int main(){}", ExpectedResult = null)]
 		public Type? LiteralTest(string code) {

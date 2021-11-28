@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Parser.LR.CLR {
@@ -7,29 +8,33 @@ namespace Parser.LR.CLR {
 	public class ParsingTable : ParsingTable<Item> {
 		public ParsingTable(Grammar grammar) : base(grammar) { }
 
-		protected override void Initialize(Grammar extendedGrammar, out ItemSetCollectionBase<Item> itemSets, out ActionTable<Item> actionTable, out GotoTable<Item> gotoTable) {
-			var @is = new ItemSetCollection(extendedGrammar);
-			var at = new ActionTable();
-			var gt = new GotoTable();
+		protected override void Initialize(Grammar extendedGrammar) {
+			ItemSets = new ItemSetCollection(extendedGrammar);
+			OnStartItemSetsCalculation();
+			ItemSets.Initialize();
+			OnCompleteItemSetsCalculation();
+			ActionTable = new ActionTable();
+			GotoTable = new GotoTable();
 			var acceptItem = new Item(extendedGrammar[extendedGrammar.InitialState].Single(), 1, Terminal.Terminator);
+			OnStartTableCalculation();
 			Task.WaitAll(
-				@is.Select(
+				ItemSets.Select(
 						state => Task.Run(
 							() => {
-								lock (at) {
+								lock (ActionTable) {
 									foreach (var item in state)
 										if (item == acceptItem)
-											at[state, Terminal.Terminator] = ActionFactory.AcceptAction;
+											ActionTable[state, Terminal.Terminator] = ActionFactory.AcceptAction;
 										else if (item.NextSymbol is null)
-											at[state, item.Lookahead] = ActionFactory.CreateReduceAction(item.ProductionRule);
+											ActionTable[state, item.Lookahead] = ActionFactory.CreateReduceAction(item.ProductionRule);
 										else if (item.NextSymbol.IsTerminal) {
 											var nextTerminal = item.NextSymbol.AsTerminal;
-											at[state, nextTerminal] = ActionFactory.CreateShiftAction(@is.Go(state, nextTerminal));
+											ActionTable[state, nextTerminal] = ActionFactory.CreateShiftAction(ItemSets.Go(state, nextTerminal));
 										}
 										else {
 											var nextSymbol = item.NextSymbol;
-											lock (gt)
-												gt[state, nextSymbol.AsNonterminal] = @is.Go(state, nextSymbol);
+											lock (GotoTable)
+												GotoTable[state, nextSymbol.AsNonterminal] = ItemSets.Go(state, nextSymbol);
 										}
 								}
 							}
@@ -37,9 +42,7 @@ namespace Parser.LR.CLR {
 					)
 					.ToArray()
 			);
-			itemSets = @is;
-			actionTable = at;
-			gotoTable = gt;
+			OnCompleteTableCalculation();
 		}
 	}
 }

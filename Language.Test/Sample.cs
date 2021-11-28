@@ -2,10 +2,22 @@
 using Parser;
 
 namespace Language.Test {
-	public class Sample : Language<Lexer.Lexer, Parser.LR.CLR.Parser, SampleFactory> {
+	using CLRParser = Parser.LR.CLR.Parser;
+
+	public class Sample : Language<Lexer.Lexer, CLRParser, SampleFactory> {
+		private CLRParser? _parser;
+
 		public override Lexer.Lexer Lexer { get; } = new(Lexicon);
 
-		public override Parser.LR.CLR.Parser Parser { get; } = new(Grammar);
+		public override CLRParser Parser {
+			get {
+				if (_parser is null) {
+					_parser = new CLRParser(Grammar);
+					_parser.Initialize();
+				}
+				return _parser;
+			}
+		}
 	}
 
 	public class SampleFactory : LanguageFactoryBase {
