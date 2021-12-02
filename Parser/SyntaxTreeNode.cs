@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using Lexer;
+using Microsoft.Extensions.Primitives;
 
 namespace Parser {
-	public class SyntaxTreeNode {
+	public class SyntaxTreeNode: IFormattable {
 		private readonly ObservableCollection<SyntaxTreeNode> _children = new();
 
 		private bool _changeParentOnChildrenChanged = true;
@@ -74,11 +76,31 @@ namespace Parser {
 
 		public override string ToString() => ToString(0);
 
+				public string ToString(string? format, IFormatProvider? formatProvider)
+			=> format?.ToLower(CultureInfo.CurrentCulture) switch {
+				null or "xml"             => ToString(),
+				"xml-temp" or "xml-debug" => ToString(0, false),
+				"source" or "code"        => ToCodeSegment().Value,
+				_                         => throw new ArgumentOutOfRangeException(nameof(format), "Unrecognized format")
+			};
+
+		private StringSegment ToCodeSegment() {
+			var node = this;
+			while (!node.IsLeaf)
+				node = node.Children[0];
+			var from = node.Value.AsTerminalInstance.Token.Segment;
+			node = this;
+			while (!node.IsLeaf)
+				node = node.Children[^1];
+			var to = node.Value.AsTerminalInstance.Token.Segment;
+			return new StringSegment(from.Buffer, from.Offset, to.Offset - from.Offset + to.Length);
+		}
+
 		public static implicit operator SyntaxTreeNode(SyntaxTreeValue value) => new(value);
 	}
 
-	public record TerminalInstance(Terminal Terminal, Token Lexeme) {
-		public override string ToString() => Lexeme.ToString();
+	public record TerminalInstance(Terminal Terminal, Token Token) {
+		public override string ToString() => Token.ToString();
 
 		public static implicit operator TerminalInstance((Terminal, Token) tuple) => new(tuple.Item1, tuple.Item2);
 	}
