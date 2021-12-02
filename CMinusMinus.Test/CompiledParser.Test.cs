@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Timers;
 using Microsoft.Toolkit.Uwp.Notifications;
 using NUnit.Framework;
 using Parser;
 using Parser.LR;
 using Parser.LR.CLR;
+using TrueMogician.Extensions.Enumerable;
 
 namespace CMinusMinus.Test {
 	public class CompiledParserTests {
@@ -87,6 +89,12 @@ namespace CMinusMinus.Test {
 				return null;
 			}
 			catch (ParserException ex) {
+				if (ex is NotRecognizedException {CurrentStack: { }} e) {
+					foreach (var node in e.CurrentStack.Reverse())
+						Console.WriteLine(node.ToString());
+					if (e.Tokens is not null && e.Position is not null)
+						Console.WriteLine($"Next token: {e.Tokens.AsArray()[e.Position.Value]}");
+				}
 				return ex.GetType();
 			}
 		}
