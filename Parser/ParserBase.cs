@@ -9,7 +9,7 @@ namespace Parser {
 
 		public abstract bool Initialized { get; protected set; }
 
-		public abstract AbstractSyntaxTree Parse(IEnumerable<Token> tokens);
+		public abstract SyntaxTree Parse(IEnumerable<Token> tokens);
 
 		public abstract void Initialize();
 	}

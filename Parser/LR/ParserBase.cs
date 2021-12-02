@@ -37,7 +37,7 @@ namespace Parser.LR {
 		}
 
 		[SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
-		public override AbstractSyntaxTree Parse(IEnumerable<Token> tokens) {
+		public override SyntaxTree Parse(IEnumerable<Token> tokens) {
 			if (ParsingTable.ItemSets is null)
 				throw new ParserNotInitializedException();
 			Stack<ItemSet<TItem>> stateStack = new();

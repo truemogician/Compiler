@@ -25,9 +25,9 @@ namespace Language {
 
 		public virtual IEnumerable<Token> Filter(IEnumerable<Token> tokens) => tokens;
 
-		public AbstractSyntaxTree Parse(string code) => Parser.Parse(Filter(Tokenize(code)));
+		public SyntaxTree Parse(string code) => Parser.Parse(Filter(Tokenize(code)));
 
-		public bool TryParse(string code, out AbstractSyntaxTree? ast) => Parser.TryParse(Filter(Tokenize(code)), out ast);
+		public bool TryParse(string code, out SyntaxTree? ast) => Parser.TryParse(Filter(Tokenize(code)), out ast);
 	}
 
 	public interface ILanguage {
@@ -41,8 +41,8 @@ namespace Language {
 
 		public virtual IEnumerable<Token> Filter(IEnumerable<Token> tokens) => tokens;
 
-		public AbstractSyntaxTree Parse(string code) => Parser.Parse(Filter(Tokenize(code)));
+		public SyntaxTree Parse(string code) => Parser.Parse(Filter(Tokenize(code)));
 
-		public bool TryParse(string code, out AbstractSyntaxTree? ast) => Parser.TryParse(Filter(Tokenize(code)), out ast);
+		public bool TryParse(string code, out SyntaxTree? ast) => Parser.TryParse(Filter(Tokenize(code)), out ast);
 	}
 }

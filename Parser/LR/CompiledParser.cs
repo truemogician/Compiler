@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Lexer;
 
+#pragma warning disable IDE0079// Remove unnecessary suppression
 namespace Parser.LR {
 	public class CompiledParser : IParser {
 		private readonly CompiledParsingTable _table;
@@ -11,7 +12,7 @@ namespace Parser.LR {
 		public CompiledParser(CompiledParsingTable table) => _table = table;
 
 		[SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
-		public AbstractSyntaxTree Parse(IEnumerable<Token> tokens) {
+		public SyntaxTree Parse(IEnumerable<Token> tokens) {
 			Stack<int> stateStack = new();
 			Stack<SyntaxTreeNode> symbolStack = new(), symbolTemp = new();
 			stateStack.Push(0);

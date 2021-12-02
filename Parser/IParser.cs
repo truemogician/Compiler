@@ -4,10 +4,10 @@ using Lexer;
 
 namespace Parser {
 	public interface IParser {
-		public AbstractSyntaxTree Parse(IEnumerable<Token> tokens);
+		public SyntaxTree Parse(IEnumerable<Token> tokens);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool TryParse(IEnumerable<Token> tokens, out AbstractSyntaxTree? ast) {
+		public bool TryParse(IEnumerable<Token> tokens, out SyntaxTree? ast) {
 			try {
 				ast = Parse(tokens);
 				return true;
