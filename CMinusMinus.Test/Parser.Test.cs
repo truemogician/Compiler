@@ -32,6 +32,7 @@ namespace CMinusMinus.Test {
 		[TestCase(@"samples/a+b.cmm", ExpectedResult = null)]
 		[TestCase(@"samples/hello.cmm", ExpectedResult = null)]
 		[TestCase(@"samples/literal.cmm", ExpectedResult = null)]
+		[TestCase(@"samples/full.cmm", ExpectedResult = null)]
 		public Type? FileTest(string filePath) => LiteralTest(File.ReadAllText(filePath));
 	}
 }
