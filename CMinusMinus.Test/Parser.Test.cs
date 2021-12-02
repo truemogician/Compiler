@@ -17,7 +17,8 @@ namespace CMinusMinus.Test {
 			}
 		}
 
-		[TestCase(@"int main(){}", ExpectedResult = null)]
+		[Test]
+		[TestCaseSource(typeof(TestCases), nameof(TestCases.LiteralSource))]
 		public Type? LiteralTest(string code) {
 			try {
 				Console.WriteLine(Language.Parse(code).ToString());
@@ -28,11 +29,8 @@ namespace CMinusMinus.Test {
 			}
 		}
 
-		[TestCase(@"samples/0.cmm", ExpectedResult = null)]
-		[TestCase(@"samples/a+b.cmm", ExpectedResult = null)]
-		[TestCase(@"samples/hello.cmm", ExpectedResult = null)]
-		[TestCase(@"samples/literal.cmm", ExpectedResult = null)]
-		[TestCase(@"samples/full.cmm", ExpectedResult = null)]
+		[Test]
+		[TestCaseSource(typeof(TestCases), nameof(TestCases.FileSource))]
 		public Type? FileTest(string filePath) => LiteralTest(File.ReadAllText(filePath));
 	}
 }

@@ -61,7 +61,8 @@ namespace CMinusMinus.Test {
 			SendNotification("Parsing Table Compiled and Saved!", $"Time cost: {DateTime.Now - startTime}");
 		}
 
-		[TestCase("int main(){}", ExpectedResult = null)]
+		[Test]
+		[TestCaseSource(typeof(TestCases), nameof(TestCases.LiteralSource))]
 		public Type? CompileAndRunLiteralTest(string code) {
 			var language = new CMinusMinus();
 			language.UseCompiledParser();
@@ -74,14 +75,12 @@ namespace CMinusMinus.Test {
 			}
 		}
 
-		[TestCase(@"samples/0.cmm", ExpectedResult = null)]
-		[TestCase(@"samples/a+b.cmm", ExpectedResult = null)]
-		[TestCase(@"samples/hello.cmm", ExpectedResult = null)]
-		[TestCase(@"samples/literal.cmm", ExpectedResult = null)]
-		[TestCase(@"samples/full.cmm", ExpectedResult = null)]
+		[Test]
+		[TestCaseSource(typeof(TestCases), nameof(TestCases.FileSource))]
 		public Type? CompileAndRunFileTest(string filePath) => CompileAndRunLiteralTest(File.ReadAllText(filePath));
 
-		[TestCase("int main(){}", ExpectedResult = null)]
+		[Test]
+		[TestCaseSource(typeof(TestCases), nameof(TestCases.LiteralSource))]
 		public Type? LoadAndRunLiteralTest(string code) {
 			var language = new CMinusMinus("cmm.ptb");
 			try {
@@ -99,11 +98,8 @@ namespace CMinusMinus.Test {
 			}
 		}
 
-		[TestCase(@"samples/0.cmm", ExpectedResult = null)]
-		[TestCase(@"samples/a+b.cmm", ExpectedResult = null)]
-		[TestCase(@"samples/hello.cmm", ExpectedResult = null)]
-		[TestCase(@"samples/literal.cmm", ExpectedResult = null)]
-		[TestCase(@"samples/full.cmm", ExpectedResult = null)]
+		[Test]
+		[TestCaseSource(typeof(TestCases), nameof(TestCases.FileSource))]
 		public Type? LoadAndRunFileTest(string filePath) => LoadAndRunLiteralTest(File.ReadAllText(filePath));
 	}
 }
