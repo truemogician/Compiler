@@ -63,21 +63,25 @@ namespace CMinusMinus {
 			var tShiftOperator = NewTerminal(LexemeType.BitwiseOperator, new Regex(@"<<|>>"));
 			var tPlusOperator = NewTerminal(LexemeType.ArithmeticOperator, "+");
 			var tMinusOperator = NewTerminal(LexemeType.ArithmeticOperator, "-");
-			var tMultiplicativeOperator = NewTerminal(LexemeType.ArithmeticOperator, new Regex(@"[\/%]"));
+			var tMultiplyOperator = NewTerminal(LexemeType.ArithmeticOperator, "*");
+			var tDivideModuloOperator = NewTerminal(LexemeType.ArithmeticOperator, new Regex(@"[\/%]"));
 			var tEqualityOperator = NewTerminal(LexemeType.RelationalOperator, new Regex(@"[=!]="));
 			var tLogicalNotOperator = NewTerminal(LexemeType.LogicalOperator, "!");
 			var tBitwiseNotOperator = NewTerminal(LexemeType.BitwiseOperator, "~");
-			var tDereferenceOperator = NewTerminal(LexemeType.ArithmeticOperator, "*");
+			var tDereferenceOperator = tMultiplyOperator;
+			var tAddressOfOperator = tBitwiseAndOperator;
 			var tMembershipOperator = NewTerminal(LexemeType.MembershipOperator);
 			#endregion
 			#endregion
 
 			#region Nonterminals
+			var nMainTypeOrVoid = new Nonterminal("MainType|void", true);
 			var nQualifier = new Nonterminal("Qualifier", true);
 			var nParenthesizedExpression = new Nonterminal("ParenthesizedExpression", true);
 			var nBlock = new Nonterminal("Block", true);
 			var nLabeledComponent = new Nonterminal("LabeledComponent", true);
 			var nStatement = new Nonterminal("Statement", true);
+			var nDeclarationStatementComponent = new Nonterminal();
 			var nCaseCommonPart = new Nonterminal();
 			var nEmbeddableBody = new Nonterminal("EmbeddableBody", true);
 			var nEmbeddedStatement = new Nonterminal("EmbeddedStatement", true);
@@ -114,7 +118,9 @@ namespace CMinusMinus {
 			);
 			grammar.Add(
 				NonterminalType.FunctionDeclaration,
-				((RSF)tVoid | NonterminalType.MainType) +
+				nQualifier +
+				nMainTypeOrVoid +
+				((RSF)tDereferenceOperator + nQualifier) * '*' +
 				tIdentifier +
 				tLeftParenthesis +
 				((RSF)SentenceForm.Empty | (nQualifier + NonterminalType.MainType + tIdentifier + ((RSF)tSeparator + nQualifier + NonterminalType.MainType + tIdentifier) * '*')) +
@@ -122,8 +128,12 @@ namespace CMinusMinus {
 				nBlock
 			);
 			grammar.Add(
+				nMainTypeOrVoid,
+				(RSF)NonterminalType.MainType | tVoid
+			);
+			grammar.Add(
 				nQualifier,
-				(RSF)tConst | tVolatile | (tConst + tVolatile) | (tVolatile + tConst) | SentenceForm.Empty
+				((RSF)tConst | tVolatile) * '*'
 			);
 			grammar.Add(
 				NonterminalType.MainType,
@@ -161,7 +171,11 @@ namespace CMinusMinus {
 			);
 			grammar.Add(
 				NonterminalType.DeclarationStatement,
-				(RSF)nQualifier + NonterminalType.MainType + ((RSF)tIdentifier | NonterminalType.AssignmentExpression) + (tSeparator + ((RSF)tIdentifier | NonterminalType.AssignmentExpression)) * '*' + tDelimiter
+				(RSF)nQualifier + nMainTypeOrVoid + nDeclarationStatementComponent + ((RSF)tSeparator + nDeclarationStatementComponent) * '*' + tDelimiter
+			);
+			grammar.Add(
+				nDeclarationStatementComponent,
+				((RSF)tDereferenceOperator + nQualifier) * '*' + (tIdentifier + ((RSF)tIndexStart + NonterminalType.Expression + tIndexEnd) * '?' + ((RSF)tAssignmentOperator + nAssignmentOrHigherPriorityExpression) * '?')
 			);
 			grammar.Add(
 				NonterminalType.ControlStatement,
@@ -259,7 +273,7 @@ namespace CMinusMinus {
 			);
 			grammar.Add(
 				NonterminalType.AssignmentExpression,
-				(RSF)tIdentifier + tAssignmentOperator + nAssignmentOrHigherPriorityExpression
+				(RSF)nConditionalOrHigherPriorityExpression + tAssignmentOperator + nAssignmentOrHigherPriorityExpression
 			);
 			grammar.Add(
 				nAssignmentOrHigherPriorityExpression,
@@ -363,7 +377,7 @@ namespace CMinusMinus {
 			);
 			grammar.Add(
 				NonterminalType.MultiplicativeExpression,
-				nUnaryOrHigherPriorityExpression + ((RSF)tMultiplicativeOperator | tDereferenceOperator) + nMultiplicativeOrHigherPriorityExpression
+				nUnaryOrHigherPriorityExpression + ((RSF)tMultiplyOperator | tDivideModuloOperator) + nMultiplicativeOrHigherPriorityExpression
 			);
 			grammar.Add(
 				nMultiplicativeOrHigherPriorityExpression,
@@ -371,7 +385,7 @@ namespace CMinusMinus {
 			);
 			grammar.Add(
 				NonterminalType.UnaryExpression,
-				(((RSF)tPlusOperator * (1, 2)) | ((RSF)tMinusOperator * (1, 2)) | tLogicalNotOperator | tBitwiseNotOperator | tDereferenceOperator | tBitwiseAndOperator | tSizeOf | ((RSF)tLeftParenthesis + NonterminalType.MainType + tRightParenthesis)) + nUnaryOrHigherPriorityExpression
+				((RSF)tPlusOperator | tMinusOperator | tLogicalNotOperator | tBitwiseNotOperator | tDereferenceOperator | tAddressOfOperator | tSizeOf | ((RSF)tLeftParenthesis + NonterminalType.MainType + tRightParenthesis)) + nUnaryOrHigherPriorityExpression
 			);
 			grammar.Add(
 				nUnaryOrHigherPriorityExpression,
@@ -379,7 +393,7 @@ namespace CMinusMinus {
 			);
 			grammar.Add(
 				nPrimaryExpression,
-				(RSF)NonterminalType.FunctionCall | NonterminalType.IndexExpression | NonterminalType.MemberExpression
+				(RSF)NonterminalType.FunctionCall | NonterminalType.SubscriptExpression | NonterminalType.MemberExpression
 			);
 			grammar.Add(
 				nPrimaryOrHigherPriorityExpression,
@@ -390,7 +404,7 @@ namespace CMinusMinus {
 				(RSF)nPrimaryOrHigherPriorityExpression + tLeftParenthesis + (RSF)NonterminalType.Expression * '?' + tRightParenthesis
 			);
 			grammar.Add(
-				NonterminalType.IndexExpression,
+				NonterminalType.SubscriptExpression,
 				(RSF)nPrimaryOrHigherPriorityExpression + tIndexStart + NonterminalType.Expression + tIndexEnd
 			);
 			grammar.Add(
@@ -408,8 +422,9 @@ namespace CMinusMinus {
 			#endregion
 			#endregion
 
-			grammar.RemoveEmptyProductionRules();
 			grammar.Simplify();
+			grammar.MergeEquivalentNonterminals();
+			grammar.RemoveEmptyProductionRules();
 			return grammar;
 		}
 
@@ -457,7 +472,7 @@ namespace CMinusMinus {
 
 		FunctionCall,
 
-		IndexExpression,
+		SubscriptExpression,
 
 		MemberExpression,
 
