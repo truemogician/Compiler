@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
+using TrueMogician.Extensions.Enumerable;
 
 namespace Parser.LR {
 	public abstract class ActionTable<TItem> where TItem : ItemBase {
 		protected readonly Dictionary<ItemSet<TItem>, Dictionary<Terminal, IAction>> Table = new();
 
-		public IReadOnlyDictionary<ItemSet<TItem>, Dictionary<Terminal, IAction>> RawTable => Table;
+		public IReadOnlyDictionary<ItemSet<TItem>, IReadOnlyDictionary<Terminal, IAction>> RawTable => Table.ToValueReadOnly<ItemSet<TItem>, Dictionary<Terminal, IAction>, IReadOnlyDictionary<Terminal, IAction>>();
 
 		public virtual IAction this[ItemSet<TItem> state, Terminal terminal] {
 			get => Table[state][terminal];

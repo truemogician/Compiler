@@ -32,7 +32,7 @@ namespace CMinusMinus.Test {
 			static void Log(string message) => Debug.WriteLine($"{DateTime.Now:s} {message}");
 			var itemSetsTimer = new Timer(reportPeriod * 1000) {AutoReset = true};
 			var itemSetsCount = 0;
-			IReadOnlyDictionary<ItemSet<Item>, Dictionary<Terminal, IAction>>? table = null;
+			IReadOnlyDictionary<ItemSet<Item>, IReadOnlyDictionary<Terminal, IAction>>? table = null;
 			itemSetsTimer.Elapsed += (_, _) => Log($"Calculated item sets: {language.RawParser?.ParsingTable.ItemSets?.Count}");
 			language.RawParser!.StartItemSetsCalculation += (_, _) => {
 				Log("Item sets calculation started");
@@ -65,6 +65,7 @@ namespace CMinusMinus.Test {
 		[TestCaseSource(typeof(TestCases), nameof(TestCases.LiteralSource))]
 		public Type? CompileAndRunLiteralTest(string code) {
 			var language = new CMinusMinus();
+			language.InitializeRawParser();
 			language.UseCompiledParser();
 			try {
 				Console.WriteLine(language.Parse(code).ToString());
