@@ -4,9 +4,20 @@ using System.Collections.Generic;
 using System.Linq;
 using Lexer;
 using TrueMogician.Extensions.Enumerable;
+using QuikGraph;
 
 namespace Parser {
 	public class Grammar : ISet<ProductionRule> {
+		private sealed record NonterminalPair(Nonterminal First, Nonterminal Second) {
+			public bool Equals(NonterminalPair? other) {
+				if (ReferenceEquals(this, other))
+					return true;
+				return First.Equals(other!.First) && Second.Equals(other!.Second) || First.Equals(other!.Second) && Second.Equals(other!.First);
+			}
+
+			public override int GetHashCode() => First.GetHashCode() + Second.GetHashCode();
+		}
+
 		private readonly Dictionary<Lexeme, HashSet<TerminalCount>> _terminals = new();
 
 		private readonly Dictionary<Nonterminal, HashSet<ProductionRule>> _productionRules = new();
@@ -204,6 +215,129 @@ namespace Parser {
 					rules.Remove(rule);
 				}
 			}
+		}
+
+		public void MergeEquivalentNonterminals(bool preserveNonTempNonterminals = true) {
+			static bool IsSentencesEquivalent(SentenceForm stc1, SentenceForm stc2, out HashSet<NonterminalPair>? dependencies) {
+				if (stc1.Count != stc2.Count)
+					goto NotMatched;
+				dependencies = new HashSet<NonterminalPair>();
+				foreach (var (sym1, sym2) in stc1.IndexJoin(stc2)) {
+					if (sym1.IsTerminal != sym2.IsTerminal || sym1.IsTerminal && !sym1.AsTerminal.Equals(sym2.AsTerminal))
+						goto NotMatched;
+					if (!sym1.IsTerminal) {
+						Nonterminal n1 = sym1.AsNonterminal, n2 = sym2.AsNonterminal;
+						if (!n1.Equals(n2))
+							dependencies.Add(new NonterminalPair(n1, n2));
+					}
+				}
+				return true;
+			NotMatched:
+				dependencies = null;
+				return false;
+			}
+			var rules = _productionRules.Select(
+					p => (p.Key, p.Value.GroupBy(pr => pr.Length, pr => pr.Production).Select(g => (g.Key, g.ToArray())).ToArray())
+				)
+				.ToArray();
+			var dependencyGraph = new BidirectionalGraph<NonterminalPair, Edge<NonterminalPair>>(false);
+			var unreachableVertex = new NonterminalPair(new Nonterminal(), new Nonterminal());
+			dependencyGraph.AddVertex(unreachableVertex);
+			for (var i = 0; i < rules.Length; ++i) {
+				var (nt1, groups1) = rules[i];
+				for (int j = i + 1; j < rules.Length; ++j) {
+					var (nt2, groups2) = rules[j];
+					if (groups1.Length != groups2.Length)
+						continue;
+					var dependencies = new HashSet<NonterminalPair>();
+					foreach (var ((length1, sentences1), (length2, sentences2)) in groups1.IndexJoin(groups2)) {
+						if (length1 != length2 || sentences1.Length != sentences2.Length)
+							goto Continue;
+						for (var k = 0; k < sentences1.Length; ++k) {
+							int l;
+							for (l = k; l < sentences2.Length; ++l)
+								if (IsSentencesEquivalent(sentences1[k], sentences2[l], out var dp)) {
+									dependencies.UnionWith(dp!);
+									break;
+								}
+							if (l == sentences2.Length)
+								goto Continue;
+							if (l != k) {
+								var tmp = sentences2[l];
+								sentences2[l] = sentences2[k];
+								sentences2[k] = tmp;
+							}
+						}
+					}
+					var cur = new NonterminalPair(nt1, nt2);
+					if (dependencyGraph.ContainsVertex(cur))
+						dependencyGraph.ClearOutEdges(cur);
+					else
+						dependencyGraph.AddVertex(cur);
+					foreach (var pair in dependencies) {
+						if (!dependencyGraph.ContainsVertex(pair)) {
+							dependencyGraph.AddVertex(pair);
+							dependencyGraph.AddEdge(new Edge<NonterminalPair>(pair, unreachableVertex));
+						}
+						dependencyGraph.AddEdge(new Edge<NonterminalPair>(cur, pair));
+					}
+				Continue: ;
+				}
+			}
+			var visited = new HashSet<NonterminalPair>();
+			var queue = new Queue<NonterminalPair>();
+			visited.Add(unreachableVertex);
+			queue.Enqueue(unreachableVertex);
+			while (queue.Count > 0) {
+				var cur = queue.Dequeue();
+				var vertices = dependencyGraph.InEdges(cur).Select(e => e.Source).ToArray();
+				dependencyGraph.RemoveVertex(cur);
+				foreach (var next in vertices)
+					if (!visited.Contains(next)) {
+						visited.Add(next);
+						queue.Enqueue(next);
+					}
+			}
+			var equivalentGraph = new UndirectedGraph<Nonterminal, Edge<Nonterminal>>(false);
+			foreach (var (first, second) in dependencyGraph.Vertices)
+				equivalentGraph.AddVerticesAndEdge(new Edge<Nonterminal>(first, second));
+			var substituteMap = new Dictionary<Nonterminal, Nonterminal>();
+			var tagged = new HashSet<Nonterminal>();
+			foreach (var nt in equivalentGraph.Vertices) {
+				if (tagged.Contains(nt))
+					continue;
+				var group = new List<Nonterminal>();
+				var q = new Queue<Nonterminal>();
+				q.Enqueue(nt);
+				while (q.Count > 0) {
+					var cur = q.Dequeue();
+					tagged.Add(cur);
+					group.Add(cur);
+					foreach (var next in equivalentGraph.AdjacentEdges(cur).Select(e => e.Source.Equals(cur) ? e.Target : e.Source))
+						if (!tagged.Contains(next))
+							q.Enqueue(next);
+				}
+				var (temps, nontemps) = group.Split(n => n.Temporary);
+				if (preserveNonTempNonterminals && temps.Count > 1) {
+					var target = temps[0];
+					foreach (var n in temps.Skip(1))
+						substituteMap[n] = target;
+				}
+				else if (!preserveNonTempNonterminals) {
+					var target = nontemps.Concat(temps).First();
+					foreach (var n in nontemps.Concat(temps).Skip(1))
+						substituteMap[n] = target;
+				}
+			}
+			substituteMap.Keys.Each(nt => Remove(nt));
+			foreach (var rule in this)
+				for (var i = 0; i < rule.Length; ++i) {
+					if (rule[i].IsTerminal)
+						continue;
+					var nt = rule[i].AsNonterminal;
+					if (substituteMap.ContainsKey(nt))
+						rule[i] = substituteMap[nt];
+				}
 		}
 
 		public void MergeAndRemove(Nonterminal nonterminal) {
