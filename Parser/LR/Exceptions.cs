@@ -4,11 +4,35 @@ using Lexer;
 
 namespace Parser.LR {
 	public class ParsingTableConstructingException : ParserConstructingException {
-		public ParsingTableConstructingException(Grammar grammar, string? message = null, Exception? innerException = null) : base(message, innerException) => Grammar = grammar;
+		public ParsingTableConstructingException(string? message = null, Exception? innerException = null) : base(message, innerException) { }
 
-		public Grammar Grammar { get; }
+		public Grammar? Grammar { get; init; }
 
 		protected override string DefaultMessage => "Error occurred when constructing parsing table";
+	}
+
+	public class ActionConflictException<TItem> : ParsingTableConstructingException where TItem : ItemBase {
+		public ActionConflictException(string? message = null, Exception? innerException = null) : base(message, innerException) { }
+
+		public ItemSet<TItem>? State { get; init; }
+
+		public Terminal? Terminal { get; init; }
+
+		public IEnumerable<IAction>? ConflictingActions { get; init; }
+
+		protected override string DefaultMessage => "Conflicting actions detected";
+	}
+
+	public class GotoConflictException<TItem> : ParsingTableConstructingException where TItem : ItemBase {
+		public GotoConflictException(string? message = null, Exception? innerException = null) : base(message, innerException) { }
+
+		public ItemSet<TItem>? State { get; init; }
+
+		public Nonterminal? Nonterminal { get; init; }
+
+		public IEnumerable<ItemSet<TItem>>? ConflictingGotoStates { get; init; }
+
+		protected override string DefaultMessage => "Conflicting goto states detected";
 	}
 
 	public class UnexpectedActionException<TItem> : ParsingException where TItem : ItemBase {
