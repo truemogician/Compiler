@@ -1,17 +1,17 @@
 ﻿using System.Collections.Generic;
-using TrueMogician.Extensions.Enumerable;
+using TrueMogician.Extensions.Collections;
 
 namespace Parser.LR {
-	public abstract class ActionTable<TItem> where TItem : ItemBase {
-		protected readonly Dictionary<ItemSet<TItem>, Dictionary<Terminal, IAction>> Table = new();
+	public abstract class ActionTable<TItem, TAction> where TItem : ItemBase {
+		protected readonly Dictionary<ItemSet<TItem>, Dictionary<Terminal, TAction>> Table = new();
 
-		public IReadOnlyDictionary<ItemSet<TItem>, IReadOnlyDictionary<Terminal, IAction>> RawTable => Table.ToValueReadOnly<ItemSet<TItem>, Dictionary<Terminal, IAction>, IReadOnlyDictionary<Terminal, IAction>>();
+		public IReadOnlyDictionary<ItemSet<TItem>, IReadOnlyDictionary<Terminal, TAction>> RawTable => Table.ToValueReadOnly<ItemSet<TItem>, Dictionary<Terminal, TAction>, IReadOnlyDictionary<Terminal, TAction>>();
 
-		public virtual IAction this[ItemSet<TItem> state, Terminal terminal] {
+		public virtual TAction this[ItemSet<TItem> state, Terminal terminal] {
 			get => Table[state][terminal];
 			set {
 				if (!Table.ContainsKey(state))
-					Table[state] = new Dictionary<Terminal, IAction> {[terminal] = value};
+					Table[state] = new Dictionary<Terminal, TAction> {[terminal] = value};
 				else
 					Table[state][terminal] = value;
 			}

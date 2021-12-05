@@ -5,12 +5,12 @@ using TrueMogician.Exceptions;
 namespace Parser.LR {
 	using static Utilities;
 
-	public abstract class ParsingTableBase<TItem> where TItem : ItemBase {
+	public abstract class ParsingTableBase<TItem, TAction> where TItem : ItemBase {
 		protected internal ParsingTableBase(Grammar grammar) => Grammar = grammar;
 
 		public Grammar Grammar { get; }
 
-		public ActionTable<TItem>? ActionTable { get; protected set; }
+		public ActionTable<TItem, TAction>? ActionTable { get; protected set; }
 
 		public GotoTable<TItem>? GotoTable { get; protected set; }
 
@@ -18,8 +18,8 @@ namespace Parser.LR {
 
 		public bool Initialized => ActionTable is not null && GotoTable is not null && ItemSets is not null;
 
-		public IAction this[ItemSet<TItem> state, Terminal terminal] {
-			get => ActionTable?[state, terminal] ?? throw new ParserNotInitializedException("Action table not initialized");
+		public TAction this[ItemSet<TItem> state, Terminal terminal] {
+			get => ActionTable is not null ? ActionTable[state, terminal] : throw new ParserNotInitializedException("Action table not initialized");
 			set {
 				if (ActionTable is null)
 					throw new ParserNotInitializedException("Action table not initialized");
@@ -51,8 +51,6 @@ namespace Parser.LR {
 				throw new BadImplementationException(nameof(Initialize), null, null);
 		}
 
-		public CompiledParsingTable Compile() => CompiledParsingTable.FromParsingTable(this);
-
 		protected static Grammar ExtendGrammar(Grammar grammar) {
 			var initial = new Nonterminal(grammar.InitialState.Name + "'");
 			var nonterminals = grammar.Nonterminals.ToList();
@@ -68,7 +66,7 @@ namespace Parser.LR {
 		///     The implementation should create ItemSets, ActionTable and GotoTable in this method
 		/// </summary>
 		/// <param name="extendedGrammar">The extended grammar</param>
-		protected abstract void Initialize(Grammar extendedGrammar);
+		protected abstract void Initialize(Grammar extendedGrammar, bool checkConflicts = true);
 
 		protected void OnStartItemSetsCalculation() => StartItemSetsCalculation(this, EventArgs.Empty);
 

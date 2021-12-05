@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using TrueMogician.Extensions.Enumerable;
+using TrueMogician.Extensions.Collections;
 
 namespace Parser.LR {
 	public abstract class GotoTable<TItem> where TItem : ItemBase {

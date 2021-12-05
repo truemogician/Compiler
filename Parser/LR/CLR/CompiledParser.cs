@@ -5,7 +5,7 @@ using System.Linq;
 using Lexer;
 
 #pragma warning disable IDE0079// Remove unnecessary suppression
-namespace Parser.LR {
+namespace Parser.LR.CLR {
 	public class CompiledParser : IParser {
 		private readonly CompiledParsingTable _table;
 

@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using Lexer;
 using TrueMogician.Extensions.Enumerable;
 
-namespace Parser.LR {
+namespace Parser.LR.CLR {
 	public class CompiledParsingTable {
 		private readonly Dictionary<Lexeme, List<(Terminal, int)>> _groupedTerminals;
 
@@ -76,7 +76,7 @@ namespace Parser.LR {
 			private set => _table[stateIndex, symbolIndex] = value.Action is null ? value.Index < 0 ? 0 : value.Index + 1 : (value.Index << 2) | (int)value.Action.Value;
 		}
 
-		public static CompiledParsingTable FromParsingTable<TItem>(ParsingTableBase<TItem> parsingTable) where TItem : ItemBase {
+		public static CompiledParsingTable FromParsingTable<TItem>(ParsingTableBase<TItem, IAction> parsingTable) where TItem : ItemBase {
 			if (!parsingTable.Initialized)
 				throw new ArgumentException("Parsing table not initialized", nameof(parsingTable));
 			var terminals = parsingTable.Grammar.Terminals.ToList();
@@ -212,32 +212,6 @@ namespace Parser.LR {
 			return (checkAmbiguity
 				? _groupedTerminals[token.Lexeme].SingleOrDefault(t => t.Item1.Match(token))
 				: _groupedTerminals[token.Lexeme].FirstOrDefault(t => t.Item1.Match(token))).Item2;
-		}
-	}
-
-	public static class StringReaderExtensions {
-		public static int? ReadInteger(this StringReader reader) {
-			int ch = reader.Peek();
-			if (ch == -1)
-				return null;
-			var neg = false;
-			if (ch is '+' or '-') {
-				neg = ch == '-';
-				reader.Read();
-			}
-			if (!char.IsDigit((char)reader.Peek()))
-				throw new InvalidOperationException("Not an integer");
-			var value = 0;
-			while (true) {
-				ch = reader.Peek();
-				if (!char.IsDigit((char)ch))
-					break;
-				value = value * 10 + ch - '0';
-				if (value < 0)
-					throw new OverflowException();
-				reader.Read();
-			}
-			return neg ? -value : value;
 		}
 	}
 }
