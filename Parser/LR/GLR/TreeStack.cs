@@ -6,94 +6,68 @@ using TrueMogician.Extensions.Collections.Tree;
 
 namespace Parser.LR.GLR {
 	internal class TreeStack<T> : IEnumerable<TreeStack<T>.BranchStack> {
-		private readonly ValuedSimpleTreeNode<List<T>> _root = CreateNewNode();
+		private readonly LinkedList<ValuedTreeNode<List<T>>> _leaves = new();
 
-		private readonly LinkedList<ValuedSimpleTreeNode<List<T>>> _leaves = new();
+		public TreeStack() : this(1) { }
 
-		public TreeStack() => _leaves.AddLast(_root);
+		public TreeStack(int initialBranch) {
+			if (initialBranch < 1)
+				throw new ArgumentOutOfRangeException(nameof(initialBranch));
+			var root = new ValuedTreeNode<List<T>>(null!);
+			while (initialBranch-- > 0)
+				_leaves.AddLast(CreateNewNode());
+			root.Children.AddRange(_leaves);
+		}
 
 		public IEnumerator<BranchStack> GetEnumerator() {
-			for (var leafNode = _leaves.First; leafNode is not null; leafNode = leafNode.Next) {
-				if (!leafNode.ValueRef.IsLeaf) {
-					var cur = leafNode;
-					foreach (var leaf in leafNode.ValueRef.Leaves)
-						cur = _leaves.AddAfter(cur, leaf);
-					var oldNode = leafNode;
-					leafNode = leafNode.Next!;
-					_leaves.Remove(oldNode);
-				}
-				yield return leafNode.ValueRef;
-			}
+			for (var listNode = _leaves.First; listNode is not null; listNode = listNode.Next)
+				yield return listNode;
 		}
 
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-		public static BranchStack[] Fork(BranchStack branch, int count) => Fork((ValuedSimpleTreeNode<List<T>>)branch, count).Select(n => (BranchStack)n).ToArray();
+		private static ValuedTreeNode<List<T>> CreateNewNode() => new(new List<T>());
 
-		public static void Remove(BranchStack branch) {
-			var node = (ValuedSimpleTreeNode<List<T>>)branch;
-			if (node.IsRoot)
-				throw new InvalidOperationException("Root cannot be removed");
-			var parent = node.Parent!;
-			node.Parent = null;
-			Maintain(parent);
-		}
+		private static ValuedTreeNode<List<T>> CreateNewNode(ValuedTreeNode<List<T>>? parent) => new(new List<T>(), parent);
 
-		private static ValuedSimpleTreeNode<List<T>> CreateNewNode() => new(new List<T>());
-
-		private static ValuedSimpleTreeNode<List<T>> CreateNewNode(IEnumerable<T> items) => new(new List<T>(items));
-
-		private static ValuedSimpleTreeNode<List<T>>[] Fork(ValuedSimpleTreeNode<List<T>> node, int count) {
-			var leaves = new ValuedSimpleTreeNode<List<T>>[count];
-			if (node.Value.Count == 0) {
-				var parent = node.Parent;
-				if (parent is null)
-					throw new InvalidOperationException("Empty root cannot be forked");
-				int index = parent.Children.IndexOf(node);
-
-				leaves[0] = node;
-				for (var i = 1; i < count; ++i)
-					leaves[i] = CreateNewNode();
-				parent.Children.InsertRange(index + 1, leaves.Skip(1));
-			}
-			else {
-				for (var i = 0; i < count; ++i)
-					leaves[i] = CreateNewNode();
-				node.Children.AddRange(leaves);
-			}
-			return leaves;
-		}
+		private static ValuedTreeNode<List<T>> CreateNewNode(IEnumerable<T> items) => new(new List<T>(items));
 
 		/// <summary>
-		///     If <paramref name="node" /> has only one child, merge it into <paramref name="node" />
+		///     If <paramref name="node" /> has only one child, merge <paramref name="node" /> it into this child
 		/// </summary>
-		private static void Maintain(ValuedSimpleTreeNode<List<T>> node) {
+		private static void Maintain(ValuedTreeNode<List<T>> node) {
 			if (node.Children.Count == 1) {
 				var child = node.Children[0];//TODO: figure out why implicit conversion happens
-				node.Children.AddRange(child.Children);
-				child.Parent = null;
-				node.Value.AddRange(child.Value);
+				child.Parent = node.Parent;
+				node.Parent = null;
+				child.Value.InsertRange(0, node.Value);
 			}
 		}
 
 		internal class BranchStack : IEnumerable<T> {
-			private ValuedSimpleTreeNode<List<T>> _node;
+			private LinkedListNode<ValuedTreeNode<List<T>>>? _listNode;
 
-			private BranchStack(ValuedSimpleTreeNode<List<T>> leaf) => _node = leaf;
+			private BranchStack(ref LinkedListNode<ValuedTreeNode<List<T>>> listNode) => _listNode = listNode;
 
 			public IEnumerator<T> GetEnumerator() {
 				for (int i = CurrentList.Count - 1; i >= 0; --i)
 					yield return CurrentList[i];
-				foreach (var ancestor in _node.Ancestors)
+				foreach (var ancestor in Leaf.Ancestors)
 					for (int i = ancestor.Value.Count - 1; i >= 0; --i)
 						yield return ancestor.Value[i];
 			}
 
 			IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-			public int Count => CurrentList.Count + _node.Ancestors.Sum(n => n.Value.Count);
+			public int Count => CurrentList.Count + Leaf.Ancestors.Sum(n => n.Value.Count);
 
-			private List<T> CurrentList => _node.Value;
+			private LinkedListNode<ValuedTreeNode<List<T>>> ListNode => _listNode ?? throw new InvalidOperationException("Branch has been forked or deleted");
+
+			private LinkedList<ValuedTreeNode<List<T>>> List => ListNode.List ?? throw new NullReferenceException("List node doesn't belong to a linked list");
+
+			private ref ValuedTreeNode<List<T>> Leaf => ref ListNode.ValueRef;
+
+			private List<T> CurrentList => Leaf.Value;
 
 			public void Push(T item) => CurrentList.Add(item);
 
@@ -109,7 +83,7 @@ namespace Parser.LR.GLR {
 				}
 				else {
 					result = new List<T>(count);
-					var targetNode = _node;
+					var targetNode = Leaf;
 					do {
 						result.AddRange(targetNode.Value);
 						targetNode = targetNode.Parent!;
@@ -118,24 +92,71 @@ namespace Parser.LR.GLR {
 					int index = list.Count + result.Count - count;
 					var slice = list.GetRange(index, count - result.Count);
 					result.AddRange(slice);
-					Remove(this);
+					var linkedList = List;
+					Delete();
 					if (index != list.Count) {
 						list.RemoveRange(index, list.Count - index);
-						var newNode = CreateNewNode(slice);
-						newNode.Children.AddRange(targetNode.Children);
-						newNode.Parent = targetNode;
+						var splitNode = CreateNewNode(slice);
+						splitNode.Children.AddRange(targetNode.Children);
+						splitNode.Parent = targetNode;
 					}
-					_node = CreateNewNode();
-					_node.Parent = targetNode;
+					var prevNode = targetNode;
+					do {
+						prevNode = prevNode.Children[^1];
+					} while (!prevNode.IsLeaf);
+					_listNode = linkedList.AddAfter(linkedList.Find(prevNode)!, CreateNewNode(targetNode));
 				}
 				return result;
 			}
 
 			public T Peek() => this.First();
 
-			public static implicit operator BranchStack(ValuedSimpleTreeNode<List<T>> leaf) => new(leaf);
+			/// <summary>
+			///     Fork this branch into <paramref name="count" /> new branches. After forking, this object is no longer a branch,
+			///     thus any operation will throw <see cref="InvalidOperationException" />
+			/// </summary>
+			/// <param name="count">Number of new branches to create. Must be at least 2.</param>
+			/// <returns>New branches created</returns>
+			public BranchStack[] Fork(int count) {
+				if (count < 2)
+					throw new ArgumentOutOfRangeException(nameof(count), $"Number of branches to fork must be at least 2");
+				var leaves = new LinkedListNode<ValuedTreeNode<List<T>>>[count];
+				if (Leaf.Value.Count == 0) {
+					var parent = Leaf.Parent!;
+					int index = parent.Children.IndexOf(Leaf);
+					leaves[0] = ListNode;
+					for (var i = 1; i < count; ++i)
+						leaves[i] = List.AddAfter(leaves[i - 1], CreateNewNode());
+					parent.Children.InsertRange(index + 1, leaves.Skip(1).Select(l => l.Value));
+				}
+				else {
+					leaves[0] = List.AddAfter(ListNode, CreateNewNode());
+					for (var i = 1; i < count; ++i)
+						leaves[i] = List.AddAfter(leaves[i - 1], CreateNewNode());
+					List.Remove(ListNode);
+					Leaf.Children.AddRange(leaves.Select(l => l.Value));
+					_listNode = null;
+				}
+				return leaves.Select(l => (BranchStack)l).ToArray();
+			}
 
-			public static explicit operator ValuedSimpleTreeNode<List<T>>(BranchStack branch) => branch._node;
+			/// <summary>
+			///     Delete the branch itself. After deletion, any operation on this object will throw
+			///     <see cref="InvalidOperationException" />
+			/// </summary>
+			public void Delete() {
+				if (Leaf.IsRoot)
+					throw new InvalidOperationException("Root cannot be deleted");
+				var parent = Leaf.Parent!;
+				Leaf.Parent = null;
+				Maintain(parent);
+				List.Remove(ListNode);
+				_listNode = null;
+			}
+
+			public static implicit operator BranchStack(LinkedListNode<ValuedTreeNode<List<T>>> listNode) => new(ref listNode);
+
+			public static explicit operator LinkedListNode<ValuedTreeNode<List<T>>>(BranchStack branch) => branch.ListNode;
 		}
 	}
 }
