@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Lexer;
+using TrueMogician.Exceptions;
 
 #pragma warning disable IDE0079// Remove unnecessary suppression
 namespace Parser.LR.CLR {
@@ -48,7 +49,7 @@ namespace Parser.LR.CLR {
 					case AcceptAction: return symbolStack.Single();
 					case ShiftAction<Item> shiftAction:
 						stateStack.Push(shiftAction.NextState);
-						symbolStack.Push(new SyntaxTreeValue(terminal!, token ?? throw new UnexpectedActionException<Item, IAction>(ParsingTable, tokens, position)));
+						symbolStack.Push(new SyntaxTreeValue(terminal!, token!));
 						break;
 					case ReduceAction reduceAction:
 						var pr = reduceAction.ProductionRule;
@@ -64,7 +65,7 @@ namespace Parser.LR.CLR {
 						break;
 				}
 			} while (action.Type != ActionType.Shift || MoveNext());
-			throw new UnexpectedActionException<Item, IAction>(ParsingTable, tokens, position);
+			throw new BugFoundException {BugInformation = "Token enumeration ends without finding a valid syntax tree or throwing exception"};
 		}
 
 		protected override ParsingTableBase<Item, IAction> CreateParsingTable() => new ParsingTable(Grammar);
