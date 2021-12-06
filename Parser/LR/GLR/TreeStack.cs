@@ -5,7 +5,7 @@ using System.Linq;
 using TrueMogician.Extensions.Collections.Tree;
 
 namespace Parser.LR.GLR {
-	internal class TreeStack<T> : IEnumerable<TreeStack<T>.BranchStack> {
+	public class TreeStack<T> : IEnumerable<TreeStack<T>.BranchStack> {
 		private readonly LinkedList<ValuedTreeNode<List<T>>> _leaves = new();
 
 		public TreeStack() : this(1) { }
@@ -21,7 +21,7 @@ namespace Parser.LR.GLR {
 
 		public IEnumerator<BranchStack> GetEnumerator() {
 			for (var listNode = _leaves.First; listNode is not null; listNode = listNode.Next)
-				yield return listNode;
+				yield return new BranchStack(ref listNode);
 		}
 
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -44,10 +44,10 @@ namespace Parser.LR.GLR {
 			}
 		}
 
-		internal class BranchStack : IEnumerable<T> {
+		public class BranchStack : IEnumerable<T> {
 			private LinkedListNode<ValuedTreeNode<List<T>>>? _listNode;
 
-			private BranchStack(ref LinkedListNode<ValuedTreeNode<List<T>>> listNode) => _listNode = listNode;
+			internal BranchStack(ref LinkedListNode<ValuedTreeNode<List<T>>> listNode) => _listNode = listNode;
 
 			public IEnumerator<T> GetEnumerator() {
 				for (int i = CurrentList.Count - 1; i >= 0; --i)
@@ -71,8 +71,17 @@ namespace Parser.LR.GLR {
 
 			public void Push(T item) => CurrentList.Add(item);
 
+			public void Push(IEnumerable<T> items) => CurrentList.AddRange(items);
+
+			/// <summary>
+			///     Pop out the top item;
+			/// </summary>
 			public T Pop() => Pop(1)[0];
 
+			/// <summary>
+			///     Pop out multiple items from top.
+			/// </summary>
+			/// <param name="count">Number of items to pop out</param>
 			public List<T> Pop(int count) {
 				if (count > Count)
 					throw new ArgumentOutOfRangeException(nameof(count));
@@ -109,6 +118,9 @@ namespace Parser.LR.GLR {
 				return result;
 			}
 
+			/// <summary>
+			///     Get the top item.
+			/// </summary>
 			public T Peek() => this.First();
 
 			/// <summary>
@@ -137,7 +149,7 @@ namespace Parser.LR.GLR {
 					Leaf.Children.AddRange(leaves.Select(l => l.Value));
 					_listNode = null;
 				}
-				return leaves.Select(l => (BranchStack)l).ToArray();
+				return leaves.Select(l => new BranchStack(ref l)).ToArray();
 			}
 
 			/// <summary>
@@ -153,10 +165,6 @@ namespace Parser.LR.GLR {
 				List.Remove(ListNode);
 				_listNode = null;
 			}
-
-			public static implicit operator BranchStack(LinkedListNode<ValuedTreeNode<List<T>>> listNode) => new(ref listNode);
-
-			public static explicit operator LinkedListNode<ValuedTreeNode<List<T>>>(BranchStack branch) => branch.ListNode;
 		}
 	}
 }
