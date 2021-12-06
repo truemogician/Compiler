@@ -31,8 +31,6 @@ namespace Parser.LR.GLR {
 
 		private static ValuedTreeNode<List<T>> CreateNewNode() => new(new List<T>());
 
-		private static ValuedTreeNode<List<T>> CreateNewNode(ValuedTreeNode<List<T>>? parent) => new(new List<T>(), parent);
-
 		private static ValuedTreeNode<List<T>> CreateNewNode(IEnumerable<T> items) => new(new List<T>(items));
 
 		/// <summary>

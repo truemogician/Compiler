@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
@@ -7,8 +7,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="QuikGraph" Version="2.3.0" />
-		<PackageReference Include="TrueMogician.Exceptions" Version="1.2.0" />
-		<PackageReference Include="TrueMogician.Extensions.Collections" Version="1.3.2" />
+		<PackageReference Include="TrueMogician.Exceptions" Version="1.3.0" />
+		<PackageReference Include="TrueMogician.Extensions.Collections" Version="0.1.0" />
 		<PackageReference Include="TrueMogician.Extensions.Enumerable" Version="1.4.0" />
 	</ItemGroup>
 
