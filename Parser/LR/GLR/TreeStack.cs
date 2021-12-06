@@ -20,8 +20,11 @@ namespace Parser.LR.GLR {
 		}
 
 		public IEnumerator<BranchStack> GetEnumerator() {
-			for (var listNode = _leaves.First; listNode is not null; listNode = listNode.Next)
+			for (var listNode = _leaves.First; listNode is not null;) {
+				var next = listNode.Next;
 				yield return new BranchStack(ref listNode);
+				listNode = next;
+			}
 		}
 
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -101,19 +104,17 @@ namespace Parser.LR.GLR {
 					int index = list.Count + result.Count - count;
 					var slice = list.GetRange(index, count - result.Count);
 					result.AddRange(slice);
-					var linkedList = List;
-					Delete();
+					var parent = Leaf.Parent!;
+					Leaf.Parent = null;
+					Maintain(parent);
 					if (index != list.Count) {
 						list.RemoveRange(index, list.Count - index);
 						var splitNode = CreateNewNode(slice);
 						splitNode.Children.AddRange(targetNode.Children);
 						splitNode.Parent = targetNode;
 					}
-					var prevNode = targetNode;
-					do {
-						prevNode = prevNode.Children[^1];
-					} while (!prevNode.IsLeaf);
-					_listNode = linkedList.AddAfter(linkedList.Find(prevNode)!, CreateNewNode(targetNode));
+					Leaf.Parent = targetNode;
+					CurrentList.Clear();
 				}
 				return result;
 			}
@@ -157,8 +158,6 @@ namespace Parser.LR.GLR {
 			///     <see cref="InvalidOperationException" />
 			/// </summary>
 			public void Delete() {
-				if (Leaf.IsRoot)
-					throw new InvalidOperationException("Root cannot be deleted");
 				var parent = Leaf.Parent!;
 				Leaf.Parent = null;
 				Maintain(parent);
