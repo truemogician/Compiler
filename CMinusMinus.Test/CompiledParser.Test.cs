@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Timers;
-using Microsoft.Toolkit.Uwp.Notifications;
 using NUnit.Framework;
 using Parser;
 using Parser.LR;
@@ -13,62 +12,86 @@ using TrueMogician.Extensions.Enumerable;
 
 namespace CMinusMinus.Test {
 	public class CompiledParserTests {
-		[TestCase("Title", "line1", "line2")]
-		public void SendNotification(string title, params string[] contents) {
-			var builder = new ToastContentBuilder().AddText(title);
-			foreach (var content in contents)
-				builder.AddText(content);
-			try {
-				builder.Show();
-			}
-			catch { }
-		}
+		public static CMinusMinus Language { get; } = new();
 
-		[TestCase(5)]
-		public void SaveTest(int reportPeriod) {
-			var startTime = DateTime.Now;
-			Console.WriteLine($"Time started: {startTime}");
-			var language = new CMinusMinus();
-			static void Log(string message) => Debug.WriteLine($"{DateTime.Now:s} {message}");
+		[TestCase(ParserAlgorithm.CanonicalLR, false, 5)]
+		[TestCase(ParserAlgorithm.CanonicalLR, true, 5)]
+		[TestCase(ParserAlgorithm.GeneralizedLR, false, 5)]
+		public void SaveTest(ParserAlgorithm algorithm, bool checkConflicts = false, int reportPeriod = 60) {
+			static void Log(string message) => Debug.WriteLine($"{DateTime.Now:HH:mm:ss.fff} {message}");
 			var itemSetsTimer = new Timer(reportPeriod * 1000) {AutoReset = true};
 			var itemSetsCount = 0;
-			IReadOnlyDictionary<ItemSet<Item>, IReadOnlyDictionary<Terminal, IAction>>? table = null;
-			itemSetsTimer.Elapsed += (_, _) => Log($"Calculated item sets: {language.RawParser?.ParsingTable.ItemSets?.Count}");
-			language.RawParser!.StartItemSetsCalculation += (_, _) => {
-				Log("Item sets calculation started");
-				itemSetsTimer.Start();
-			};
-			language.RawParser!.CompleteItemSetsCalculation += (_, args) => {
-				itemSetsTimer.Stop();
-				Log("Item sets calculation completed");
-				itemSetsCount = args.Value!.Count;
-			};
-			var tableTimer = new Timer(reportPeriod * 1000) {AutoReset = true};
-			tableTimer.Elapsed += (_, _) => Log($"Table calculation progress: {table!.Count}/{itemSetsCount}({100 * table!.Count / (decimal)itemSetsCount:##.00}%)");
-			language.RawParser!.StartTableCalculation += (_, _) => {
-				table = language.RawParser!.ParsingTable.ActionTable!.RawTable;
-				Log("Table calculation started");
-				tableTimer.Start();
-			};
-			language.RawParser!.CompleteTableCalculation += (_, _) => {
-				tableTimer.Stop();
-				Log("Table calculation completed");
-			};
-			language.InitializeRawParser();
-			var compiled = language.RawParser!.Compile();
-			compiled.Save("cmm.ptb");
+			if (algorithm == ParserAlgorithm.CanonicalLR) {
+				IReadOnlyDictionary<ItemSet<Item>, IReadOnlyDictionary<Terminal, IAction>>? table = null;
+				itemSetsTimer.Elapsed += (_, _) => Log($"Calculated item sets: {Language.CLRParser?.ParsingTable.ItemSets?.Count}");
+				Language.CLRParser!.StartItemSetsCalculation += (_, _) => {
+					Log("Item sets calculation started");
+					itemSetsTimer.Start();
+				};
+				Language.CLRParser!.CompleteItemSetsCalculation += (_, args) => {
+					itemSetsTimer.Stop();
+					Log("Item sets calculation completed");
+					itemSetsCount = args.Value!.Count;
+				};
+				var tableTimer = new Timer(reportPeriod * 1000) {AutoReset = true};
+				tableTimer.Elapsed += (_, _) => Log($"Table calculation progress: {table!.Count}/{itemSetsCount}({100 * table!.Count / (decimal)itemSetsCount:##.00}%)");
+				Language.CLRParser!.StartTableCalculation += (_, _) => {
+					table = Language.CLRParser!.ParsingTable.ActionTable!.RawTable;
+					Log("Table calculation started");
+					tableTimer.Start();
+				};
+				Language.CLRParser!.CompleteTableCalculation += (_, _) => {
+					tableTimer.Stop();
+					Log("Table calculation completed");
+				};
+			}
+			else {
+				IReadOnlyDictionary<ItemSet<Item>, IReadOnlyDictionary<Terminal, List<IAction>>>? table = null;
+				itemSetsTimer.Elapsed += (_, _) => Log($"Calculated item sets: {Language.GLRParser?.ParsingTable.ItemSets?.Count}");
+				Language.GLRParser!.StartItemSetsCalculation += (_, _) => {
+					Log("Item sets calculation started");
+					itemSetsTimer.Start();
+				};
+				Language.GLRParser!.CompleteItemSetsCalculation += (_, args) => {
+					itemSetsTimer.Stop();
+					Log("Item sets calculation completed");
+					itemSetsCount = args.Value!.Count;
+				};
+				var tableTimer = new Timer(reportPeriod * 1000) {AutoReset = true};
+				tableTimer.Elapsed += (_, _) => Log($"Table calculation progress: {table!.Count}/{itemSetsCount}({100 * table!.Count / (decimal)itemSetsCount:##.00}%)");
+				Language.GLRParser!.StartTableCalculation += (_, _) => {
+					table = Language.GLRParser!.ParsingTable.ActionTable!.RawTable;
+					Log("Table calculation started");
+					tableTimer.Start();
+				};
+				Language.GLRParser!.CompleteTableCalculation += (_, _) => {
+					tableTimer.Stop();
+					Log("Table calculation completed");
+				};
+			}
+			var startTime = DateTime.Now;
+			Log("Started");
+			Language.CreateParser(algorithm);
+			Log("Parser created");
+			Language.InitializeParser(algorithm);
+			Language.CompileParser(algorithm);
+			if (algorithm == ParserAlgorithm.CanonicalLR)
+				Language.CompiledCLRParser!.Save("cmm.ptb");
+			else
+				Language.CompiledGLRParser!.Save("cmm.ptb");
 			Console.WriteLine($"Time cost: {DateTime.Now - startTime}");
-			SendNotification("Parsing Table Compiled and Saved!", $"Time cost: {DateTime.Now - startTime}");
+			Utilities.SendNotification("Parsing Table Compiled and Saved!", $"Time cost: {DateTime.Now - startTime}");
 		}
 
 		[Test]
-		[TestCaseSource(typeof(TestCases), nameof(TestCases.LiteralSource))]
-		public Type? CompileAndRunLiteralTest(string code) {
-			var language = new CMinusMinus();
-			language.InitializeRawParser();
-			language.UseCompiledParser();
+		[TestCaseSource(typeof(TestCases), nameof(TestCases.LiteralSource), new object?[] {ParserAlgorithm.CanonicalLR, false}, Category = "CLR")]
+		[TestCaseSource(typeof(TestCases), nameof(TestCases.LiteralSource), new object?[] {ParserAlgorithm.GeneralizedLR, false}, Category = "GLR")]
+		public Type? CompileAndRunLiteralTest(string code, ParserAlgorithm algorithm, bool checkConflicts = false) {
+			Language.CreateParser(algorithm);
+			Language.InitializeParser(algorithm, checkConflicts);
+			Language.SelectParser(algorithm, false);
 			try {
-				Console.WriteLine(language.Parse(code).ToString());
+				Console.WriteLine(Language.Parse(code).ToString());
 				return null;
 			}
 			catch (ParserException ex) {
@@ -77,15 +100,18 @@ namespace CMinusMinus.Test {
 		}
 
 		[Test]
-		[TestCaseSource(typeof(TestCases), nameof(TestCases.FileSource))]
-		public Type? CompileAndRunFileTest(string filePath) => CompileAndRunLiteralTest(File.ReadAllText(filePath));
+		[TestCaseSource(typeof(TestCases), nameof(TestCases.FileSource), new object?[] {ParserAlgorithm.CanonicalLR, false}, Category = "CLR")]
+		[TestCaseSource(typeof(TestCases), nameof(TestCases.FileSource), new object?[] {ParserAlgorithm.GeneralizedLR, false}, Category = "GLR")]
+		public Type? CompileAndRunFileTest(string filePath, ParserAlgorithm algorithm, bool checkConflicts = false) => CompileAndRunLiteralTest(File.ReadAllText(filePath), algorithm, checkConflicts);
 
 		[Test]
-		[TestCaseSource(typeof(TestCases), nameof(TestCases.LiteralSource))]
-		public Type? LoadAndRunLiteralTest(string code) {
-			var language = new CMinusMinus("cmm.ptb");
+		[TestCaseSource(typeof(TestCases), nameof(TestCases.LiteralSource), new object?[] {ParserAlgorithm.CanonicalLR, null}, Category = "CLR")]
+		[TestCaseSource(typeof(TestCases), nameof(TestCases.LiteralSource), new object?[] {ParserAlgorithm.GeneralizedLR, null}, Category = "GLR")]
+		public Type? LoadAndRunLiteralTest(string code, ParserAlgorithm algorithm) {
+			Language.LoadCompiledParser(algorithm, "cmm.ptb");
+			Language.SelectParser(algorithm, true);
 			try {
-				Console.WriteLine(language.Parse(code).ToString());
+				Console.WriteLine(Language.Parse(code).ToString());
 				return null;
 			}
 			catch (ParserException ex) {
@@ -100,7 +126,8 @@ namespace CMinusMinus.Test {
 		}
 
 		[Test]
-		[TestCaseSource(typeof(TestCases), nameof(TestCases.FileSource))]
-		public Type? LoadAndRunFileTest(string filePath) => LoadAndRunLiteralTest(File.ReadAllText(filePath));
+		[TestCaseSource(typeof(TestCases), nameof(TestCases.FileSource), new object?[] {ParserAlgorithm.CanonicalLR, null}, Category = "CLR")]
+		[TestCaseSource(typeof(TestCases), nameof(TestCases.FileSource), new object?[] {ParserAlgorithm.GeneralizedLR, null}, Category = "GLR")]
+		public Type? LoadAndRunFileTest(string filePath, ParserAlgorithm algorithm) => LoadAndRunLiteralTest(File.ReadAllText(filePath), algorithm);
 	}
 }

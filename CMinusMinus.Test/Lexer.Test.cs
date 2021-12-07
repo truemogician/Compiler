@@ -1,11 +1,14 @@
 using System;
 using System.IO;
+using System.Linq;
 using Lexer;
 using NUnit.Framework;
 
 namespace CMinusMinus.Test {
 	public class LexerTests {
 		public static readonly Lexer.Lexer Lexer = new(CMinusMinus.Lexicon);
+
+		public static TestCaseData[] FileSource { get; } = TestCases.Files.Select(path => new TestCaseData(path).Returns(true)).ToArray();
 
 		[TestCase(@"int func(){}", ExpectedResult = true)]
 		[TestCase(@"'\'", ExpectedResult = false)]
@@ -22,7 +25,7 @@ namespace CMinusMinus.Test {
 		}
 
 		[Test]
-		[TestCaseSource(typeof(TestCases), nameof(TestCases.FileSource))]
+		[TestCaseSource(nameof(FileSource))]
 		public bool FileTest(string filePath) => LiteralTest(File.ReadAllText(filePath));
 	}
 }
