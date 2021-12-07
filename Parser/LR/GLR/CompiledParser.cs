@@ -97,6 +97,8 @@ namespace Parser.LR.GLR {
 			throw new BugFoundException {BugInformation = "Token enumeration ends without finding a valid syntax tree or throwing exception"};
 		}
 
+		public static CompiledParser FromParser(Parser parser) => new(CompiledParsingTable.FromParsingTable(parser.ParsingTable));
+
 		public static CompiledParser Load(string path) => new(CompiledParsingTable.Load(path));
 
 		public void Save(string path) => _table.Save(path);

@@ -68,6 +68,8 @@ namespace Parser.LR.CLR {
 			throw new BugFoundException {BugInformation = "Token enumeration ends without finding a valid syntax tree or throwing exception"};
 		}
 
+		public CompiledParser Compile() => CompiledParser.FromParser(this);
+
 		protected override ParsingTableBase<Item, IAction> CreateParsingTable() => new ParsingTable(Grammar);
 	}
 }

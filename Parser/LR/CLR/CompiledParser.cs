@@ -64,6 +64,8 @@ namespace Parser.LR.CLR {
 			throw new Exception();
 		}
 
+		public static CompiledParser FromParser(Parser parser) => new(CompiledParsingTable.FromParsingTable(parser.ParsingTable));
+
 		public static CompiledParser Load(string path) => new(CompiledParsingTable.Load(path));
 
 		public void Save(string path) => _table.Save(path);
