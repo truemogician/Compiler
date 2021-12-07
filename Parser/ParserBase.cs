@@ -11,6 +11,6 @@ namespace Parser {
 
 		public abstract SyntaxTree Parse(IEnumerable<Token> tokens);
 
-		public abstract void Initialize();
+		public abstract void Initialize(bool checkConflicts = true);
 	}
 }

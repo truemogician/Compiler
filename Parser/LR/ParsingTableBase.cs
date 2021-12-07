@@ -45,8 +45,8 @@ namespace Parser.LR {
 
 		public event EventHandler CompleteTableCalculation = delegate { };
 
-		public void Initialize() {
-			Initialize(ExtendGrammar(Grammar));
+		public void Initialize(bool checkConflicts = true) {
+			Initialize(ExtendGrammar(Grammar), checkConflicts);
 			if (!Initialized)
 				throw new BadImplementationException(nameof(Initialize), null, null);
 		}

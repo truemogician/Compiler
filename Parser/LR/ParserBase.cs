@@ -35,9 +35,12 @@ namespace Parser.LR {
 
 		public abstract override SyntaxTree Parse(IEnumerable<Token> tokens);
 
-		public override void Initialize() {
+		/// <summary>
+		///     Initialize the parsing table if not initialized
+		/// </summary>
+		public override void Initialize(bool checkConflicts = true) {
 			if (!Initialized)
-				ParsingTable.Initialize();
+				ParsingTable.Initialize(checkConflicts);
 			Initialized = true;
 		}
 
