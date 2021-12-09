@@ -22,12 +22,18 @@ namespace Parser.LR.GLR {
 		public IEnumerator<BranchStack> GetEnumerator() {
 			for (var listNode = _leaves.First; listNode is not null;) {
 				var next = listNode.Next;
-				yield return new BranchStack(ref listNode);
+				yield return new BranchStack(listNode);
 				listNode = next;
 			}
 		}
 
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+		public int Count => _leaves.Count;
+
+		public BranchStack? First => _leaves.First is null ? null : new BranchStack(_leaves.First);
+
+		public BranchStack? Last => _leaves.Last is null ? null : new BranchStack(_leaves.Last);
 
 		private static ValuedTreeNode<List<T>> CreateNewNode() => new(new List<T>());
 
@@ -38,7 +44,7 @@ namespace Parser.LR.GLR {
 		/// </summary>
 		private static void Maintain(ValuedTreeNode<List<T>> node) {
 			if (node.Children.Count == 1) {
-				var child = node.Children[0];//TODO: figure out why implicit conversion happens
+				var child = node.Children[0];
 				child.Parent = node.Parent;
 				node.Parent = null;
 				child.Value.InsertRange(0, node.Value);
@@ -48,19 +54,24 @@ namespace Parser.LR.GLR {
 		public class BranchStack : IEnumerable<T> {
 			private LinkedListNode<ValuedTreeNode<List<T>>>? _listNode;
 
-			internal BranchStack(ref LinkedListNode<ValuedTreeNode<List<T>>> listNode) => _listNode = listNode;
+			internal BranchStack(LinkedListNode<ValuedTreeNode<List<T>>> listNode) => _listNode = listNode;
 
 			public IEnumerator<T> GetEnumerator() {
 				for (int i = CurrentList.Count - 1; i >= 0; --i)
 					yield return CurrentList[i];
-				foreach (var ancestor in Leaf.Ancestors)
+				foreach (var ancestor in Leaf.Ancestors) {
+					// ReSharper disable once ConditionIsAlwaysTrueOrFalse
+					if (ancestor.Value is null)
+						break;
 					for (int i = ancestor.Value.Count - 1; i >= 0; --i)
 						yield return ancestor.Value[i];
+				}
 			}
 
 			IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-			public int Count => CurrentList.Count + Leaf.Ancestors.Sum(n => n.Value.Count);
+			// ReSharper disable once ConstantConditionalAccessQualifier
+			public int Count => CurrentList.Count + Leaf.Ancestors.Sum(n => n.Value?.Count ?? 0);
 
 			private LinkedListNode<ValuedTreeNode<List<T>>> ListNode => _listNode ?? throw new InvalidOperationException("Branch has been forked or deleted");
 
@@ -73,6 +84,8 @@ namespace Parser.LR.GLR {
 			public void Push(T item) => CurrentList.Add(item);
 
 			public void Push(IEnumerable<T> items) => CurrentList.AddRange(items);
+
+			public void Push(params T[] items) => CurrentList.AddRange(items);
 
 			/// <summary>
 			///     Pop out the top item;
@@ -89,19 +102,25 @@ namespace Parser.LR.GLR {
 				List<T> result;
 				if (count <= CurrentList.Count) {
 					result = CurrentList.GetRange(CurrentList.Count - count, count);
+					result.Reverse();
 					CurrentList.RemoveRange(CurrentList.Count - count, count);
 				}
 				else {
 					result = new List<T>(count);
 					var targetNode = Leaf;
+					int idx;
 					do {
+						idx = result.Count;
 						result.AddRange(targetNode.Value);
+						result.Reverse(idx, targetNode.Value.Count);
 						targetNode = targetNode.Parent!;
 					} while (targetNode.Value.Count <= count - result.Count);
 					var list = targetNode.Value;
 					int index = list.Count + result.Count - count;
 					var slice = list.GetRange(index, count - result.Count);
+					idx = result.Count;
 					result.AddRange(slice);
+					result.Reverse(idx, slice.Count);
 					var parent = Leaf.Parent!;
 					Leaf.Parent = null;
 					Maintain(parent);
@@ -148,7 +167,7 @@ namespace Parser.LR.GLR {
 					Leaf.Children.AddRange(leaves.Select(l => l.Value));
 					_listNode = null;
 				}
-				return leaves.Select(l => new BranchStack(ref l)).ToArray();
+				return leaves.Select(l => new BranchStack(l)).ToArray();
 			}
 
 			/// <summary>
