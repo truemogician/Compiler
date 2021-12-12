@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
+using CMinusMinus;
 using Microsoft.Win32;
 
 namespace Visualizer {
@@ -21,9 +22,9 @@ namespace Visualizer {
 		}
 
 		private static Task<CMM>? LoadCompiled() {
-			var dialog = new OpenFileDialog {Title = "选择分析表", Filter = "分析表文件（*.ptb)|*.ptb"};
+			var dialog = new OpenFileDialog {Title = "选择GLR分析表", Filter = "GLR分析表文件（*.glr.ptb)|*.glr.ptb"};
 			bool? result = dialog.ShowDialog();
-			return result != true ? null : Task<CMM>.Factory.StartNew(() => new CMM(dialog.FileName));
+			return result != true ? null : Task<CMM>.Factory.StartNew(() => new CMM(ParserAlgorithm.GeneralizedLR, dialog.FileName));
 		}
 
 		private Task<CMM>? CreateNew() {
@@ -31,8 +32,9 @@ namespace Visualizer {
 				return null;
 			return Task<CMM>.Factory.StartNew(
 				() => {
-					var cmm = new CMM();
-					cmm.RawParser!.ParsingTable.CompleteItemSetsCalculation += (_, args) => Dispatcher.Invoke(
+					var cmm = new CMM(ParserAlgorithm.GeneralizedLR);
+					var table = cmm.GLRParser!.ParsingTable;
+					table.CompleteItemSetsCalculation += (_, args) => Dispatcher.Invoke(
 						() => {
 							ProgressBar.IsIndeterminate = false;
 							ProgressBar.Value = 0;
@@ -40,10 +42,10 @@ namespace Visualizer {
 						}
 					);
 					var timer = new Timer(1000) {AutoReset = true};
-					timer.Elapsed += (_, _) => Dispatcher.Invoke(() => ProgressBar.Value = cmm.RawParser!.ParsingTable.ActionTable!.RawTable.Count);
-					cmm.RawParser!.ParsingTable.StartTableCalculation += (_, _) => timer.Start();
-					cmm.RawParser!.ParsingTable.CompleteTableCalculation += (_, _) => timer.Stop();
-					cmm.InitializeRawParser();
+					timer.Elapsed += (_, _) => Dispatcher.Invoke(() => ProgressBar.Value = table.ActionTable!.RawTable.Count);
+					table.StartTableCalculation += (_, _) => timer.Start();
+					table.CompleteTableCalculation += (_, _) => timer.Stop();
+					cmm.InitializeParser(ParserAlgorithm.GeneralizedLR);
 					return cmm;
 				}
 			);
