@@ -6,7 +6,7 @@ using Microsoft.Extensions.Primitives;
 using TrueMogician.Extensions.Collections.Tree;
 
 namespace Parser {
-	public class SyntaxTreeNode : SimpleTreeNode<SyntaxTreeNode>, IFormattable {
+	public class SyntaxTreeNode : TreeNode<SyntaxTreeNode>, IFormattable {
 		public SyntaxTreeNode(SyntaxTreeValue value) => Value = value;
 
 		public SyntaxTreeValue Value { get; }
