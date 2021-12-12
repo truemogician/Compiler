@@ -22,7 +22,6 @@ namespace Parser.LR.GLR {
 				throw new ParserNotInitializedException();
 			TreeStack<ItemSet> stateStacks = new();
 			TreeStack<SyntaxTreeNode> symbolStacks = new();
-			Stack<SyntaxTreeNode> symbolTemp = new();
 			stateStacks.First().Push(ParsingTable.ItemSets.InitialState);
 			using var enumerator = tokens.GetEnumerator();
 			int position = -1;
@@ -53,12 +52,10 @@ namespace Parser.LR.GLR {
 					case ReduceAction reduceAction:
 						var pr = reduceAction.ProductionRule;
 						var newNode = new SyntaxTreeNode(pr.Nonterminal);
-						for (var i = 0; i < pr.Length; ++i) {
-							stateStack.Pop();
-							symbolTemp.Push(symbolStack.Pop());
-						}
-						while (symbolTemp.Count > 0)
-							symbolTemp.Pop().Parent = newNode;
+						stateStack.Pop(pr.Length);
+						var symbols = symbolStack.Pop(pr.Length);
+						symbols.Reverse();
+						newNode.Children.AddRange(symbols);
 						stateStack.Push(ParsingTable[stateStack.Peek(), pr.Nonterminal] ?? throw new NotRecognizedException(tokens, position) {Grammar = Grammar});
 						symbolStack.Push(newNode);
 						break;

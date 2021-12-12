@@ -17,7 +17,6 @@ namespace Parser.LR.GLR {
 		public SyntaxTree Parse(IEnumerable<Token> tokens) {
 			TreeStack<int> stateStacks = new();
 			TreeStack<SyntaxTreeNode> symbolStacks = new();
-			Stack<SyntaxTreeNode> symbolTemp = new();
 			stateStacks.First().Push(0);
 			using var enumerator = tokens.GetEnumerator();
 			int position = -1;
@@ -48,12 +47,10 @@ namespace Parser.LR.GLR {
 					case ActionType.Reduce:
 						var (nonterminalIndex, length) = _table.ProductionRules[action.Index];
 						var newNode = new SyntaxTreeNode(_table.Nonterminals[nonterminalIndex]);
-						for (var i = 0; i < length; ++i) {
-							stateStack.Pop();
-							symbolTemp.Push(symbolStack.Pop());
-						}
-						while (symbolTemp.Count > 0)
-							symbolTemp.Pop().Parent = newNode;
+						stateStack.Pop(length);
+						var symbols = symbolStack.Pop(length);
+						symbols.Reverse();
+						newNode.Children.AddRange(symbols);
 						stateStack.Push(_table.GotoTable[stateStack.Peek(), nonterminalIndex] is var idx and >= 0 ? idx : throw new NotRecognizedException(tokens, position));
 						symbolStack.Push(newNode);
 						break;
