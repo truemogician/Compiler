@@ -127,7 +127,7 @@ namespace Parser.LR.GLR {
 			}
 			foreach (var (state, states) in parsingTable.GotoTable!.RawTable) {
 				foreach (var (nt, st) in states)
-					result.GotoTable[stateIndices[state], ntIndices[nt] + terminals.Count + 1] = st is null ? -1 : stateIndices[st];
+					result.GotoTable[stateIndices[state], ntIndices[nt]] = st is null ? -1 : stateIndices[st];
 			}
 			return result;
 		}

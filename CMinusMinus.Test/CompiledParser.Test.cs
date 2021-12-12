@@ -14,6 +14,8 @@ namespace CMinusMinus.Test {
 	public class CompiledParserTests {
 		public static CMinusMinus Language { get; } = new();
 
+		public const string TableFilePath = @"cmm.glr.ptb";
+
 		[TestCase(ParserAlgorithm.CanonicalLR, false, 5)]
 		[TestCase(ParserAlgorithm.CanonicalLR, true, 5)]
 		[TestCase(ParserAlgorithm.GeneralizedLR, false, 5)]
@@ -21,6 +23,10 @@ namespace CMinusMinus.Test {
 			static void Log(string message) => Debug.WriteLine($"{DateTime.Now:HH:mm:ss.fff} {message}");
 			var itemSetsTimer = new Timer(reportPeriod * 1000) {AutoReset = true};
 			var itemSetsCount = 0;
+			var startTime = DateTime.Now;
+			Log("Started");
+			Language.CreateParser(algorithm);
+			Log("Parser created");
 			if (algorithm == ParserAlgorithm.CanonicalLR) {
 				IReadOnlyDictionary<ItemSet<Item>, IReadOnlyDictionary<Terminal, IAction>>? table = null;
 				itemSetsTimer.Elapsed += (_, _) => Log($"Calculated item sets: {Language.CLRParser?.ParsingTable.ItemSets?.Count}");
@@ -69,16 +75,12 @@ namespace CMinusMinus.Test {
 					Log("Table calculation completed");
 				};
 			}
-			var startTime = DateTime.Now;
-			Log("Started");
-			Language.CreateParser(algorithm);
-			Log("Parser created");
 			Language.InitializeParser(algorithm);
 			Language.CompileParser(algorithm);
 			if (algorithm == ParserAlgorithm.CanonicalLR)
-				Language.CompiledCLRParser!.Save("cmm.ptb");
+				Language.CompiledCLRParser!.Save(TableFilePath);
 			else
-				Language.CompiledGLRParser!.Save("cmm.ptb");
+				Language.CompiledGLRParser!.Save(TableFilePath);
 			Console.WriteLine($"Time cost: {DateTime.Now - startTime}");
 			Utilities.SendNotification("Parsing Table Compiled and Saved!", $"Time cost: {DateTime.Now - startTime}");
 		}
@@ -108,7 +110,7 @@ namespace CMinusMinus.Test {
 		[TestCaseSource(typeof(TestCases), nameof(TestCases.LiteralSource), new object?[] {ParserAlgorithm.CanonicalLR, null}, Category = "CLR")]
 		[TestCaseSource(typeof(TestCases), nameof(TestCases.LiteralSource), new object?[] {ParserAlgorithm.GeneralizedLR, null}, Category = "GLR")]
 		public Type? LoadAndRunLiteralTest(string code, ParserAlgorithm algorithm) {
-			Language.LoadCompiledParser(algorithm, "cmm.ptb");
+			Language.LoadCompiledParser(algorithm, TableFilePath);
 			Language.SelectParser(algorithm, true);
 			try {
 				Console.WriteLine(Language.Parse(code).ToString());

@@ -28,7 +28,9 @@ namespace Parser.LR {
 		}
 
 		public ItemSet<TItem>? this[ItemSet<TItem> state, Nonterminal nonterminal] {
-			get => GotoTable?[state, nonterminal] ?? throw new ParserNotInitializedException("Goto table not initialized");
+			get => GotoTable is null
+				? throw new ParserNotInitializedException("Goto table not initialized")
+				: GotoTable[state, nonterminal];
 			set {
 				if (GotoTable is null)
 					throw new ParserNotInitializedException("Goto table not initialized");
