@@ -1,0 +1,11 @@
+const const int* const x, * y, * const* volatile* const volatile z[2 + 3];
+const int* const* const main(const int argc) {
+	int a = 1, b = 2, c = 3;
+	int arr[3];
+	arr[1 - 1] = sizeof ++a;
+	a = *(arr + 1 - 1);
+	b = --a - -a;
+	*(arr + 1) = arr[b = 0];
+	(*&arr)[2] = (short)c + ~a ? a : !b ? b : c;
+	return 0;
+}
