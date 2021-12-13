@@ -42,13 +42,19 @@ namespace Parser.LR.GLR {
 		/// <summary>
 		///     If <paramref name="node" /> has only one child, merge <paramref name="node" /> it into this child
 		/// </summary>
-		private static void Maintain(ValuedTreeNode<List<T>> node) {
+		/// <returns>
+		///     If <paramref name="node" /> is merged, that specific child that <paramref name="node" /> merged into;
+		///     Otherwise, <paramref name="node" /> itself
+		/// </returns>
+		private static ValuedTreeNode<List<T>> Maintain(ValuedTreeNode<List<T>> node) {
 			if (node.Children.Count == 1) {
 				var child = node.Children[0];
 				child.Parent = node.Parent;
 				node.Parent = null;
 				child.Value.InsertRange(0, node.Value);
+				return child;
 			}
+			return node;
 		}
 
 		public class BranchStack : IEnumerable<T> {
@@ -114,23 +120,24 @@ namespace Parser.LR.GLR {
 						result.AddRange(targetNode.Value);
 						result.Reverse(idx, targetNode.Value.Count);
 						targetNode = targetNode.Parent!;
-					} while (targetNode.Value.Count <= count - result.Count);
-					var list = targetNode.Value;
-					int index = list.Count + result.Count - count;
-					var slice = list.GetRange(index, count - result.Count);
-					idx = result.Count;
-					result.AddRange(slice);
-					result.Reverse(idx, slice.Count);
+					} while (count > result.Count && targetNode.Value.Count <= count - result.Count);
 					var parent = Leaf.Parent!;
-					Leaf.Parent = null;
-					Maintain(parent);
-					if (index != list.Count) {
-						list.RemoveRange(index, list.Count - index);
-						var splitNode = CreateNewNode(slice);
-						splitNode.Children.AddRange(targetNode.Children);
-						splitNode.Parent = targetNode;
+					if (count == result.Count)
+						Leaf.Parent = targetNode;
+					else {
+						var list = targetNode.Value;
+						int index = list.Count + result.Count - count;
+						var slice = list.GetRange(index, count - result.Count);
+						idx = result.Count;
+						result.AddRange(slice);
+						result.Reverse(idx, slice.Count);
+						var newNode = CreateNewNode(list.GetRange(0, index));
+						list.RemoveRange(0, index);
+						newNode.Parent = targetNode.Parent;
+						targetNode.Parent = newNode;
+						Leaf.Parent = newNode;
 					}
-					Leaf.Parent = targetNode;
+					Maintain(parent);
 					CurrentList.Clear();
 				}
 				return result;
@@ -177,7 +184,9 @@ namespace Parser.LR.GLR {
 			public void Delete() {
 				var parent = Leaf.Parent!;
 				Leaf.Parent = null;
-				Maintain(parent);
+				// ReSharper disable once ConditionIsAlwaysTrueOrFalse
+				if (parent.Value is not null)
+					Maintain(parent);
 				List.Remove(ListNode);
 				_listNode = null;
 			}

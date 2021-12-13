@@ -37,6 +37,8 @@ namespace Parser.Test {
 			Assert.AreEqual(14, stacks[1].Pop());
 			Assert.AreEqual(new[] {7, 3, 2, 1}, stacks[2].Pop(4));
 			Assert.Throws<ArgumentOutOfRangeException>(() => stacks[3].Pop(7));
+			stacks[3].Pop(6);
+			Assert.AreEqual(0, stacks[3].Count);
 			Assert.AreEqual(4, Stacks.Count);
 		}
 
