@@ -90,6 +90,8 @@ namespace CMinusMinus {
 			var nBitwiseOrExpression = new Nonterminal("BitwiseOrExpression", true);
 			var nBitwiseXorExpression = new Nonterminal("BitwiseXorExpression", true);
 			var nBitwiseAndExpression = new Nonterminal("BitwiseAndExpression", true);
+			var nUnaryPlusMinusExpression = new Nonterminal();
+			var nOtherUnaryExpression = new Nonterminal();
 			var nPrimaryExpression = new Nonterminal("PrimaryExpression", true);
 			var nAtomExpression = new Nonterminal("AtomExpression", true);
 			var nCommaOrHigherPriorityExpression = new Nonterminal("CommaExpression+", true);
@@ -385,7 +387,15 @@ namespace CMinusMinus {
 			);
 			grammar.Add(
 				NonterminalType.UnaryExpression,
-				((RSF)tPlusOperator | tMinusOperator | tLogicalNotOperator | tBitwiseNotOperator | tDereferenceOperator | tAddressOfOperator | tSizeOf | ((RSF)tLeftParenthesis + NonterminalType.MainType + tRightParenthesis)) + nUnaryOrHigherPriorityExpression
+				(RSF)nUnaryPlusMinusExpression | nOtherUnaryExpression
+			);
+			grammar.Add(
+				nUnaryPlusMinusExpression,
+				((RSF)tPlusOperator | tMinusOperator) + ((RSF)nOtherUnaryExpression | nPrimaryOrHigherPriorityExpression)
+			);
+			grammar.Add(
+				nOtherUnaryExpression,
+				(((RSF)tPlusOperator * 2) | ((RSF)tMinusOperator * 2) | tLogicalNotOperator | tBitwiseNotOperator | tDereferenceOperator | tAddressOfOperator | tSizeOf | ((RSF)tLeftParenthesis + NonterminalType.MainType + tRightParenthesis)) + nUnaryOrHigherPriorityExpression
 			);
 			grammar.Add(
 				nUnaryOrHigherPriorityExpression,
@@ -393,11 +403,15 @@ namespace CMinusMinus {
 			);
 			grammar.Add(
 				nPrimaryExpression,
-				(RSF)NonterminalType.FunctionCall | NonterminalType.SubscriptExpression | NonterminalType.MemberExpression
+				(RSF)NonterminalType.SuffixExpression | NonterminalType.FunctionCall | NonterminalType.SubscriptExpression | NonterminalType.MemberExpression
 			);
 			grammar.Add(
 				nPrimaryOrHigherPriorityExpression,
 				(RSF)nPrimaryExpression | nAtomExpression
+			);
+			grammar.Add(
+				NonterminalType.SuffixExpression,
+				nPrimaryOrHigherPriorityExpression + (((RSF)tPlusOperator * (1, 2)) | ((RSF)tMinusOperator * (1, 2)))
 			);
 			grammar.Add(
 				NonterminalType.FunctionCall,
@@ -469,6 +483,8 @@ namespace CMinusMinus {
 		Label,
 
 		Expression,
+
+		SuffixExpression,
 
 		FunctionCall,
 
