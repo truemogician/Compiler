@@ -38,12 +38,18 @@ namespace Parser.LR.GLR {
 				}
 				return true;
 			}
-			void ApplyAction(TreeStack<int>.BranchStack stateStack, TreeStack<SyntaxTreeNode>.BranchStack symbolStack, (ActionType Action, int Index) action) {
+			void DeleteBranch(TreeStack<int>.BranchStack stateStack, TreeStack<SyntaxTreeNode>.BranchStack symbolStack) {
+				stateStack.Delete();
+				symbolStack.Delete();
+				if (symbolStacks.Count == 0)
+					throw new NotRecognizedException(tokens, position);
+			}
+			bool ApplyAction(TreeStack<int>.BranchStack stateStack, TreeStack<SyntaxTreeNode>.BranchStack symbolStack, (ActionType Action, int Index) action) {
 				switch (action.Action) {
 					case ActionType.Shift:
 						stateStack.Push(action.Index);
 						symbolStack.Push(new SyntaxTreeValue(_table.Terminals[terminalIndex], token ?? throw new Exception()));
-						break;
+						return true;
 					case ActionType.Reduce:
 						var (nonterminalIndex, length) = _table.ProductionRules[action.Index];
 						var newNode = new SyntaxTreeNode(_table.Nonterminals[nonterminalIndex]);
@@ -51,17 +57,20 @@ namespace Parser.LR.GLR {
 						var symbols = symbolStack.Pop(length);
 						symbols.Reverse();
 						newNode.Children.AddRange(symbols);
-						stateStack.Push(_table.GotoTable[stateStack.Peek(), nonterminalIndex] is var idx and >= 0 ? idx : throw new NotRecognizedException(tokens, position));
+						int nextState = _table.GotoTable[stateStack.Peek(), nonterminalIndex];
+						if (nextState < 0) {
+							DeleteBranch(stateStack, symbolStack);
+							return false;
+						}
+						stateStack.Push(nextState);
 						symbolStack.Push(newNode);
-						break;
+						return true;
+					default: throw new BugFoundException();
 				}
 			}
 			SyntaxTreeNode? ApplyActionsUntilShift(TreeStack<int>.BranchStack stateStack, TreeStack<SyntaxTreeNode>.BranchStack symbolStack, (ActionType Action, int Index)[]? actions) {
 				if (actions is null) {
-					stateStack.Delete();
-					symbolStack.Delete();
-					if (!stateStack.Any())
-						throw new NotRecognizedException(tokens, position);
+					DeleteBranch(stateStack, symbolStack);
 					return null;
 				}
 				IEnumerable<(TreeStack<int>.BranchStack, TreeStack<SyntaxTreeNode>.BranchStack, (ActionType Action, int Index))> enumerable;
@@ -72,17 +81,15 @@ namespace Parser.LR.GLR {
 				}
 				else
 					enumerable = new[] {(stateStack, symbolStack, actions[0])};
-				foreach (var (newStateStack, newSymbolStack, action) in enumerable)
-					while (true) {
-						if (action.Action == ActionType.Accept)
-							return newSymbolStack.Single();
-						ApplyAction(newStateStack, newSymbolStack, action);
-						if (action.Action == ActionType.Shift)
-							break;
-						var newActions = _table.ActionTable[newStateStack.Peek(), terminalIndex];
-						if (ApplyActionsUntilShift(newStateStack, newSymbolStack, newActions) is { } result)
-							return result;
-					}
+				foreach (var (newStateStack, newSymbolStack, action) in enumerable) {
+					if (action.Action == ActionType.Accept)
+						return newSymbolStack.Single();
+					if (!ApplyAction(newStateStack, newSymbolStack, action) || action.Action == ActionType.Shift)
+						continue;
+					var newActions = _table.ActionTable[newStateStack.Peek(), terminalIndex];
+					if (ApplyActionsUntilShift(newStateStack, newSymbolStack, newActions) is { } result)
+						return result;
+				}
 				return null;
 			}
 			while (MoveNext())

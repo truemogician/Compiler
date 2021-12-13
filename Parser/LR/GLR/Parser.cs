@@ -43,12 +43,18 @@ namespace Parser.LR.GLR {
 				}
 				return true;
 			}
-			void ApplyAction(TreeStack<ItemSet>.BranchStack stateStack, TreeStack<SyntaxTreeNode>.BranchStack symbolStack, IAction action) {
+			void DeleteBranch(TreeStack<ItemSet>.BranchStack stateStack, TreeStack<SyntaxTreeNode>.BranchStack symbolStack) {
+				stateStack.Delete();
+				symbolStack.Delete();
+				if (stateStacks.Count == 0)
+					throw new NotRecognizedException(tokens, position) {Grammar = Grammar};
+			}
+			bool ApplyAction(TreeStack<ItemSet>.BranchStack stateStack, TreeStack<SyntaxTreeNode>.BranchStack symbolStack, IAction action) {
 				switch (action) {
 					case ShiftAction<Item> shiftAction:
 						stateStack.Push(shiftAction.NextState);
 						symbolStack.Push(new SyntaxTreeValue(terminal!, token!));
-						break;
+						return true;
 					case ReduceAction reduceAction:
 						var pr = reduceAction.ProductionRule;
 						var newNode = new SyntaxTreeNode(pr.Nonterminal);
@@ -56,17 +62,20 @@ namespace Parser.LR.GLR {
 						var symbols = symbolStack.Pop(pr.Length);
 						symbols.Reverse();
 						newNode.Children.AddRange(symbols);
-						stateStack.Push(ParsingTable[stateStack.Peek(), pr.Nonterminal] ?? throw new NotRecognizedException(tokens, position) {Grammar = Grammar});
+						var nextState = ParsingTable[stateStack.Peek(), pr.Nonterminal];
+						if (nextState is null) {
+							DeleteBranch(stateStack, symbolStack);
+							return false;
+						}
+						stateStack.Push(nextState);
 						symbolStack.Push(newNode);
-						break;
+						return true;
+					default: throw new BugFoundException();
 				}
 			}
 			SyntaxTreeNode? ApplyActionsUntilShift(TreeStack<ItemSet>.BranchStack stateStack, TreeStack<SyntaxTreeNode>.BranchStack symbolStack, List<IAction> actions) {
 				if (actions.Count == 0) {
-					stateStack.Delete();
-					symbolStack.Delete();
-					if (!stateStack.Any())
-						throw new NotRecognizedException(tokens, position);
+					DeleteBranch(stateStack, symbolStack);
 					return null;
 				}
 				IEnumerable<(TreeStack<ItemSet>.BranchStack, TreeStack<SyntaxTreeNode>.BranchStack, IAction)> enumerable;
@@ -77,17 +86,15 @@ namespace Parser.LR.GLR {
 				}
 				else
 					enumerable = new[] {(stateStack, symbolStack, actions[0])};
-				foreach (var (newStateStack, newSymbolStack, action) in enumerable)
-					while (true) {
-						if (action.Type == ActionType.Accept)
-							return newSymbolStack.Single();
-						ApplyAction(newStateStack, newSymbolStack, action);
-						if (action.Type == ActionType.Shift)
-							break;
-						var newActions = ParsingTable[newStateStack.Peek(), terminal!];
-						if (ApplyActionsUntilShift(newStateStack, newSymbolStack, newActions) is { } result)
-							return result;
-					}
+				foreach (var (newStateStack, newSymbolStack, action) in enumerable) {
+					if (action.Type == ActionType.Accept)
+						return newSymbolStack.Single();
+					if (!ApplyAction(newStateStack, newSymbolStack, action) || action.Type == ActionType.Shift)
+						continue;
+					var newActions = ParsingTable[newStateStack.Peek(), terminal!];
+					if (ApplyActionsUntilShift(newStateStack, newSymbolStack, newActions) is { } result)
+						return result;
+				}
 				return null;
 			}
 			while (MoveNext())
