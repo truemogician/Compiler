@@ -6,8 +6,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Lexer\Lexer.csproj" />
-		<ProjectReference Include="..\Parser\Parser.csproj" />
+	  <ProjectReference Include="..\Analyzer\Analyzer.csproj" />
 	</ItemGroup>
 
 </Project>

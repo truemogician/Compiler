@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using Analyzer;
 using Lexer;
 using Parser;
 
@@ -12,6 +14,8 @@ namespace Language {
 		public abstract TLexer Lexer { get; }
 
 		public abstract TParser Parser { get; }
+
+		public ICollection<IAnalyzer> Analyzers { get; } = new List<IAnalyzer>();
 
 		protected static TFactory Factory { get; } = new();
 
@@ -35,6 +39,8 @@ namespace Language {
 
 		public IParser Parser { get; }
 
+		public ICollection<IAnalyzer> Analyzers { get; }
+
 		public IEnumerable<Token> Tokenize(string code) => Lexer.Tokenize(code);
 
 		public bool TryTokenize(string code, out IEnumerable<Token>? tokens) => Lexer.TryTokenize(code, out tokens);
@@ -44,5 +50,11 @@ namespace Language {
 		public SyntaxTree Parse(string code) => Parser.Parse(Filter(Tokenize(code)));
 
 		public bool TryParse(string code, out SyntaxTree? ast) => Parser.TryParse(Filter(Tokenize(code)), out ast);
+
+		public IEnumerable<SemanticError> Analyze(string code) {
+			var tree = Parse(code);
+			tree.Clean();
+			return Analyzers.SelectMany(analyzer => analyzer.Analyze(tree));
+		}
 	}
 }
