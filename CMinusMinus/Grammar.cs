@@ -7,7 +7,7 @@ namespace CMinusMinus {
 
 	public partial class CMinusMinusFactory {
 		public override Grammar CreateGrammar() {
-			var grammar = new Grammar(NonterminalType.SourceCode);
+			var grammar = new Grammar(NonterminalType.Program);
 
 			#region Terminals
 			#region Keywords
@@ -75,12 +75,11 @@ namespace CMinusMinus {
 			#endregion
 
 			#region Nonterminals
-			var nMainTypeOrVoid = new Nonterminal("MainType|void", true);
 			var nQualifier = new Nonterminal("Qualifier", true);
-			var nParenthesizedExpression = new Nonterminal("ParenthesizedExpression", true);
-			var nBlock = new Nonterminal("Block", true);
-			var nLabeledComponent = new Nonterminal("LabeledComponent", true);
+			var nType = new Nonterminal("Type", true);
 			var nStatement = new Nonterminal("Statement", true);
+			var nParenthesizedExpression = new Nonterminal("ParenthesizedExpression", true);
+			var nLabeledComponent = new Nonterminal("LabeledComponent", true);
 			var nDeclarationStatementComponent = new Nonterminal();
 			var nCaseCommonPart = new Nonterminal();
 			var nEmbeddableBody = new Nonterminal("EmbeddableBody", true);
@@ -115,43 +114,42 @@ namespace CMinusMinus {
 
 			#region Production Rules
 			grammar.Add(
-				NonterminalType.SourceCode,
+				NonterminalType.Program,
 				((RSF)NonterminalType.FunctionDeclaration | NonterminalType.DeclarationStatement) * '+'
 			);
 			grammar.Add(
 				NonterminalType.FunctionDeclaration,
-				nQualifier +
-				nMainTypeOrVoid +
-				((RSF)tDereferenceOperator + nQualifier) * '*' +
+				(RSF)nType +
 				tIdentifier +
 				tLeftParenthesis +
-				((RSF)SentenceForm.Empty | (nQualifier + NonterminalType.MainType + tIdentifier + ((RSF)tSeparator + nQualifier + NonterminalType.MainType + tIdentifier) * '*')) +
+				((RSF)SentenceForm.Empty | ((RSF)nType + tIdentifier + ((RSF)tSeparator + nType + tIdentifier) * '*')) +
 				tRightParenthesis +
-				nBlock
+				NonterminalType.Block
 			);
 			grammar.Add(
-				nMainTypeOrVoid,
-				(RSF)NonterminalType.MainType | tVoid
+				nType,
+				(RSF)nQualifier + NonterminalType.FundamentalType + ((RSF)tDereferenceOperator + nQualifier) * '*'
 			);
 			grammar.Add(
 				nQualifier,
 				((RSF)tConst | tVolatile) * '*'
 			);
 			grammar.Add(
-				NonterminalType.MainType,
+				NonterminalType.FundamentalType,
 				((RSF)tSignModifier * '?' + ((RSF)tChar | tInt | (((RSF)tShort | ((RSF)tLong * (1, 2))) + (RSF)tInt * '?'))) |
 				tSignModifier |
 				tFloat |
 				tDouble |
-				(tLong + tDouble)
+				(tLong + tDouble) |
+				tVoid
 			);
 			grammar.Add(
-				nBlock,
+				NonterminalType.Block,
 				tBlockStart + (RSF)nLabeledComponent * '*' + tBlockEnd
 			);
 			grammar.Add(
 				nLabeledComponent,
-				(RSF)NonterminalType.Label * '?' + ((RSF)nStatement | nBlock | NonterminalType.ControlFlow)
+				(RSF)NonterminalType.Label * '?' + ((RSF)nStatement | NonterminalType.Block | NonterminalType.ControlFlow)
 			);
 
 			#region Statements
@@ -173,7 +171,7 @@ namespace CMinusMinus {
 			);
 			grammar.Add(
 				NonterminalType.DeclarationStatement,
-				(RSF)nQualifier + nMainTypeOrVoid + nDeclarationStatementComponent + ((RSF)tSeparator + nDeclarationStatementComponent) * '*' + tDelimiter
+				(RSF)nQualifier + NonterminalType.FundamentalType + nDeclarationStatementComponent + ((RSF)tSeparator + nDeclarationStatementComponent) * '*' + tDelimiter
 			);
 			grammar.Add(
 				nDeclarationStatementComponent,
@@ -229,15 +227,15 @@ namespace CMinusMinus {
 			);
 			grammar.Add(
 				nCaseCommonPart,
-				(RSF)tColon + (((RSF)nLabeledComponent * '*') | nBlock)
+				(RSF)tColon + (((RSF)nLabeledComponent * '*') | NonterminalType.Block)
 			);
 			grammar.Add(
 				NonterminalType.ForBlock,
-				(RSF)tFor + tLeftParenthesis + ((RSF)NonterminalType.DeclarationStatement | tDelimiter) + (RSF)NonterminalType.Expression * '?' + tDelimiter + (RSF)NonterminalType.Expression * '?' + tRightParenthesis + nEmbeddableBody
+				(RSF)tFor + tLeftParenthesis + ((RSF)NonterminalType.DeclarationStatement | NonterminalType.EmptyStatement) + (RSF)NonterminalType.Expression * '?' + tDelimiter + (RSF)NonterminalType.Expression * '?' + tRightParenthesis + nEmbeddableBody
 			);
 			grammar.Add(
 				nEmbeddableBody,
-				(RSF)nEmbeddedStatement | nBlock
+				(RSF)nEmbeddedStatement | NonterminalType.Block
 			);
 			grammar.Add(
 				NonterminalType.WhileBlock,
@@ -395,7 +393,7 @@ namespace CMinusMinus {
 			);
 			grammar.Add(
 				nOtherUnaryExpression,
-				(((RSF)tPlusOperator * 2) | ((RSF)tMinusOperator * 2) | tLogicalNotOperator | tBitwiseNotOperator | tDereferenceOperator | tAddressOfOperator | tSizeOf | ((RSF)tLeftParenthesis + NonterminalType.MainType + tRightParenthesis)) + nUnaryOrHigherPriorityExpression
+				(((RSF)tPlusOperator * 2) | ((RSF)tMinusOperator * 2) | tLogicalNotOperator | tBitwiseNotOperator | tDereferenceOperator | tAddressOfOperator | tSizeOf | ((RSF)tLeftParenthesis + nType + tRightParenthesis)) + nUnaryOrHigherPriorityExpression
 			);
 			grammar.Add(
 				nUnaryOrHigherPriorityExpression,
@@ -452,11 +450,11 @@ namespace CMinusMinus {
 	}
 
 	public enum NonterminalType : byte {
-		SourceCode,
+		Program,
 
 		FunctionDeclaration,
 
-		MainType,
+		FundamentalType,
 
 		EmptyStatement,
 
@@ -469,6 +467,8 @@ namespace CMinusMinus {
 		ReturnStatement,
 
 		ControlFlow,
+
+		Block,
 
 		IfBlock,
 

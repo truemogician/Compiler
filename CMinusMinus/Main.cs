@@ -22,9 +22,11 @@ namespace CMinusMinus {
 
 		public CMinusMinus() { }
 
-		public CMinusMinus(ParserAlgorithm parserAlgorithm) {
+		public CMinusMinus(ParserAlgorithm parserAlgorithm, bool initialize = false) {
 			_algorithm = parserAlgorithm;
 			CreateParser(parserAlgorithm);
+			if (initialize)
+				InitializeParser(parserAlgorithm);
 		}
 
 		public CMinusMinus(ParserAlgorithm parserAlgorithm, string compiledTablePath) {
