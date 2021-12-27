@@ -5,6 +5,8 @@ const int* const* const main(const int argc) {
 	arr[1 - 1] = sizeof ++a;
 	a = *(arr + 1 - 1);
 	b = --a - -a;
+	a = b++ - ++a - +a++;
+	b = +--b;
 	*(arr + 1) = arr[b = 0];
 	(*&arr)[2] = (short)c + ~a ? a : !b ? b : c;
 	return 0;
