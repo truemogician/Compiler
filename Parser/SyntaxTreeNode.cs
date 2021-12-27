@@ -11,11 +11,25 @@ namespace Parser {
 
 		public SyntaxTreeValue Value { get; }
 
-		public string ToString(string? format, IFormatProvider? formatProvider)
+		public StringSegment CodeRange {
+			get {
+				var node = this;
+				while (!node.IsLeaf)
+					node = node.Children[0];
+				var from = node.Value.AsTerminalInstance.Token.Segment;
+				node = this;
+				while (!node.IsLeaf)
+					node = node.Children[^1];
+				var to = node.Value.AsTerminalInstance.Token.Segment;
+				return new StringSegment(from.Buffer, from.Offset, to.Offset - from.Offset + to.Length);
+			}
+		}
+
+		public string ToString(string? format, IFormatProvider? formatProvider = null)
 			=> format?.ToLower(CultureInfo.CurrentCulture) switch {
 				null or "xml"             => ToString(),
 				"xml-temp" or "xml-debug" => ToString(0, false),
-				"source" or "code"        => ToCodeSegment().Value,
+				"source" or "code"        => CodeRange.Value,
 				_                         => throw new ArgumentOutOfRangeException(nameof(format), "Unrecognized format")
 			};
 
@@ -38,18 +52,6 @@ namespace Parser {
 
 		public override string ToString() => ToString(0);
 
-		private StringSegment ToCodeSegment() {
-			var node = this;
-			while (!node.IsLeaf)
-				node = node.Children[0];
-			var from = node.Value.AsTerminalInstance.Token.Segment;
-			node = this;
-			while (!node.IsLeaf)
-				node = node.Children[^1];
-			var to = node.Value.AsTerminalInstance.Token.Segment;
-			return new StringSegment(from.Buffer, from.Offset, to.Offset - from.Offset + to.Length);
-		}
-
 		public static implicit operator SyntaxTreeNode(SyntaxTreeValue value) => new(value);
 	}
 
@@ -60,21 +62,21 @@ namespace Parser {
 	}
 
 	public class SyntaxTreeValue {
-		private readonly Nonterminal? _nonterminal;
+		public SyntaxTreeValue(Nonterminal nonterminal) => Nonterminal = nonterminal;
 
-		private readonly TerminalInstance? _terminalInstance;
-
-		public SyntaxTreeValue(Nonterminal nonterminal) => _nonterminal = nonterminal;
-
-		public SyntaxTreeValue(TerminalInstance terminalInstance) => _terminalInstance = terminalInstance;
+		public SyntaxTreeValue(TerminalInstance terminalInstance) => TerminalInstance = terminalInstance;
 
 		public SyntaxTreeValue(Terminal terminal, Token token) : this(new TerminalInstance(terminal, token)) { }
 
-		public bool IsTerminal => _terminalInstance is not null;
+		public Nonterminal? Nonterminal { get; }
 
-		public TerminalInstance AsTerminalInstance => _terminalInstance ?? throw new InvalidOperationException("Not a terminal");
+		public TerminalInstance? TerminalInstance { get; }
 
-		public Nonterminal AsNonterminal => _nonterminal ?? throw new InvalidOperationException("Not a nonterminal");
+		public bool IsTerminal => TerminalInstance is not null;
+
+		public TerminalInstance AsTerminalInstance => TerminalInstance ?? throw new InvalidOperationException("Not a terminal");
+
+		public Nonterminal AsNonterminal => Nonterminal ?? throw new InvalidOperationException("Not a nonterminal");
 
 		public static implicit operator SyntaxTreeValue(Nonterminal nonterminal) => new(nonterminal);
 
