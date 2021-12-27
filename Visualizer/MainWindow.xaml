@@ -17,15 +17,15 @@
 		</Grid.ColumnDefinitions>
 		<Grid Column="0">
 			<Grid.RowDefinitions>
-				<RowDefinition Height="24" />
+				<RowDefinition Height="32" />
 				<RowDefinition Height="*" />
 			</Grid.RowDefinitions>
 			<ToolBarTray Grid.Row="0" IsLocked="True">
-				<ToolBar MaxHeight="24">
-					<Button x:Name="OpenSourceButton" ToolTip="打开源文件">
+				<ToolBar MaxHeight="32">
+					<Button x:Name="OpenSourceButton" ToolTip="打开源文件" Click="OpenSourceButtonClicked">
 						<svgc:SvgViewbox Source="/Images/OpenSource.svg" />
 					</Button>
-					<Button x:Name="SaveSourceButton" ToolTip="保存源文件">
+					<Button x:Name="SaveSourceButton" ToolTip="保存源文件" Click="SaveSourceButtonClicked">
 						<svgc:SvgViewbox Source="/Images/SaveSource.svg" />
 					</Button>
 					<Separator />
@@ -36,10 +36,10 @@
 						<svgc:SvgViewbox Source="/Images/Redo.svg" />
 					</Button>
 					<Separator />
-					<ToggleButton x:Name="HighlightButton" ToolTip="高亮显示">
+					<ToggleButton x:Name="HighlightButton" ToolTip="高亮显示" IsChecked="True">
 						<svgc:SvgViewbox Source="/Images/Highlight.svg" />
 					</ToggleButton>
-					<Button x:Name="ParseButton" ToolTip="分析">
+					<Button x:Name="ParseButton" ToolTip="分析" Click="ParseButtonClicked">
 						<svgc:SvgViewbox Source="/Images/Parse.svg" />
 					</Button>
 					<Button x:Name="StartParsingButton" ToolTip="开始逐步分析">
@@ -51,11 +51,11 @@
 		</Grid>
 		<GridSplitter Grid.Column="1" Width="2" HorizontalAlignment="Stretch" />
 		<TabControl Grid.Column="2">
+			<TabItem Header="XML">
+				<TextBox IsReadOnly="True" x:Name="XmlTextBox" />
+			</TabItem>
 			<TabItem Header="语法树">
 				<wpfGraphControl:AutomaticGraphLayoutControl x:Name="GraphControl" />
-			</TabItem>
-			<TabItem Header="XML">
-				<TextBlock x:Name="XmlTextBlock" />
 			</TabItem>
 		</TabControl>
 	</Grid>
