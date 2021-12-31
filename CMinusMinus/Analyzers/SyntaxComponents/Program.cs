@@ -14,7 +14,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 						functions.Add(child);
 						break;
 					case nameof(NonterminalType.DeclarationStatement):
-						globals.AddRange(VariableDeclaration.FromStatement(child));
+						globals.AddRange(VariableDeclaration.FromDeclarationStatement(child));
 						break;
 					default: throw new UnexpectedSyntaxNodeException { Node = child };
 				}
