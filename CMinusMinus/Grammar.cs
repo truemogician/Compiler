@@ -92,7 +92,6 @@ namespace CMinusMinus {
 			var nUnaryPlusMinusExpression = new Nonterminal();
 			var nOtherUnaryExpression = new Nonterminal();
 			var nPrimaryExpression = new Nonterminal("PrimaryExpression", true);
-			var nAtomExpression = new Nonterminal("AtomExpression", true);
 			var nCommaOrHigherPriorityExpression = new Nonterminal("CommaExpression+", true);
 			var nAssignmentOrHigherPriorityExpression = new Nonterminal("AssignmentExpression+", true);
 			var nConditionalOrHigherPriorityExpression = new Nonterminal("ConditionalExpression+", true);
@@ -169,6 +168,7 @@ namespace CMinusMinus {
 				NonterminalType.ExpressionStatement,
 				(RSF)NonterminalType.Expression + tDelimiter
 			);
+			//TODO: declaration with parenthesis, function pointer declaration
 			grammar.Add(
 				NonterminalType.DeclarationStatement,
 				(RSF)nQualifier + NonterminalType.FundamentalType + nDeclarationStatementComponent + ((RSF)tSeparator + nDeclarationStatementComponent) * '*' + tDelimiter
@@ -261,7 +261,7 @@ namespace CMinusMinus {
 				NonterminalType.MultiplicativeExpression |
 				NonterminalType.UnaryExpression |
 				nPrimaryExpression |
-				nAtomExpression
+				NonterminalType.AtomExpression
 			);
 			grammar.Add(
 				NonterminalType.CommaExpression,
@@ -405,11 +405,11 @@ namespace CMinusMinus {
 			);
 			grammar.Add(
 				nPrimaryOrHigherPriorityExpression,
-				(RSF)nPrimaryExpression | nAtomExpression
+				(RSF)nPrimaryExpression | NonterminalType.AtomExpression
 			);
 			grammar.Add(
 				NonterminalType.SuffixExpression,
-				nPrimaryOrHigherPriorityExpression + (((RSF)tPlusOperator * (1, 2)) | ((RSF)tMinusOperator * (1, 2)))
+				nPrimaryOrHigherPriorityExpression + (((RSF)tPlusOperator * 2) | ((RSF)tMinusOperator * 2))
 			);
 			grammar.Add(
 				NonterminalType.FunctionCall,
@@ -424,7 +424,7 @@ namespace CMinusMinus {
 				(RSF)nPrimaryOrHigherPriorityExpression + tMembershipOperator + ((RSF)nPrimaryExpression | tIdentifier)
 			);
 			grammar.Add(
-				nAtomExpression,
+				NonterminalType.AtomExpression,
 				(RSF)NonterminalType.Literal | tIdentifier | (tLeftParenthesis + NonterminalType.Expression + tRightParenthesis)
 			);
 			grammar.Add(
@@ -483,6 +483,8 @@ namespace CMinusMinus {
 		Label,
 
 		Expression,
+
+		AtomExpression,
 
 		SuffixExpression,
 
