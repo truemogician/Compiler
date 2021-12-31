@@ -6,14 +6,15 @@ using Parser;
 using TrueMogician.Extensions.Enumerable;
 
 namespace CMinusMinus.Analyzers.SyntaxComponents {
+	//TODO: array type
 	public class FullType {
-		private FullType(Qualifier qualifier, FundamentalType type) {
+		internal FullType(Qualifier qualifier, FundamentalType type) {
 			Qualifier = qualifier;
 			Type = type;
 			ValueType = null;
 		}
 
-		private FullType(Qualifier qualifier, FullType valueType) {
+		internal FullType(Qualifier qualifier, FullType valueType) {
 			Qualifier = qualifier;
 			Type = null;
 			ValueType = valueType;
@@ -24,9 +25,9 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			var i = 0;
 			var qualifiers = new List<Qualifier>();
 			var qualifier = Qualifier.None;
-			for (; i < nds.Length && nds[i].Value.TerminalInstance is { } t; ++i) {
+			for (; i < nds.Length && nds[i].Value.Token is { } t; ++i) {
 				ThrowHelper.IsTerminal(nds[i], LexemeType.Keyword);
-				qualifier |= t.Token.Value switch {
+				qualifier |= t.Value switch {
 					"const"    => Qualifier.Const,
 					"volatile" => Qualifier.Volatile,
 					_          => throw new UnexpectedSyntaxNodeException { Node = nds[i] }
@@ -37,8 +38,8 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			while (i < nds.Length) {
 				ThrowHelper.IsTerminal(nds[i++], "*");
 				qualifier = Qualifier.None;
-				for (; i < nds.Length && nds[i].Value.TerminalInstance is { Terminal: { Lexeme: { Name: nameof(LexemeType.Keyword) } } } t; ++i)
-					qualifier |= t.Token.Value switch {
+				for (; i < nds.Length && nds[i].Value.Lexeme?.GetNameAsEnum<LexemeType>() == LexemeType.Keyword; ++i)
+					qualifier |= nds[i].Value.Token!.Value switch {
 						"const"    => Qualifier.Const,
 						"volatile" => Qualifier.Volatile,
 						_          => throw new UnexpectedSyntaxNodeException { Node = nds[i] }
@@ -72,7 +73,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 
 		private static FundamentalType ParseFundamentalType(SyntaxTreeNode node) {
 			ThrowHelper.IsNonterminal(node, NonterminalType.FundamentalType);
-			var tokens = node.Children.Select(n => n.Value.AsTerminalInstance.Token);
+			var tokens = node.Children.Select(n => n.Value.AsToken);
 			return string.Join(' ', tokens.Select(t => t.Value)) switch {
 				"void"                                                                         => FundamentalType.Void,
 				"char"                                                                         => FundamentalType.Char,
@@ -92,8 +93,6 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 				_                                                                              => throw new UnexpectedSyntaxNodeException { Node = node }
 			};
 		}
-
-		public static implicit operator FullType(SyntaxTreeNode node) => new(node);
 	}
 
 	[Flags]

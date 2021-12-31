@@ -16,11 +16,11 @@ namespace Parser {
 				var node = this;
 				while (!node.IsLeaf)
 					node = node.Children[0];
-				var from = node.Value.AsTerminalInstance.Token.Segment;
+				var from = node.Value.AsToken.Segment;
 				node = this;
 				while (!node.IsLeaf)
 					node = node.Children[^1];
-				var to = node.Value.AsTerminalInstance.Token.Segment;
+				var to = node.Value.AsToken.Segment;
 				return new StringSegment(from.Buffer, from.Offset, to.Offset - from.Offset + to.Length);
 			}
 		}
@@ -35,7 +35,7 @@ namespace Parser {
 
 		public string ToString(int indentation, bool skipTempNonterminal = true) {
 			if (IsLeaf)
-				return new string('\t', indentation) + Value.AsTerminalInstance + Environment.NewLine;
+				return new string('\t', indentation) + Value.AsToken + Environment.NewLine;
 			var builder = new StringBuilder();
 			if (skipTempNonterminal && Value.AsNonterminal.Temporary)
 				foreach (var child in Children)
@@ -55,31 +55,30 @@ namespace Parser {
 		public static implicit operator SyntaxTreeNode(SyntaxTreeValue value) => new(value);
 	}
 
-	public record TerminalInstance(Terminal Terminal, Token Token) {
-		public override string ToString() => Token.ToString();
-
-		public static implicit operator TerminalInstance((Terminal, Token) tuple) => new(tuple.Item1, tuple.Item2);
-	}
-
 	public class SyntaxTreeValue {
 		public SyntaxTreeValue(Nonterminal nonterminal) => Nonterminal = nonterminal;
 
-		public SyntaxTreeValue(TerminalInstance terminalInstance) => TerminalInstance = terminalInstance;
-
-		public SyntaxTreeValue(Terminal terminal, Token token) : this(new TerminalInstance(terminal, token)) { }
+		public SyntaxTreeValue(Terminal terminal, Token token) {
+			Terminal = terminal;
+			Token = token;
+		}
 
 		public Nonterminal? Nonterminal { get; }
 
-		public TerminalInstance? TerminalInstance { get; }
+		public Terminal? Terminal { get; }
 
-		public bool IsTerminal => TerminalInstance is not null;
+		public Token? Token { get; }
 
-		public TerminalInstance AsTerminalInstance => TerminalInstance ?? throw new InvalidOperationException("Not a terminal");
+		public Lexeme? Lexeme => Terminal?.Lexeme;
+
+		public bool IsTerminal => Nonterminal is null;
 
 		public Nonterminal AsNonterminal => Nonterminal ?? throw new InvalidOperationException("Not a nonterminal");
 
-		public static implicit operator SyntaxTreeValue(Nonterminal nonterminal) => new(nonterminal);
+		public Terminal AsTerminal => Terminal ?? throw new InvalidOperationException("Not a terminal");
 
-		public static implicit operator SyntaxTreeValue(TerminalInstance terminalInstance) => new(terminalInstance);
+		public Token AsToken => Token ?? throw new InvalidOperationException("Not a terminal");
+
+		public static implicit operator SyntaxTreeValue(Nonterminal nonterminal) => new(nonterminal);
 	}
 }

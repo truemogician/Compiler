@@ -64,6 +64,8 @@ namespace Lexer {
 			return Name == other.Name && UseRegex == other.UseRegex && Pattern == other.Pattern;
 		}
 
+		public T? GetNameAsEnum<T>() where T : struct, Enum => Enum.TryParse<T>(Name, out var result) ? result : null;
+
 		public Token? Match(StringSegment input) {
 			if (_regex is null) {
 				if (Pattern.Length > input.Buffer.Length - input.Offset)
@@ -74,8 +76,6 @@ namespace Lexer {
 			var result = _maxLength is null ? _regex.Match(input) : _regex.Match(input, 0, _maxLength.Value);
 			return result.Success ? new Token(this, input.Subsegment(0, result.Length)) : null;
 		}
-
-		private static string GetEnumName(Enum value) => Enum.GetName(value.GetType(), value) ?? throw new Exception();
 
 		public override string ToString() => Name;
 
@@ -88,5 +88,7 @@ namespace Lexer {
 		}
 
 		public override int GetHashCode() => HashCode.Combine(Name, Pattern, UseRegex);
+
+		private static string GetEnumName(Enum value) => Enum.GetName(value.GetType(), value) ?? throw new Exception();
 	}
 }

@@ -7,6 +7,8 @@ namespace Parser {
 		/// </summary>
 		public Nonterminal() : this(Guid.NewGuid().ToString("N"), true) { }
 
+		public T? GetNameAsEnum<T>() where T : struct, Enum => Enum.TryParse<T>(Name, out var result) ? result : null;
+
 		public override string ToString() => Name;
 
 		public static implicit operator Nonterminal(string name) => new(name);
