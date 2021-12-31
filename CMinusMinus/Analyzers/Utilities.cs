@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Analyzer;
 using Parser;
@@ -37,5 +36,13 @@ namespace CMinusMinus.Analyzers {
 			if (node.Children.Count != count)
 				throw new UnexpectedSyntaxNodeException($"Expect to have {count} children nodes, but {node.Children.Count} received") { Node = node };
 		}
+	}
+
+	internal static class SyntaxTreeNodeExtensions {
+		internal static LexemeType? GetLexemeType(this SyntaxTreeNode node) => node.Value.Lexeme?.GetNameAsEnum<LexemeType>();
+
+		internal static NonterminalType? GetNonterminalType(this SyntaxTreeNode node) => node.Value.Nonterminal?.GetNameAsEnum<NonterminalType>();
+
+		internal static string? GetTokenValue(this SyntaxTreeNode node) => node.Value.Token?.Value;
 	}
 }
