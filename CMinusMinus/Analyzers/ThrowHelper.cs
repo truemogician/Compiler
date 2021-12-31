@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Analyzer;
 using Parser;
@@ -30,6 +31,11 @@ namespace CMinusMinus.Analyzers {
 				throw new UnexpectedSyntaxNodeException("Not a terminal") { Node = node };
 			if (node.Value.AsToken.Value is var v && v != value)
 				throw new UnexpectedSyntaxNodeException($"Expecting terminal \"{value}\", but {v} received") { Node = node };
+		}
+
+		internal static void ChildrenCountIs(SyntaxTreeNode node, int count) {
+			if (node.Children.Count != count)
+				throw new UnexpectedSyntaxNodeException($"Expect to have {count} children nodes, but {node.Children.Count} received") { Node = node };
 		}
 	}
 }
