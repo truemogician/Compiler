@@ -82,8 +82,6 @@ namespace CMinusMinus {
 			var nLabeledComponent = new Nonterminal("LabeledComponent", true);
 			var nDeclarationStatementComponent = new Nonterminal();
 			var nCaseCommonPart = new Nonterminal();
-			var nEmbeddableBody = new Nonterminal("EmbeddableBody", true);
-			var nEmbeddedStatement = new Nonterminal("EmbeddedStatement", true);
 			var nLogicalOrExpression = new Nonterminal("LogicalOrExpression", true);
 			var nLogicalAndExpression = new Nonterminal("LogicalAndExpression", true);
 			var nBitwiseOrExpression = new Nonterminal("BitwiseOrExpression", true);
@@ -200,20 +198,13 @@ namespace CMinusMinus {
 				NonterminalType.IfBlock,
 				(RSF)tIf +
 				nParenthesizedExpression +
-				nEmbeddableBody +
-				((RSF)tElse + tIf + nParenthesizedExpression + nEmbeddableBody) * '*' +
-				((RSF)tElse + nEmbeddableBody) * '?'
+				nLabeledComponent +
+				((RSF)tElse + tIf + nParenthesizedExpression + nLabeledComponent) * '*' +
+				((RSF)tElse + nLabeledComponent) * '?'
 			);
 			grammar.Add(
 				nParenthesizedExpression,
 				(RSF)tLeftParenthesis + NonterminalType.Expression + tRightParenthesis
-			);
-			grammar.Add(
-				nEmbeddedStatement,
-				(RSF)NonterminalType.ExpressionStatement |
-				NonterminalType.ControlStatement |
-				NonterminalType.ReturnStatement |
-				NonterminalType.ControlFlow
 			);
 			grammar.Add(
 				NonterminalType.SwitchBlock,
@@ -231,19 +222,15 @@ namespace CMinusMinus {
 			);
 			grammar.Add(
 				NonterminalType.ForBlock,
-				(RSF)tFor + tLeftParenthesis + ((RSF)NonterminalType.DeclarationStatement | NonterminalType.EmptyStatement) + (RSF)NonterminalType.Expression * '?' + tDelimiter + (RSF)NonterminalType.Expression * '?' + tRightParenthesis + nEmbeddableBody
-			);
-			grammar.Add(
-				nEmbeddableBody,
-				(RSF)nEmbeddedStatement | NonterminalType.Block
+				(RSF)tFor + tLeftParenthesis + ((RSF)NonterminalType.DeclarationStatement | NonterminalType.EmptyStatement) + (RSF)NonterminalType.Expression * '?' + tDelimiter + (RSF)NonterminalType.Expression * '?' + tRightParenthesis + nLabeledComponent
 			);
 			grammar.Add(
 				NonterminalType.WhileBlock,
-				(RSF)tWhile + nParenthesizedExpression + nEmbeddableBody
+				(RSF)tWhile + nParenthesizedExpression + nLabeledComponent
 			);
 			grammar.Add(
 				NonterminalType.DoWhileBlock,
-				(RSF)tDo + nEmbeddableBody + tWhile + nParenthesizedExpression + tDelimiter
+				(RSF)tDo + nLabeledComponent + tWhile + nParenthesizedExpression + tDelimiter
 			);
 			#endregion
 
