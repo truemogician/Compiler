@@ -81,7 +81,6 @@ namespace CMinusMinus {
 			var nParenthesizedExpression = new Nonterminal("ParenthesizedExpression", true);
 			var nLabeledComponent = new Nonterminal("LabeledComponent", true);
 			var nDeclarationStatementComponent = new Nonterminal();
-			var nCaseCommonPart = new Nonterminal();
 			var nLogicalOrExpression = new Nonterminal("LogicalOrExpression", true);
 			var nLogicalAndExpression = new Nonterminal("LogicalAndExpression", true);
 			var nBitwiseOrExpression = new Nonterminal("BitwiseOrExpression", true);
@@ -211,14 +210,12 @@ namespace CMinusMinus {
 				(RSF)tSwitch +
 				nParenthesizedExpression +
 				tBlockStart +
-				((RSF)tCase + NonterminalType.Expression + nCaseCommonPart) * '*' +
-				((RSF)tDefault + nCaseCommonPart) * '?' +
-				((RSF)tCase + NonterminalType.Expression + nCaseCommonPart) * '*' +
+				(RSF)NonterminalType.CaseBlock * '*' +
 				tBlockEnd
 			);
 			grammar.Add(
-				nCaseCommonPart,
-				(RSF)tColon + (((RSF)nLabeledComponent * '*') | NonterminalType.Block)
+				NonterminalType.CaseBlock,
+				((RSF)tDefault | (tCase + NonterminalType.Expression)) + (RSF)tColon + (RSF)nLabeledComponent * '*'
 			);
 			grammar.Add(
 				NonterminalType.ForBlock,
@@ -460,6 +457,8 @@ namespace CMinusMinus {
 		IfBlock,
 
 		SwitchBlock,
+
+		CaseBlock,
 
 		ForBlock,
 
