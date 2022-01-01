@@ -219,7 +219,13 @@ namespace CMinusMinus {
 			);
 			grammar.Add(
 				NonterminalType.ForBlock,
-				(RSF)tFor + tLeftParenthesis + ((RSF)NonterminalType.DeclarationStatement | NonterminalType.EmptyStatement) + (RSF)NonterminalType.Expression * '?' + tDelimiter + (RSF)NonterminalType.Expression * '?' + tRightParenthesis + nLabeledComponent
+				(RSF)tFor +
+				tLeftParenthesis +
+				((RSF)NonterminalType.DeclarationStatement | NonterminalType.ExpressionStatement | NonterminalType.EmptyStatement) +
+				((RSF)NonterminalType.ExpressionStatement | NonterminalType.EmptyStatement) +
+				(RSF)NonterminalType.Expression * '?' +
+				tRightParenthesis +
+				nLabeledComponent
 			);
 			grammar.Add(
 				NonterminalType.WhileBlock,
