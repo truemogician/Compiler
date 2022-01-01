@@ -1,10 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Parser;
 
 namespace Analyzer {
 	public interface IAnalyzer {
 		public string Name { get; }
 
-		public IEnumerable<SemanticError> Analyze(SyntaxTree ast);
+		public object Analyze(object source, out IEnumerable<SemanticError> errors);
 	}
+
+	public interface IAnalyzer<in TSource, out TTarget> : IAnalyzer {
+		object IAnalyzer.Analyze(object source, out IEnumerable<SemanticError> errors) => Analyze((TSource)source, out errors)!;
+
+		public TTarget Analyze(TSource source, out IEnumerable<SemanticError> errors);
+	}
+
+	public interface IAnalyzer<T> : IAnalyzer<T, T> { }
+
+	public interface IRootAnalyzer<out T> : IAnalyzer<SyntaxTree, T> { }
 }
