@@ -39,28 +39,49 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 	public class BlockComponent {
 		private readonly object _content;
 
-		public BlockComponent(SyntaxTreeNode contentNode) {
-			_content = contentNode.GetNonterminalType() switch {
-				NonterminalType.Block       => new Block(contentNode),
-				NonterminalType.ControlFlow => ControlFlow.Create(contentNode),
-				_                           => Statement.Create(contentNode)
-			};
+		private readonly string? _label;
+
+		internal BlockComponent(IEnumerator<SyntaxTreeNode> enumerator) {
+			SyntaxTreeNode? label = null;
+			if (enumerator.Current.GetNonterminalType() == NonterminalType.Literal) {
+				label = enumerator.Current;
+				enumerator.MoveNext();
+			}
+			InitializeLabel(out _label, label);
+			InitializeContent(out _content, enumerator.Current);
+			enumerator.MoveNext();
 		}
 
-		public BlockComponent(SyntaxTreeNode labelNode, SyntaxTreeNode contentNode) : this(contentNode) {
-			ThrowHelper.IsNonterminal(labelNode, NonterminalType.Label);
-			ThrowHelper.ChildrenCountIs(labelNode, 2);
-			ThrowHelper.IsTerminal(labelNode.Children[0], LexemeType.Identifier);
-			ThrowHelper.IsTerminal(labelNode.Children[1], LexemeType.Colon);
-			Label = labelNode.Children[0].GetTokenValue()!;
-		}
+		public BlockComponent(SyntaxTreeNode contentNode) => InitializeContent(out _content, contentNode);
 
-		public string? Label { get; }
+		public BlockComponent(SyntaxTreeNode? labelNode, SyntaxTreeNode contentNode) : this(contentNode) => InitializeLabel(out _label, labelNode);
+
+		public string? Label => _label;
 
 		public Statement? Statement => _content as Statement;
 
 		public Block? Block => _content as Block;
 
 		public ControlFlow? ControlFlow => _content as ControlFlow;
+
+		private void InitializeLabel(out string? field, SyntaxTreeNode? node) {
+			if (node is null) {
+				field = null;
+				return;
+			}
+			ThrowHelper.IsNonterminal(node, NonterminalType.Label);
+			ThrowHelper.ChildrenCountIs(node, 2);
+			ThrowHelper.IsTerminal(node.Children[0], LexemeType.Identifier);
+			ThrowHelper.IsTerminal(node.Children[1], LexemeType.Colon);
+			field = node.Children[0].GetTokenValue()!;
+		}
+
+		private void InitializeContent(out object field, SyntaxTreeNode node) {
+			field = node.GetNonterminalType() switch {
+				NonterminalType.Block       => new Block(node),
+				NonterminalType.ControlFlow => ControlFlow.Create(node),
+				_                           => Statement.Create(node)
+			};
+		}
 	}
 }
