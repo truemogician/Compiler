@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using TrueMogician.Extensions.Collections.Tree;
 
 namespace Parser {
@@ -14,13 +15,8 @@ namespace Parser {
 		public void Clean() {
 			if (Root.Value.Nonterminal is { Temporary: true })
 				throw new InvalidOperationException("Root is a temporary node");
-			foreach (var node in Root)
-				if (node.Value.Nonterminal is { Temporary: true }) {
-					var parent = node.Parent!;
-					int index = parent.Children.IndexOf(node);
-					node.Parent = null;
-					parent.Children.InsertRange(index, node.Children);
-				}
+			foreach (var node in Root.Where(n => n.Value.Nonterminal?.Temporary == true))
+				SyntaxTreeNode.Unlink(node);
 		}
 
 		public static implicit operator SyntaxTree(SyntaxTreeNode node) => new(node);
