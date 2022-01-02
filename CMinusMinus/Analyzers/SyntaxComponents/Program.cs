@@ -4,7 +4,8 @@ using Parser;
 
 namespace CMinusMinus.Analyzers.SyntaxComponents {
 	public class Program {
-		public Program(SyntaxTreeNode node) {
+		public Program(SyntaxTree rootTree) {
+			var node = rootTree.Root;
 			ThrowHelper.IsNonterminal(node, NonterminalType.Program);
 			var functions = new List<FunctionDeclaration>();
 			var globals = new List<VariableDeclaration>();
