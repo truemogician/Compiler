@@ -1,4 +1,5 @@
-﻿using Lexer;
+﻿using Analyzer;
+using Lexer;
 using Parser;
 
 namespace Language.Test {
@@ -28,5 +29,7 @@ namespace Language.Test {
 			var b = new Nonterminal("B");
 			return new Grammar(s) {{s, b + b}, {b, Lexicon["b"]}, {b, (SentenceForm)Lexicon["a"] + b}};
 		}
+
+		public override AnalyzerCollection CreateAnalyzers() => new();
 	}
 }
