@@ -1,7 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using Parser;
 
-#nullable enable
 namespace CMinusMinus {
 	using RSF = RegularSentenceForm;
 

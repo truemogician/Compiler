@@ -2,7 +2,6 @@
 using System.Text.RegularExpressions;
 using Lexer;
 
-#nullable enable
 namespace CMinusMinus {
 	public partial class CMinusMinusFactory {
 		public override Lexicon CreateLexicon() {

@@ -5,7 +5,6 @@ using Language;
 using Lexer;
 using Parser;
 
-#nullable enable
 namespace CMinusMinus {
 	using RegexLexer = Lexer.Lexer;
 	using CLRParser = Parser.LR.CLR.Parser;

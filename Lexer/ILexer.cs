@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-#nullable enable
 namespace Lexer {
 	public interface ILexer {
 		public IEnumerable<Token> Tokenize(string code);

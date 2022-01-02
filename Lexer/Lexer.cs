@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Extensions.Primitives;
 
-#nullable enable
 namespace Lexer {
 	public class Lexer : ILexer {
 		public Lexer(Lexicon lexicon) => Lexicon = lexicon;

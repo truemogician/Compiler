@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.Primitives;
 
-#nullable enable
 namespace Lexer {
 	public class Token : IEquatable<Token> {
 		private readonly StringSegment _segment;
