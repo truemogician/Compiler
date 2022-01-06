@@ -12,7 +12,7 @@ namespace Analyzer {
 		public StringSegment? Range { get; init; }
 	}
 
-	public record SemanticErrorType(string Code, ErrorLevel Level, IAnalyzer Analyzer) {
+	public record SemanticErrorType(string Code, ErrorLevel Level, string Analyzer) {
 		public string? DefaultMessage { get; init; }
 	}
 

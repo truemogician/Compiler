@@ -7,7 +7,7 @@ namespace CMinusMinus {
 			var collection = new AnalyzerCollection();
 			var propertyAnalyzer = new PropertyAnalyzer();
 			collection.Add(propertyAnalyzer);
-			collection.Add(new ControlFlowAnalyzer(), propertyAnalyzer);
+			collection.Add(new JumpStatementAnalyzer(), propertyAnalyzer);
 			collection.Add(new DeclarationAnalyzer(), propertyAnalyzer);
 			var identifierAnalyzer = new IdentifierAnalyzer();
 			collection.Add(identifierAnalyzer, propertyAnalyzer);
