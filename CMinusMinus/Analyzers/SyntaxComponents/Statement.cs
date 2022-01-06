@@ -15,15 +15,15 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 				NonterminalType.EmptyStatement       => new EmptyStatement(node),
 				NonterminalType.ExpressionStatement  => new ExpressionStatement(node),
 				NonterminalType.DeclarationStatement => new DeclarationStatement(node),
-				NonterminalType.ControlStatement =>
+				NonterminalType.JumpStatement =>
 					node.Children[0].Value.AsToken.Value switch {
 						"continue" => new ContinueStatement(node),
 						"break"    => new BreakStatement(node),
 						"goto"     => new GotoStatement(node),
+						"return"   => new ReturnStatement(node),
 						_          => throw new UnexpectedSyntaxNodeException { Node = node }
 					},
-				NonterminalType.ReturnStatement => new ReturnStatement(node),
-				_                               => throw new UnexpectedSyntaxNodeException { Node = node }
+				_ => throw new UnexpectedSyntaxNodeException { Node = node }
 			};
 		}
 	}

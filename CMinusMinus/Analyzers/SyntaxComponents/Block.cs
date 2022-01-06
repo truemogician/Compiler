@@ -23,8 +23,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 					case NonterminalType.EmptyStatement:
 					case NonterminalType.ExpressionStatement:
 					case NonterminalType.DeclarationStatement:
-					case NonterminalType.ControlStatement:
-					case NonterminalType.ReturnStatement:
+					case NonterminalType.JumpStatement:
 						components.Add(label is null ? new BlockComponent(n) : new BlockComponent(label, n));
 						label = null;
 						break;

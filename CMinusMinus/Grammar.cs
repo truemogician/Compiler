@@ -152,8 +152,7 @@ namespace CMinusMinus {
 				(RSF)NonterminalType.EmptyStatement |
 				NonterminalType.ExpressionStatement |
 				NonterminalType.DeclarationStatement |
-				NonterminalType.ControlStatement |
-				NonterminalType.ReturnStatement
+				NonterminalType.JumpStatement
 			);
 			grammar.Add(
 				NonterminalType.EmptyStatement,
@@ -173,12 +172,8 @@ namespace CMinusMinus {
 				((RSF)tDereferenceOperator + nQualifier) * '*' + (tIdentifier + ((RSF)tIndexStart + NonterminalType.Expression + tIndexEnd) * '?' + ((RSF)tAssignmentOperator + nAssignmentOrHigherPriorityExpression) * '?')
 			);
 			grammar.Add(
-				NonterminalType.ControlStatement,
-				((RSF)tContinue | tBreak | ((RSF)tGoto + tIdentifier)) + tDelimiter
-			);
-			grammar.Add(
-				NonterminalType.ReturnStatement,
-				(RSF)tReturn + (RSF)NonterminalType.Expression * '?' + tDelimiter
+				NonterminalType.JumpStatement,
+				((RSF)tContinue | tBreak | ((RSF)tGoto + tIdentifier) | ((RSF)tReturn + (RSF)NonterminalType.Expression * '?')) + tDelimiter
 			);
 			grammar.Add(
 				NonterminalType.Label,
@@ -438,9 +433,7 @@ namespace CMinusMinus {
 
 		DeclarationStatement,
 
-		ControlStatement,
-
-		ReturnStatement,
+		JumpStatement,
 
 		ControlFlow,
 
