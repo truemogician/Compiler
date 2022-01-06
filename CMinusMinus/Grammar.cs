@@ -87,7 +87,6 @@ namespace CMinusMinus {
 			var nBitwiseAndExpression = new Nonterminal("BitwiseAndExpression", true);
 			var nUnaryPlusMinusExpression = new Nonterminal();
 			var nOtherUnaryExpression = new Nonterminal();
-			var nPrimaryExpression = new Nonterminal("PrimaryExpression", true);
 			var nCommaOrHigherPriorityExpression = new Nonterminal("CommaExpression+", true);
 			var nAssignmentOrHigherPriorityExpression = new Nonterminal("AssignmentExpression+", true);
 			var nConditionalOrHigherPriorityExpression = new Nonterminal("ConditionalExpression+", true);
@@ -104,7 +103,7 @@ namespace CMinusMinus {
 			var nAdditiveOrHigherPriorityExpression = new Nonterminal("AdditiveExpression+", true);
 			var nMultiplicativeOrHigherPriorityExpression = new Nonterminal("MultiplicativeExpression+", true);
 			var nUnaryOrHigherPriorityExpression = new Nonterminal("UnaryExpression+", true);
-			var nPrimaryOrHigherPriorityExpression = new Nonterminal("PrimaryExpression+", true);
+			var nPostfixOrHigherPriorityExpression = new Nonterminal("PrimaryExpression+", true);
 			#endregion
 
 			#region Production Rules
@@ -249,8 +248,8 @@ namespace CMinusMinus {
 				NonterminalType.AdditiveExpression |
 				NonterminalType.MultiplicativeExpression |
 				NonterminalType.UnaryExpression |
-				nPrimaryExpression |
-				NonterminalType.AtomExpression
+				NonterminalType.PostfixExpression |
+				NonterminalType.PrimaryExpression
 			);
 			grammar.Add(
 				NonterminalType.CommaExpression,
@@ -378,7 +377,7 @@ namespace CMinusMinus {
 			);
 			grammar.Add(
 				nUnaryPlusMinusExpression,
-				((RSF)tPlusOperator | tMinusOperator) + ((RSF)nOtherUnaryExpression | nPrimaryOrHigherPriorityExpression)
+				((RSF)tPlusOperator | tMinusOperator) + ((RSF)nOtherUnaryExpression | nPostfixOrHigherPriorityExpression)
 			);
 			grammar.Add(
 				nOtherUnaryExpression,
@@ -386,34 +385,22 @@ namespace CMinusMinus {
 			);
 			grammar.Add(
 				nUnaryOrHigherPriorityExpression,
-				(RSF)NonterminalType.UnaryExpression | nPrimaryOrHigherPriorityExpression
+				(RSF)NonterminalType.UnaryExpression | nPostfixOrHigherPriorityExpression
 			);
 			grammar.Add(
-				nPrimaryExpression,
-				(RSF)NonterminalType.SuffixExpression | NonterminalType.FunctionCall | NonterminalType.SubscriptExpression | NonterminalType.MemberExpression
+				NonterminalType.PostfixExpression,
+				(RSF)nPostfixOrHigherPriorityExpression +
+				(((RSF)tIndexStart + NonterminalType.Expression + tIndexEnd) |
+					((RSF)tLeftParenthesis + (RSF)NonterminalType.Expression * '?' + tRightParenthesis) |
+					((RSF)tMembershipOperator + tIdentifier) |
+					(((RSF)tPlusOperator * 2) | ((RSF)tMinusOperator * 2)))
 			);
 			grammar.Add(
-				nPrimaryOrHigherPriorityExpression,
-				(RSF)nPrimaryExpression | NonterminalType.AtomExpression
+				nPostfixOrHigherPriorityExpression,
+				(RSF)NonterminalType.PostfixExpression | NonterminalType.PrimaryExpression
 			);
 			grammar.Add(
-				NonterminalType.SuffixExpression,
-				nPrimaryOrHigherPriorityExpression + (((RSF)tPlusOperator * 2) | ((RSF)tMinusOperator * 2))
-			);
-			grammar.Add(
-				NonterminalType.FunctionCall,
-				(RSF)nPrimaryOrHigherPriorityExpression + tLeftParenthesis + (RSF)NonterminalType.Expression * '?' + tRightParenthesis
-			);
-			grammar.Add(
-				NonterminalType.SubscriptExpression,
-				(RSF)nPrimaryOrHigherPriorityExpression + tIndexStart + NonterminalType.Expression + tIndexEnd
-			);
-			grammar.Add(
-				NonterminalType.MemberExpression,
-				(RSF)nPrimaryOrHigherPriorityExpression + tMembershipOperator + ((RSF)nPrimaryExpression | tIdentifier)
-			);
-			grammar.Add(
-				NonterminalType.AtomExpression,
+				NonterminalType.PrimaryExpression,
 				(RSF)NonterminalType.Literal | tIdentifier | (tLeftParenthesis + NonterminalType.Expression + tRightParenthesis)
 			);
 			grammar.Add(
@@ -475,15 +462,9 @@ namespace CMinusMinus {
 
 		Expression,
 
-		AtomExpression,
+		PrimaryExpression,
 
-		SuffixExpression,
-
-		FunctionCall,
-
-		SubscriptExpression,
-
-		MemberExpression,
+		PostfixExpression,
 
 		UnaryExpression,
 

@@ -4,13 +4,14 @@ using Parser;
 namespace CMinusMinus.Analyzers.SyntaxComponents {
 	public class FunctionCall : SyntaxComponent {
 		public FunctionCall(SyntaxTreeNode node) : base(node) {
-			ThrowHelper.IsNonterminal(node, NonterminalType.FunctionCall);
-			ThrowHelper.IsTerminal(node.Children[^1], LexemeType.RightParenthesis);
-			int pos;
+			ThrowHelper.IsNonterminal(node, NonterminalType.PostfixExpression);
+			Function = new Expression(node.Children[0]);
+			ThrowHelper.IsTerminal(node.Children[1], LexemeType.LeftParenthesis);
+			ThrowHelper.IsTerminal(node.Children[^1], LexemeType.LeftParenthesis);
 			var parameters = new List<Expression>();
-			if (node.Children[^2].Value.Nonterminal?.GetNameAsEnum<NonterminalType>() == NonterminalType.Expression) {
-				pos = node.Children.Count - 3;
-				var exp = node.Children[^2].Children;
+			if (node.Children.Count == 4) {
+				ThrowHelper.IsNonterminal(node.Children[2], NonterminalType.Expression);
+				var exp = node.Children[2].Children;
 				if (exp.Count == 1 && exp[0].Value.Nonterminal?.GetNameAsEnum<NonterminalType>() == NonterminalType.CommaExpression) {
 					var commaExp = new Expression(exp) as IBinaryExpression;
 					do {
@@ -22,9 +23,6 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 				else
 					parameters.Add(new Expression(exp));
 			}
-			else
-				pos = node.Children.Count - 2;
-			Function = new Expression(node.Children[..pos]);
 			Parameters = parameters;
 		}
 

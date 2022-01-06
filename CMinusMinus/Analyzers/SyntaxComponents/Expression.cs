@@ -16,7 +16,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			var node = nodes.Single();
 			var type = node.GetNonterminalType();
 			var exception = new UnexpectedSyntaxNodeException { Node = node };
-			if (type == NonterminalType.AtomExpression) {
+			if (type == NonterminalType.PrimaryExpression) {
 				if (node.Children.Count == 3)//Remove parenthesis
 					do {
 						var c = node.Children;
@@ -24,14 +24,12 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 							break;
 						node = c[1];
 						type = node.GetNonterminalType();
-					} while (type == NonterminalType.AtomExpression && node.Children.Count == 3);
+					} while (type == NonterminalType.PrimaryExpression && node.Children.Count == 3);
 				node = node.Children.Single();
 				if (node.GetLexemeType() == LexemeType.Identifier)
 					_value = node.Value.AsToken.Value;
-				else if (node.GetNonterminalType() is var t && t == NonterminalType.Literal)
+				else if (node.GetNonterminalType() is NonterminalType.Literal)
 					_value = new Literal(node);
-				else if (t == NonterminalType.FunctionCall)
-					_value = new FunctionCall(node);
 			}
 			else {
 				var operands = new List<Expression>(2);
@@ -76,20 +74,31 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 								break;
 						}
 						break;
-					case NonterminalType.SuffixExpression:
-						ThrowHelper.ChildrenCountIs(node, 3);
-						operands.Add(new Expression(node.Children[0]));
-						Operator = node.Children[1].GetTokenValue() == "+" ? Op.SuffixIncrement : Op.SuffixDecrement;
-						break;
-					case NonterminalType.SubscriptExpression:
-						ThrowHelper.ChildrenCountIs(node, 4);
-						ThrowHelper.IsTerminal(node.Children[1], LexemeType.IndexStartSymbol);
-						ThrowHelper.IsTerminal(node.Children[3], LexemeType.IndexEndSymbol);
-						operands.Add(new Expression(node.Children[0]));
-						operands.Add(new Expression(node.Children[2]));
-						Operator = Op.Subscript;
+					case NonterminalType.PostfixExpression:
+						ThrowHelper.IsNonterminal(node.Children[0], NonterminalType.PostfixExpression, NonterminalType.PrimaryExpression);
+						ThrowHelper.IsTerminal(node.Children[1]);
+						switch (node.Children[1].GetLexemeType()) {
+							case LexemeType.IndexStartSymbol:
+								ThrowHelper.ChildrenCountIs(node, 4);
+								ThrowHelper.IsTerminal(node.Children[3], LexemeType.IndexEndSymbol);
+								operands.Add(new Expression(node.Children[0]));
+								operands.Add(new Expression(node.Children[2]));
+								Operator = Op.Subscript;
+								break;
+							case LexemeType.LeftParenthesis:
+								_value = new FunctionCall(node);
+								break;
+							case LexemeType.ArithmeticOperator:
+								ThrowHelper.ChildrenCountIs(node, 3);
+								operands.Add(new Expression(node.Children[0]));
+								Operator = node.Children[1].GetTokenValue() == "+" ? Op.SuffixIncrement : Op.SuffixDecrement;
+								break;
+							case LexemeType.MembershipOperator: goto BinaryExpression;
+							default:                            throw new UnexpectedSyntaxNodeException { Node = node };
+						}
 						break;
 					default:
+					BinaryExpression:
 						ThrowHelper.ChildrenCountIs(node, 3);
 						operands.Add(new Expression(node.Children[0]));
 						operands.Add(new Expression(node.Children[2]));
