@@ -3,8 +3,8 @@ using Analyzer;
 using Parser;
 
 namespace CMinusMinus.Analyzers.SyntaxComponents {
-	public class Program {
-		public Program(SyntaxTree rootTree) {
+	public class Program : SyntaxComponent {
+		public Program(SyntaxTree rootTree) : base(rootTree.Root) {
 			var node = rootTree.Root;
 			ThrowHelper.IsNonterminal(node, NonterminalType.Program);
 			var functions = new List<FunctionDeclaration>();

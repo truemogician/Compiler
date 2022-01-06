@@ -7,12 +7,12 @@ using Parser;
 namespace CMinusMinus.Analyzers.SyntaxComponents {
 	using Op = Operator;
 
-	public class Expression : IUnaryExpression, IBinaryExpression {
+	public class Expression : SyntaxComponent, IUnaryExpression, IBinaryExpression {
 		private readonly object? _value;
 
 		public Expression(SyntaxTreeNode node) : this(node.GetNonterminalType() == NonterminalType.Expression ? node.Children : new[] { node }) { }
 
-		public Expression(IEnumerable<SyntaxTreeNode> nodes) {
+		public Expression(ICollection<SyntaxTreeNode> nodes) : base(nodes.Single()) {
 			var node = nodes.Single();
 			var type = node.GetNonterminalType();
 			var exception = new UnexpectedSyntaxNodeException { Node = node };

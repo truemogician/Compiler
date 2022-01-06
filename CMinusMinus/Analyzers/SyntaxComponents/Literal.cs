@@ -5,8 +5,8 @@ using Parser;
 using TrueMogician.Exceptions;
 
 namespace CMinusMinus.Analyzers.SyntaxComponents {
-	public class Literal {
-		public Literal(SyntaxTreeNode node) {
+	public class Literal : SyntaxComponent {
+		public Literal(SyntaxTreeNode node) : base(node) {
 			ThrowHelper.IsTerminal(node, LexemeType.CharacterLiteral, LexemeType.FloatLiteral, LexemeType.IntegerLiteral, LexemeType.StringLiteral);
 			string value = node.Value.AsToken.Value;
 			switch (node.Value.Lexeme!.GetNameAsEnum<LexemeType>()) {

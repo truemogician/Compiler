@@ -2,8 +2,8 @@
 using Parser;
 
 namespace CMinusMinus.Analyzers.SyntaxComponents {
-	public class FunctionCall {
-		public FunctionCall(SyntaxTreeNode node) {
+	public class FunctionCall : SyntaxComponent {
+		public FunctionCall(SyntaxTreeNode node) : base(node) {
 			ThrowHelper.IsNonterminal(node, NonterminalType.FunctionCall);
 			ThrowHelper.IsTerminal(node.Children[^1], LexemeType.RightParenthesis);
 			int pos;

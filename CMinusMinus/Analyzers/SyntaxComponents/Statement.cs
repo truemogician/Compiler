@@ -4,19 +4,21 @@ using Analyzer;
 using Parser;
 
 namespace CMinusMinus.Analyzers.SyntaxComponents {
-	public abstract class Statement {
+	public abstract class Statement : SyntaxComponent {
+		protected Statement(SyntaxTreeNode node) : base(node) { }
+
 		public static Statement Create(SyntaxTreeNode node) {
 			ThrowHelper.IsNonterminal(node);
 			if (!Enum.TryParse<NonterminalType>(node.Value.AsNonterminal.Name, out var type))
 				throw new UnexpectedSyntaxNodeException($"Unrecognizable nonterminal name: {node.Value.AsNonterminal.Name}") { Node = node };
 			return type switch {
-				NonterminalType.EmptyStatement       => new EmptyStatement(),
+				NonterminalType.EmptyStatement       => new EmptyStatement(node),
 				NonterminalType.ExpressionStatement  => new ExpressionStatement(node),
 				NonterminalType.DeclarationStatement => new DeclarationStatement(node),
 				NonterminalType.ControlStatement =>
 					node.Children[0].Value.AsToken.Value switch {
-						"continue" => new ContinueStatement(),
-						"break"    => new BreakStatement(),
+						"continue" => new ContinueStatement(node),
+						"break"    => new BreakStatement(node),
 						"goto"     => new GotoStatement(node),
 						_          => throw new UnexpectedSyntaxNodeException { Node = node }
 					},
@@ -26,14 +28,20 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 		}
 	}
 
-	public class EmptyStatement : Statement { }
+	public class EmptyStatement : Statement {
+		public EmptyStatement(SyntaxTreeNode node) : base(node) { }
+	}
 
-	public class ContinueStatement : Statement { }
+	public class ContinueStatement : Statement {
+		public ContinueStatement(SyntaxTreeNode node) : base(node) { }
+	}
 
-	public class BreakStatement : Statement { }
+	public class BreakStatement : Statement {
+		public BreakStatement(SyntaxTreeNode node) : base(node) { }
+	}
 
 	public class GotoStatement : Statement {
-		internal GotoStatement(SyntaxTreeNode node) {
+		internal GotoStatement(SyntaxTreeNode node) : base(node) {
 			ThrowHelper.ChildrenCountIs(node, 3);
 			ThrowHelper.IsTerminal(node.Children[0], "goto");
 			ThrowHelper.IsTerminal(node.Children[1], LexemeType.Identifier);
@@ -45,7 +53,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 	}
 
 	public class ReturnStatement : Statement {
-		internal ReturnStatement(SyntaxTreeNode node) {
+		internal ReturnStatement(SyntaxTreeNode node) : base(node) {
 			ThrowHelper.IsTerminal(node.Children[0], "return");
 			if (node.Children[1].Value.Nonterminal?.GetNameAsEnum<NonterminalType>() == NonterminalType.Expression) {
 				ThrowHelper.ChildrenCountIs(node, 3);
@@ -62,7 +70,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 	}
 
 	public class ExpressionStatement : Statement {
-		internal ExpressionStatement(SyntaxTreeNode node) {
+		internal ExpressionStatement(SyntaxTreeNode node) : base(node) {
 			ThrowHelper.ChildrenCountIs(node, 2);
 			ThrowHelper.IsTerminal(node.Children[1], LexemeType.Delimiter);
 			Expression = new Expression(node.Children[0]);
@@ -72,7 +80,8 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 	}
 
 	public class DeclarationStatement : Statement {
-		internal DeclarationStatement(SyntaxTreeNode node) => VariableDeclarations = VariableDeclaration.FromDeclarationStatement(node).ToArray();
+		internal DeclarationStatement(SyntaxTreeNode node) : base(node)
+			=> VariableDeclarations = VariableDeclaration.FromDeclarationStatement(node).ToArray();
 
 		public VariableDeclaration[] VariableDeclarations { get; }
 	}

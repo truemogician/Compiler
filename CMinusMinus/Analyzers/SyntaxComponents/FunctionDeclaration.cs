@@ -4,8 +4,8 @@ using Analyzer;
 using Parser;
 
 namespace CMinusMinus.Analyzers.SyntaxComponents {
-	public class FunctionDeclaration {
-		public FunctionDeclaration(SyntaxTreeNode node) {
+	public class FunctionDeclaration : SyntaxComponent {
+		public FunctionDeclaration(SyntaxTreeNode node) : base(node) {
 			ThrowHelper.IsNonterminal(node, NonterminalType.FunctionDeclaration);
 			var children = node.Children.Select(n => n.Value).ToArray();
 			var i = 0;

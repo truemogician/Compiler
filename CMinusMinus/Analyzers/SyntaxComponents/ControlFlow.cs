@@ -5,7 +5,9 @@ using Parser;
 using TrueMogician.Extensions.Enumerator;
 
 namespace CMinusMinus.Analyzers.SyntaxComponents {
-	public abstract class ControlFlow {
+	public abstract class ControlFlow : SyntaxComponent {
+		protected ControlFlow(SyntaxTreeNode node) : base(node) { }
+
 		public static ControlFlow Create(SyntaxTreeNode node) {
 			ThrowHelper.IsNonterminal(node, NonterminalType.ControlFlow);
 			ThrowHelper.ChildrenCountIs(node, 1);
@@ -22,7 +24,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 	}
 
 	public class IfBlock : ControlFlow {
-		public IfBlock(SyntaxTreeNode node) {
+		public IfBlock(SyntaxTreeNode node) : base(node) {
 			ThrowHelper.IsNonterminal(node, NonterminalType.IfBlock);
 			using var enumerator = node.Children.GetEnumerator().ToExtended();
 			ThrowHelper.IsTerminal(enumerator.MoveNextAndGet(), "if");
@@ -50,7 +52,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 	}
 
 	public class SwitchBlock : ControlFlow {
-		public SwitchBlock(SyntaxTreeNode node) {
+		public SwitchBlock(SyntaxTreeNode node) : base(node) {
 			ThrowHelper.IsNonterminal(node, NonterminalType.SwitchBlock);
 			using var enumerator = node.Children.GetEnumerator().ToExtended();
 			ThrowHelper.IsTerminal(enumerator.MoveNextAndGet(), "switch");
@@ -80,7 +82,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 	}
 
 	public class ForBlock : ControlFlow {
-		public ForBlock(SyntaxTreeNode node) {
+		public ForBlock(SyntaxTreeNode node) : base(node) {
 			ThrowHelper.IsNonterminal(node, NonterminalType.ForBlock);
 			using var enumerator = node.Children.GetEnumerator().ToExtended();
 			ThrowHelper.IsTerminal(enumerator.MoveNextAndGet(), "for");
@@ -104,7 +106,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 	}
 
 	public class WhileBlock : ControlFlow {
-		public WhileBlock(SyntaxTreeNode node) {
+		public WhileBlock(SyntaxTreeNode node) : base(node) {
 			ThrowHelper.IsNonterminal(node, NonterminalType.WhileBlock);
 			using var enumerator = node.Children.GetEnumerator().ToExtended();
 			ThrowHelper.IsTerminal(enumerator.MoveNextAndGet(), "while");
@@ -122,7 +124,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 	}
 
 	public class DoWhileBlock : ControlFlow {
-		public DoWhileBlock(SyntaxTreeNode node) {
+		public DoWhileBlock(SyntaxTreeNode node) : base(node) {
 			ThrowHelper.IsNonterminal(node, NonterminalType.DoWhileBlock);
 			using var enumerator = node.Children.GetEnumerator().ToExtended();
 			ThrowHelper.IsTerminal(enumerator.MoveNextAndGet(), "do");

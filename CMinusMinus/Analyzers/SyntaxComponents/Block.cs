@@ -4,8 +4,8 @@ using Analyzer;
 using Parser;
 
 namespace CMinusMinus.Analyzers.SyntaxComponents {
-	public class Block {
-		public Block(SyntaxTreeNode node) {
+	public class Block : SyntaxComponent {
+		public Block(SyntaxTreeNode node) : base(node) {
 			ThrowHelper.IsNonterminal(node, NonterminalType.Block);
 			ThrowHelper.IsTerminal(node.Children[0], LexemeType.BlockStartSymbol);
 			ThrowHelper.IsTerminal(node.Children[^1], LexemeType.BlockEndSymbol);
@@ -64,7 +64,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 
 		public ControlFlow? ControlFlow => _content as ControlFlow;
 
-		private void InitializeLabel(out string? field, SyntaxTreeNode? node) {
+		private static void InitializeLabel(out string? field, SyntaxTreeNode? node) {
 			if (node is null) {
 				field = null;
 				return;
@@ -76,7 +76,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			field = node.Children[0].GetTokenValue()!;
 		}
 
-		private void InitializeContent(out object field, SyntaxTreeNode node) {
+		private static void InitializeContent(out object field, SyntaxTreeNode node) {
 			field = node.GetNonterminalType() switch {
 				NonterminalType.Block       => new Block(node),
 				NonterminalType.ControlFlow => ControlFlow.Create(node),
