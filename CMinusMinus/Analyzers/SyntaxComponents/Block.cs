@@ -36,9 +36,9 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 	}
 
 	public class BlockComponent {
-		private readonly object _content;
+		private readonly SyntaxComponent _content;
 
-		private readonly string? _label;
+		private readonly Identifier? _label;
 
 		internal BlockComponent(IEnumerator<SyntaxTreeNode> enumerator) {
 			SyntaxTreeNode? label = null;
@@ -55,7 +55,9 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 
 		public BlockComponent(SyntaxTreeNode? labelNode, SyntaxTreeNode contentNode) : this(contentNode) => InitializeLabel(out _label, labelNode);
 
-		public string? Label => _label;
+		public Identifier? Label => _label;
+
+		public SyntaxComponent Content => _content;
 
 		public Statement? Statement => _content as Statement;
 
@@ -63,7 +65,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 
 		public ControlFlow? ControlFlow => _content as ControlFlow;
 
-		private static void InitializeLabel(out string? field, SyntaxTreeNode? node) {
+		private static void InitializeLabel(out Identifier? field, SyntaxTreeNode? node) {
 			if (node is null) {
 				field = null;
 				return;
@@ -72,10 +74,10 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			ThrowHelper.ChildrenCountIs(node, 2);
 			ThrowHelper.IsTerminal(node.Children[0], LexemeType.Identifier);
 			ThrowHelper.IsTerminal(node.Children[1], LexemeType.Colon);
-			field = node.Children[0].GetTokenValue()!;
+			field = new Identifier(node.Children[0]);
 		}
 
-		private static void InitializeContent(out object field, SyntaxTreeNode node) {
+		private static void InitializeContent(out SyntaxComponent field, SyntaxTreeNode node) {
 			field = node.GetNonterminalType() switch {
 				NonterminalType.Block       => new Block(node),
 				NonterminalType.ControlFlow => ControlFlow.Create(node),

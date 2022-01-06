@@ -13,7 +13,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			if (i == nds.Length)
 				throw new UnexpectedSyntaxNodeException();
 			Type = new FullType(nds[..i]);
-			Name = nds[i++].Value.AsToken.Value;
+			Name = new Identifier(nds[i++]);
 			if (i < nds.Length) {
 				ThrowHelper.IsTerminal(nds[i++], "=");
 				if (i == nds.Length)
@@ -26,7 +26,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 
 		public FullType Type { get; }
 
-		public string Name { get; }
+		public Identifier Name { get; }
 
 		public Expression? DefaultValue { get; }
 

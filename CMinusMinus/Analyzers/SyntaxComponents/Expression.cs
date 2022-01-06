@@ -8,7 +8,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 	using Op = Operator;
 
 	public class Expression : SyntaxComponent, IUnaryExpression, IBinaryExpression {
-		private readonly object? _value;
+		private readonly SyntaxComponent? _value;
 
 		public Expression(SyntaxTreeNode node) : this(node.GetNonterminalType() == NonterminalType.Expression ? node.Children : new[] { node }) { }
 
@@ -27,7 +27,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 					} while (type == NonterminalType.PrimaryExpression && node.Children.Count == 3);
 				node = node.Children.Single();
 				if (node.GetLexemeType() == LexemeType.Identifier)
-					_value = node.Value.AsToken.Value;
+					_value = new Identifier(node);
 				else if (node.GetNonterminalType() is NonterminalType.Literal)
 					_value = new Literal(node);
 			}
@@ -162,7 +162,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 
 		public bool Atomic => Operator is null;
 
-		public string? Identifier => _value as string;
+		public Identifier? Identifier => _value as Identifier;
 
 		public FunctionCall? FunctionCall => _value as FunctionCall;
 

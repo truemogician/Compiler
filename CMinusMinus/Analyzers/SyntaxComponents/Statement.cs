@@ -46,10 +46,10 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			ThrowHelper.IsTerminal(node.Children[0], "goto");
 			ThrowHelper.IsTerminal(node.Children[1], LexemeType.Identifier);
 			ThrowHelper.IsTerminal(node.Children[2], LexemeType.Delimiter);
-			Label = node.Children[1].Value.AsToken.Value;
+			Label = new Identifier(node.Children[1]);
 		}
 
-		public string Label { get; }
+		public Identifier Label { get; }
 	}
 
 	public class ReturnStatement : Statement {

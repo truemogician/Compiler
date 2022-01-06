@@ -13,7 +13,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			if (i >= children.Length)
 				throw new UnexpectedSyntaxNodeException { Node = node };
 			ReturnType = new FullType(node.Children[..i]);
-			Name = children[i++].AsToken.Value;
+			Name = new Identifier(children[i++]);
 			ThrowHelper.IsTerminal(node.Children[i++], LexemeType.LeftParenthesis);
 			int j = i;
 			var parameters = new List<Parameter>();
@@ -29,7 +29,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			Body = new Block(node.Children[i + 1]);
 		}
 
-		public string Name { get; }
+		public Identifier Name { get; }
 
 		public FullType ReturnType { get; }
 
