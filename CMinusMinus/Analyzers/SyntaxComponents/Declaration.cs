@@ -12,7 +12,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			for (; i < nds.Length && nds[i].Value.Lexeme?.GetNameAsEnum<LexemeType>() != LexemeType.Identifier; ++i) { }
 			if (i == nds.Length)
 				throw new UnexpectedSyntaxNodeException();
-			Type = new CommonType(nds[..i]);
+			Type = new FullType(nds[..i]);
 			Name = new Identifier(nds[i++]);
 			if (i < nds.Length) {
 				ThrowHelper.IsTerminal(nds[i++], "=");
@@ -24,7 +24,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			}
 		}
 
-		public IdentifierType Type { get; }
+		public FullType Type { get; }
 
 		public Identifier Name { get; }
 

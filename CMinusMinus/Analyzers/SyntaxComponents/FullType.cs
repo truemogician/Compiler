@@ -7,20 +7,20 @@ using TrueMogician.Extensions.Enumerable;
 
 namespace CMinusMinus.Analyzers.SyntaxComponents {
 	//TODO: array type
-	public class CommonType {
-		internal CommonType(Qualifier qualifier, FundamentalType type) {
+	public class FullType {
+		internal FullType(Qualifier qualifier, FundamentalType type) {
 			Qualifier = qualifier;
 			Type = type;
 			ValueType = null;
 		}
 
-		internal CommonType(Qualifier qualifier, CommonType valueType) {
+		internal FullType(Qualifier qualifier, FullType valueType) {
 			Qualifier = qualifier;
 			Type = null;
 			ValueType = valueType;
 		}
 
-		public CommonType(IEnumerable<SyntaxTreeNode> nodes) {
+		public FullType(IEnumerable<SyntaxTreeNode> nodes) {
 			var nds = nodes.AsArray();
 			var i = 0;
 			var qualifiers = new List<Qualifier>();
@@ -52,9 +52,9 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 				ValueType = null;
 			}
 			else {
-				var prev = new CommonType(qualifiers[0], fType);
+				var prev = new FullType(qualifiers[0], fType);
 				for (var j = 1; j < qualifiers.Count - 1; ++j) {
-					var cur = new CommonType(qualifiers[j], prev);
+					var cur = new FullType(qualifiers[j], prev);
 					prev = cur;
 				}
 				Qualifier = qualifiers[^1];
@@ -67,7 +67,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 
 		public FundamentalType? Type { get; }
 
-		public CommonType? ValueType { get; }
+		public FullType? ValueType { get; }
 
 		public bool IsPointer => ValueType is not null;
 
