@@ -4,17 +4,17 @@ using System.Linq;
 using Analyzer;
 using Parser;
 using TrueMogician.Extensions.Enumerable;
+using TrueMogician.Extensions.Enumerator;
 
 namespace CMinusMinus.Analyzers.SyntaxComponents {
-	//TODO: array type
 	public class FullType {
-		internal FullType(Qualifier qualifier, FundamentalType type) {
+		internal FullType(TypeQualifier qualifier, FundamentalType type) {
 			Qualifier = qualifier;
 			Type = type;
 			ValueType = null;
 		}
 
-		internal FullType(Qualifier qualifier, FullType valueType) {
+		internal FullType(TypeQualifier qualifier, FullType valueType) {
 			Qualifier = qualifier;
 			Type = null;
 			ValueType = valueType;
@@ -23,13 +23,13 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 		public FullType(IEnumerable<SyntaxTreeNode> nodes) {
 			var nds = nodes.AsArray();
 			var i = 0;
-			var qualifiers = new List<Qualifier>();
-			var qualifier = Qualifier.None;
+			var qualifiers = new List<TypeQualifier>();
+			var qualifier = TypeQualifier.None;
 			for (; i < nds.Length && nds[i].Value.Token is { } t; ++i) {
 				ThrowHelper.IsTerminal(nds[i], LexemeType.Keyword);
 				qualifier |= t.Value switch {
-					"const"    => Qualifier.Const,
-					"volatile" => Qualifier.Volatile,
+					"const"    => TypeQualifier.Const,
+					"volatile" => TypeQualifier.Volatile,
 					_          => throw new UnexpectedSyntaxNodeException { Node = nds[i] }
 				};
 			}
@@ -37,11 +37,11 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			var fType = ParseFundamentalType(nds[i++]);
 			while (i < nds.Length) {
 				ThrowHelper.IsTerminal(nds[i++], "*");
-				qualifier = Qualifier.None;
+				qualifier = TypeQualifier.None;
 				for (; i < nds.Length && nds[i].Value.Lexeme?.GetNameAsEnum<LexemeType>() == LexemeType.Keyword; ++i)
 					qualifier |= nds[i].Value.Token!.Value switch {
-						"const"    => Qualifier.Const,
-						"volatile" => Qualifier.Volatile,
+						"const"    => TypeQualifier.Const,
+						"volatile" => TypeQualifier.Volatile,
 						_          => throw new UnexpectedSyntaxNodeException { Node = nds[i] }
 					};
 				qualifiers.Add(qualifier);
@@ -63,9 +63,9 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			}
 		}
 
-		public Qualifier Qualifier { get; }
+		public TypeQualifier Qualifier { get; }
 
-		public FundamentalType? Type { get; }
+		public BasicType? Type { get; }
 
 		public FullType? ValueType { get; }
 
@@ -96,7 +96,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 	}
 
 	[Flags]
-	public enum Qualifier : byte {
+	public enum TypeQualifier : byte {
 		None = 0,
 
 		Const = 1,
@@ -106,37 +106,94 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 		ConstVolatile = 3
 	}
 
-	#pragma warning disable CA1720
-	public enum FundamentalType : byte {
-		Void,
+	public abstract class BasicType { }
 
-		Char,
+	public class FundamentalType : BasicType {
+		private FundamentalType() { }
 
-		SignedChar,
+		public static FundamentalType Void { get; } = new();
 
-		UnsignedChar,
+		public static FundamentalType Char { get; } = new();
 
-		Short,
+		public static FundamentalType SignedChar { get; } = new();
 
-		UnsignedShort,
+		public static FundamentalType UnsignedChar { get; } = new();
 
-		Int,
+		public static FundamentalType Short { get; } = new();
 
-		UnsignedInt,
+		public static FundamentalType UnsignedShort { get; } = new();
 
-		Long,
+		public static FundamentalType Int { get; } = new();
 
-		UnsignedLong,
+		public static FundamentalType UnsignedInt { get; } = new();
 
-		LongLong,
+		public static FundamentalType Long { get; } = new();
 
-		UnsignedLongLong,
+		public static FundamentalType UnsignedLong { get; } = new();
 
-		Float,
+		public static FundamentalType LongLong { get; } = new();
 
-		Double,
+		public static FundamentalType UnsignedLongLong { get; } = new();
 
-		LongDouble
+		public static FundamentalType Float { get; } = new();
+
+		public static FundamentalType Double { get; } = new();
+
+		public static FundamentalType LongDouble { get; } = new();
 	}
-	#pragma warning restore CA1720
+
+	public class FunctionType : BasicType {
+		public FunctionType(FullType returnType, IEnumerable<SyntaxTreeNode> paramList) : this(returnType, paramList.GetEnumerator()) { }
+
+		public FunctionType(FullType returnType, IEnumerator<SyntaxTreeNode> paramList) {
+			ReturnType = returnType;
+			ThrowHelper.IsTerminal(paramList.GetAndMoveNext(), LexemeType.LeftParenthesis);
+			var parameters = new List<Parameter>();
+			var typeNodes = new List<SyntaxTreeNode>();
+			for (Identifier? name = null; paramList.Current.GetLexemeType() is var type && type != LexemeType.RightParenthesis; paramList.MoveNext()) {
+				if (type != LexemeType.Separator && name is not null)
+					throw new UnexpectedSyntaxNodeException();
+				switch (type) {
+					case LexemeType.Separator:
+						parameters.Add(new Parameter(new FullType(typeNodes), name));
+						name = null;
+						typeNodes.Clear();
+						break;
+					case LexemeType.Identifier:
+						name = new Identifier(paramList.Current);
+						break;
+					default:
+						typeNodes.Add(paramList.Current);
+						break;
+				}
+			}
+			Parameters = parameters;
+			paramList.MoveNext();
+		}
+
+		public FullType ReturnType { get; }
+
+		public IReadOnlyList<Parameter> Parameters { get; }
+
+		public record Parameter(FullType Type, Identifier? Name);
+	}
+
+	public class ArrayType : BasicType {
+		public ArrayType(FullType itemType, IEnumerable<SyntaxTreeNode> dimensions) : this(itemType, dimensions.GetEnumerator()) { }
+
+		public ArrayType(FullType itemType, IEnumerator<SyntaxTreeNode> dimensionNodes) {
+			ItemType = itemType;
+			var dimensions = new List<Expression?>();
+			while (dimensionNodes.Current.GetLexemeType() == LexemeType.IndexStartSymbol) {
+				dimensions.Add(new Expression(dimensionNodes.MoveNextAndGet()));
+				ThrowHelper.IsTerminal(dimensionNodes.MoveNextAndGet(), LexemeType.IndexEndSymbol);
+				dimensionNodes.MoveNext();
+			}
+			Dimensions = dimensions;
+		}
+
+		public FullType ItemType { get; }
+
+		public IReadOnlyList<Expression?> Dimensions { get; }
+	}
 }
