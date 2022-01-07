@@ -4,19 +4,16 @@ using Analyzer;
 using CMinusMinus.Analyzers.SyntaxComponents;
 
 namespace CMinusMinus.Analyzers {
-	public class JumpStatementAnalyzer : IAnalyzer<Program> {
+	public class JumpStatementAnalyzer : IReadOnlyAnalyzer<Program> {
 		private static readonly SemanticErrorType BreakStatementError = new("JS0001", ErrorLevel.Error, Name) { DefaultMessage = "Break statement appears in wrong context." };
 
 		private static readonly SemanticErrorType ContinueStatementError = new("JS0002", ErrorLevel.Error, Name) { DefaultMessage = "Continue statement appears in wrong context." };
 
 		string IAnalyzer.Name => Name;
 
-		public static string Name => nameof(JumpStatementAnalyzer);
+		IEnumerable<SemanticError> IReadOnlyAnalyzer<Program>.Analyze(Program source) => source.FunctionDeclarations.Aggregate(Enumerable.Empty<SemanticError>(), (current, func) => current.Concat(Analyze(func.Body.Components, false, false)));
 
-		public Program Analyze(Program source, out IEnumerable<SemanticError> errors) {
-			errors = source.FunctionDeclarations.Aggregate(Enumerable.Empty<SemanticError>(), (current, func) => current.Concat(Analyze(func.Body.Components, false, false)));
-			return source;
-		}
+		public static string Name => nameof(JumpStatementAnalyzer);
 
 		private static IEnumerable<SemanticError> Analyze(IEnumerable<BlockComponent> components, bool allowBreak, bool allowContinue) {
 			foreach (var comp in components) {
