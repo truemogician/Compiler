@@ -44,7 +44,7 @@ namespace CMinusMinus.Analyzers {
 					case ForBlock:
 					case WhileBlock:
 					case DoWhileBlock:
-						foreach (var error in Analyze((ControlFlowBody)((dynamic)content).Body, true, true))
+						foreach (var error in Analyze(((LoopBlock)content).Body, true, true))
 							yield return error;
 						break;
 				}

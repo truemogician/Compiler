@@ -81,7 +81,17 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 		public IReadOnlyList<(Expression? Value, IReadOnlyList<BlockComponent> Body)> Cases { get; }
 	}
 
-	public class ForBlock : ControlFlow {
+	public abstract class LoopBlock : ControlFlow {
+		#pragma warning disable CS8618
+		protected LoopBlock(SyntaxTreeNode node) : base(node) { }
+		#pragma warning restore CS8618
+
+		public Expression? Condition { get; protected init; }
+
+		public ControlFlowBody Body { get; protected init; }
+	}
+
+	public class ForBlock : LoopBlock {
 		public ForBlock(SyntaxTreeNode node) : base(node) {
 			ThrowHelper.IsNonterminal(node, NonterminalType.ForBlock);
 			using var enumerator = node.Children.GetEnumerator().ToExtended();
@@ -98,14 +108,10 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 
 		public Statement Initialization { get; }
 
-		public Expression? Condition { get; }
-
 		public Expression? Iteration { get; }
-
-		public ControlFlowBody Body { get; }
 	}
 
-	public class WhileBlock : ControlFlow {
+	public class WhileBlock : LoopBlock {
 		public WhileBlock(SyntaxTreeNode node) : base(node) {
 			ThrowHelper.IsNonterminal(node, NonterminalType.WhileBlock);
 			using var enumerator = node.Children.GetEnumerator().ToExtended();
@@ -117,13 +123,9 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			if (enumerator.Success)
 				throw new UnexpectedSyntaxNodeException { Node = enumerator.Current };
 		}
-
-		public Expression Condition { get; }
-
-		public ControlFlowBody Body { get; }
 	}
 
-	public class DoWhileBlock : ControlFlow {
+	public class DoWhileBlock : LoopBlock {
 		public DoWhileBlock(SyntaxTreeNode node) : base(node) {
 			ThrowHelper.IsNonterminal(node, NonterminalType.DoWhileBlock);
 			using var enumerator = node.Children.GetEnumerator().ToExtended();
@@ -134,10 +136,6 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			Condition = new Expression(enumerator.MoveNextAndGet());
 			ThrowHelper.IsTerminal(enumerator.MoveNextAndGet(), LexemeType.RightParenthesis);
 		}
-
-		public ControlFlowBody Body { get; }
-
-		public Expression Condition { get; }
 	}
 
 	public class ControlFlowBody : IReadOnlyList<BlockComponent> {
