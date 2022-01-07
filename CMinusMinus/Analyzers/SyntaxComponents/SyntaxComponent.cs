@@ -8,5 +8,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 		protected SyntaxComponent(SyntaxTreeNode node) => Node = node;
 
 		internal SemanticError CreateError(SemanticErrorType type) => new(type, Node);
+
+		internal SemanticError CreateError(SemanticErrorType type, string message) => new(type, Node) { Message = message };
 	}
 }
