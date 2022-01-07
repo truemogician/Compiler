@@ -12,7 +12,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			for (; i < children.Length && children[i].Lexeme?.GetNameAsEnum<LexemeType>() != LexemeType.Identifier; ++i) { }
 			if (i >= children.Length)
 				throw new UnexpectedSyntaxNodeException { Node = node };
-			ReturnType = new FullType(node.Children[..i]);
+			ReturnType = new CommonType(node.Children[..i]);
 			Name = new Identifier(children[i++]);
 			ThrowHelper.IsTerminal(node.Children[i++], LexemeType.LeftParenthesis);
 			int j = i;
@@ -20,7 +20,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			for (; i < children.Length && children[i].Lexeme?.GetNameAsEnum<LexemeType>() is var type && type != LexemeType.RightParenthesis; ++i)
 				if (type == LexemeType.Identifier) {
 					ThrowHelper.IsTerminal(node.Children[i + 1], LexemeType.Separator, LexemeType.RightParenthesis);
-					parameters.Add(new Parameter(new FullType(node.Children[j..i]), children[i].AsToken.Value));
+					parameters.Add(new Parameter(new CommonType(node.Children[j..i]), children[i].AsToken.Value));
 					j = i + 2;
 				}
 			Parameters = parameters;
@@ -31,7 +31,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 
 		public Identifier Name { get; }
 
-		public FullType ReturnType { get; }
+		public CommonType ReturnType { get; }
 
 		public IReadOnlyList<Parameter> Parameters { get; }
 
@@ -39,6 +39,6 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 
 		public static implicit operator FunctionDeclaration(SyntaxTreeNode node) => new(node);
 
-		public record Parameter(FullType Type, string Name);
+		public record Parameter(CommonType Type, string Name);
 	}
 }

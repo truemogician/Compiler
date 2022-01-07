@@ -70,7 +70,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 								ThrowHelper.IsTerminal(node.Children[0], LexemeType.LeftParenthesis);
 								ThrowHelper.IsTerminal(node.Children[^2], LexemeType.RightParenthesis);
 								Operator = Op.Cast;
-								Type = new FullType(node.Children[1..^3]);
+								Type = new CommonType(node.Children[1..^3]);
 								break;
 						}
 						break;
@@ -152,7 +152,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 
 		Expression IBinaryExpression.RightOperand => Arity == 2 ? Operands![1] : throw new InvalidOperationException("Not a binary expression");
 
-		public FullType? Type { get; set; }
+		public CommonType? Type { get; set; }
 
 		public Operator? Operator { get; }
 

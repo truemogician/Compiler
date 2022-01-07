@@ -11,23 +11,22 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			string value = node.Value.AsToken.Value;
 			switch (node.Value.Lexeme!.GetNameAsEnum<LexemeType>()) {
 				case LexemeType.CharacterLiteral:
-					Type = new FullType(Qualifier.Const, FundamentalType.Char);
+					Type = new CommonType(Qualifier.Const, FundamentalType.Char);
 					Value = char.Parse(Regex.Unescape(value[1..^1]));
 					break;
 				case LexemeType.StringLiteral:
-					Type = new FullType(Qualifier.None, new FullType(Qualifier.Const, FundamentalType.Char));
+					Type = new CommonType(Qualifier.None, new CommonType(Qualifier.Const, FundamentalType.Char));
 					Value = Regex.Unescape(value[1..^1]);
 					break;
 				case LexemeType.IntegerLiteral:
-					Type = new FullType(Qualifier.Const, FundamentalType.Int);
+					Type = new CommonType(Qualifier.Const, FundamentalType.Int);
 					var idx = 0;
 					bool negative = value[0] == '-';
 					if (!char.IsDigit(value[0]))
 						++idx;
 					int radix = value[idx..(idx + 2)] switch {
 						"0b" => 2,
-						"0x" => 16,
-						_    => 10
+						"0x" => 16,    			_    => 10
 					};
 					if (radix != 10)
 						idx += 2;
@@ -36,14 +35,14 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 						Value = -(int)Value;
 					break;
 				case LexemeType.FloatLiteral:
-					Type = new FullType(Qualifier.Const, FundamentalType.Double);
+					Type = new CommonType(Qualifier.Const, FundamentalType.Double);
 					Value = double.Parse(value, NumberStyles.Float);
 					break;
 				default: throw new BugFoundException();
 			}
 		}
 
-		public FullType Type { get; }
+		public CommonType Type { get; }
 
 		public object Value { get; }
 	}
