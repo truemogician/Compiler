@@ -7,11 +7,11 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 		public Program(SyntaxTree rootTree) : base(rootTree.Root) {
 			var node = rootTree.Root;
 			ThrowHelper.IsNonterminal(node, NonterminalType.Program);
-			var functions = new List<FunctionDeclaration>();
+			var functions = new List<FunctionDefinition>();
 			var globals = new List<Declaration>();
 			foreach (var child in node.Children)
 				switch (child.Value.Nonterminal?.Name) {
-					case nameof(NonterminalType.FunctionDeclaration):
+					case nameof(NonterminalType.FunctionDefinition):
 						functions.Add(child);
 						break;
 					case nameof(NonterminalType.DeclarationStatement):
@@ -19,11 +19,11 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 						break;
 					default: throw new UnexpectedSyntaxNodeException { Node = child };
 				}
-			FunctionDeclarations = functions;
+			FunctionDefinitions = functions;
 			GlobalVariableDeclarations = globals;
 		}
 
-		public IReadOnlyList<FunctionDeclaration> FunctionDeclarations { get; }
+		public IReadOnlyList<FunctionDefinition> FunctionDefinitions { get; }
 
 		public IReadOnlyList<Declaration> GlobalVariableDeclarations { get; }
 

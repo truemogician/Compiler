@@ -11,7 +11,7 @@ namespace CMinusMinus.Analyzers {
 
 		string IAnalyzer.Name => Name;
 
-		IEnumerable<SemanticError> IReadOnlyAnalyzer<Program>.Analyze(Program source) => source.FunctionDeclarations.Aggregate(Enumerable.Empty<SemanticError>(), (current, func) => current.Concat(Analyze(func.Body.Components, false, false)));
+		IEnumerable<SemanticError> IReadOnlyAnalyzer<Program>.Analyze(Program source) => source.FunctionDefinitions.Aggregate(Enumerable.Empty<SemanticError>(), (current, func) => current.Concat(Analyze(func.Body.Components, false, false)));
 
 		public static string Name => nameof(JumpStatementAnalyzer);
 

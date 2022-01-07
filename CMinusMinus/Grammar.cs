@@ -109,10 +109,10 @@ namespace CMinusMinus {
 			#region Production Rules
 			grammar.Add(
 				NonterminalType.Program,
-				((RSF)NonterminalType.FunctionDeclaration | NonterminalType.DeclarationStatement) * '+'
+				((RSF)NonterminalType.FunctionDefinition | NonterminalType.DeclarationStatement) * '+'
 			);
 			grammar.Add(
-				NonterminalType.FunctionDeclaration,
+				NonterminalType.FunctionDefinition,
 				(RSF)nType +
 				tIdentifier +
 				tLeftParenthesis +
@@ -423,7 +423,7 @@ namespace CMinusMinus {
 	public enum NonterminalType : byte {
 		Program,
 
-		FunctionDeclaration,
+		FunctionDefinition,
 
 		FundamentalType,
 
