@@ -86,7 +86,23 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 								Operator = Op.Subscript;
 								break;
 							case LexemeType.LeftParenthesis:
-								_value = new FunctionCall(node);
+								ThrowHelper.IsTerminal(node.Children[^1], LexemeType.RightParenthesis);
+								operands.Add(new Expression(node.Children[0]));
+								if (node.Children.Count == 4) {
+									ThrowHelper.IsNonterminal(node.Children[2], NonterminalType.Expression);
+									var exp = node.Children[2].Children;
+									if (exp.Count == 1 && exp[0].Value.Nonterminal?.GetNameAsEnum<NonterminalType>() == NonterminalType.CommaExpression) {
+										var commaExp = new Expression(exp) as IBinaryExpression;
+										do {
+											operands.Add(commaExp.LeftOperand);
+											commaExp = commaExp.RightOperand;
+										} while (commaExp.Operator == Op.Comma);
+										operands.Add((Expression)commaExp);
+									}
+									else
+										operands.Add(new Expression(exp));
+								}
+								Operator = Op.FunctionCall;
 								break;
 							case LexemeType.ArithmeticOperator:
 								ThrowHelper.ChildrenCountIs(node, 3);
@@ -164,13 +180,9 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 
 		public Identifier? Identifier => _value as Identifier;
 
-		public FunctionCall? FunctionCall => _value as FunctionCall;
-
 		public Literal? Literal => _value as Literal;
 
 		public string AsIdentifier => Identifier ?? throw new InvalidOperationException("Not an identifier");
-
-		public FunctionCall AsFunctionCall => FunctionCall ?? throw new InvalidOperationException("Not a function call");
 
 		public Literal AsLiteral => Literal ?? throw new InvalidOperationException("Not a literal");
 
@@ -281,6 +293,8 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 		Member,
 
 		Subscript,
+
+		FunctionCall,
 
 		SuffixIncrement,
 
