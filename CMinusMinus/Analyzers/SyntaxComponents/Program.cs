@@ -8,14 +8,14 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			var node = rootTree.Root;
 			ThrowHelper.IsNonterminal(node, NonterminalType.Program);
 			var functions = new List<FunctionDeclaration>();
-			var globals = new List<VariableDeclaration>();
+			var globals = new List<Declaration>();
 			foreach (var child in node.Children)
 				switch (child.Value.Nonterminal?.Name) {
 					case nameof(NonterminalType.FunctionDeclaration):
 						functions.Add(child);
 						break;
 					case nameof(NonterminalType.DeclarationStatement):
-						globals.AddRange(VariableDeclaration.FromDeclarationStatement(child));
+						globals.AddRange(Declaration.FromDeclarationStatement(child));
 						break;
 					default: throw new UnexpectedSyntaxNodeException { Node = child };
 				}
@@ -25,7 +25,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 
 		public IReadOnlyList<FunctionDeclaration> FunctionDeclarations { get; }
 
-		public IReadOnlyList<VariableDeclaration> GlobalVariableDeclarations { get; }
+		public IReadOnlyList<Declaration> GlobalVariableDeclarations { get; }
 
 		public static implicit operator Program(SyntaxTreeNode node) => new(node);
 	}

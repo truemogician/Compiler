@@ -81,8 +81,8 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 
 	public class DeclarationStatement : Statement {
 		internal DeclarationStatement(SyntaxTreeNode node) : base(node)
-			=> VariableDeclarations = VariableDeclaration.FromDeclarationStatement(node).ToArray();
+			=> VariableDeclarations = Declaration.FromDeclarationStatement(node).ToArray();
 
-		public VariableDeclaration[] VariableDeclarations { get; }
+		public Declaration[] VariableDeclarations { get; }
 	}
 }

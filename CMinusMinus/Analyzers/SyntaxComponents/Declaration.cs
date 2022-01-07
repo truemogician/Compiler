@@ -5,8 +5,8 @@ using Parser;
 using TrueMogician.Extensions.Enumerable;
 
 namespace CMinusMinus.Analyzers.SyntaxComponents {
-	public class VariableDeclaration {
-		public VariableDeclaration(IEnumerable<SyntaxTreeNode> nodes) {
+	public class Declaration {
+		public Declaration(IEnumerable<SyntaxTreeNode> nodes) {
 			var nds = nodes.AsArray();
 			var i = 0;
 			for (; i < nds.Length && nds[i].Value.Lexeme?.GetNameAsEnum<LexemeType>() != LexemeType.Identifier; ++i) { }
@@ -24,13 +24,13 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			}
 		}
 
-		public CommonType Type { get; }
+		public IdentifierType Type { get; }
 
 		public Identifier Name { get; }
 
 		public Expression? DefaultValue { get; }
 
-		public static IEnumerable<VariableDeclaration> FromDeclarationStatement(SyntaxTreeNode node) {
+		public static IEnumerable<Declaration> FromDeclarationStatement(SyntaxTreeNode node) {
 			ThrowHelper.IsNonterminal(node, NonterminalType.DeclarationStatement);
 			var i = 0;
 			for (; node.Children[i].Value.Lexeme?.GetNameAsEnum<LexemeType>() == LexemeType.Keyword; ++i) { }
@@ -42,7 +42,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 					break;
 				if (i >= node.Children.Count)
 					throw new UnexpectedSyntaxNodeException { Node = node };
-				yield return new VariableDeclaration(prefix.Concat(node.Children[prev..i]));
+				yield return new Declaration(prefix.Concat(node.Children[prev..i]));
 				prev = ++i;
 			} while (true);
 		}
