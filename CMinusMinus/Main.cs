@@ -12,9 +12,9 @@ namespace CMinusMinus {
 	using GLRParser = Parser.LR.GLR.Parser;
 	using CompiledGLRParser = Parser.LR.GLR.CompiledParser;
 
-	public partial class CMinusMinusFactory : LanguageFactoryBase { }
+	public partial class CMinusMinusFactory : AnalyzableLanguageFactoryBase { }
 
-	public class CMinusMinus : Language<RegexLexer, IParser, CMinusMinusFactory> {
+	public class CMinusMinus : AnalyzableLanguage<RegexLexer, IParser, CMinusMinusFactory> {
 		private bool _useCompiled;
 
 		private ParserAlgorithm? _algorithm;

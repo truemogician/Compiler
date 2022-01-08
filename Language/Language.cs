@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
-using Analyzer;
+﻿using System;
+using System.Collections.Generic;
 using Lexer;
 using Parser;
 
 namespace Language {
 	public abstract class Language<TLexer, TParser, TFactory> : ILanguage where TLexer : ILexer where TParser : IParser where TFactory : LanguageFactoryBase, new() {
-		AnalyzerCollection ILanguage.Analyzers => Analyzers;
-
 		ILexer ILanguage.Lexer => Lexer;
 
 		IParser ILanguage.Parser => Parser;
@@ -21,17 +19,9 @@ namespace Language {
 
 		public bool TryParse(string code, out SyntaxTree? ast) => Parser.TryParse(Filter(Tokenize(code)), out ast);
 
-		public IEnumerable<SemanticError> Analyze(string code) {
-			var tree = Parse(code);
-			tree.Clean();
-			return Analyzers.Analyze(tree);
-		}
-
 		public static Lexicon Lexicon => Factory.Lexicon;
 
 		public static Grammar Grammar => Factory.Grammar;
-
-		public static AnalyzerCollection Analyzers => Factory.Analyzers;
 
 		public abstract TLexer Lexer { get; }
 
@@ -45,8 +35,6 @@ namespace Language {
 
 		public IParser Parser { get; }
 
-		public AnalyzerCollection Analyzers { get; }
-
 		public IEnumerable<Token> Tokenize(string code) => Lexer.Tokenize(code);
 
 		public bool TryTokenize(string code, out IEnumerable<Token>? tokens) => Lexer.TryTokenize(code, out tokens);
@@ -56,11 +44,24 @@ namespace Language {
 		public SyntaxTree Parse(string code) => Parser.Parse(Filter(Tokenize(code)));
 
 		public bool TryParse(string code, out SyntaxTree? ast) => Parser.TryParse(Filter(Tokenize(code)), out ast);
+	}
 
-		public IEnumerable<SemanticError> Analyze(string code) {
-			var tree = Parse(code);
-			tree.Clean();
-			return Analyzers.Analyze(tree);
+	public abstract class LanguageFactoryBase {
+		private readonly Lazy<Grammar> _grammar;
+
+		private readonly Lazy<Lexicon> _lexicon;
+
+		protected LanguageFactoryBase() {
+			_grammar = new Lazy<Grammar>(CreateGrammar);
+			_lexicon = new Lazy<Lexicon>(CreateLexicon);
 		}
+
+		public Lexicon Lexicon => _lexicon.Value;
+
+		public Grammar Grammar => _grammar.Value;
+
+		public abstract Lexicon CreateLexicon();
+
+		public abstract Grammar CreateGrammar();
 	}
 }
