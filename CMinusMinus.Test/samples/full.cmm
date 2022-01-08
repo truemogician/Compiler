@@ -1,12 +1,15 @@
 int global = 0;
 unsigned long long foo(const unsigned long long l) {
 	char c = 'c', d;
+	if (c)
+		Label: if (c) { c = c; }
+		else;
 	if (l & 1)
 		return l;
 	else if (l == 0)
 		return l - 1;
 	else {
-		d = c + 1;
+		int d = c + 1;
 		return l + 1;
 	}
 }
@@ -14,10 +17,12 @@ unsigned long long foo(const unsigned long long l) {
 void bar(volatile /*block comment*/ char ch, short sh) {
 	switch (ch) {
 	case 'a':
-	case 'b':
+	case 'b': {
+		int x;
 		ch = 'a';
 	Label1:
 		break;
+	}
 	default:
 		break;
 	}
