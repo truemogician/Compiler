@@ -103,6 +103,32 @@ namespace Analyzer {
 			}
 		}
 
+		public IEnumerable<SemanticError> Analyze(SyntaxTree tree, out IReadOnlyList<AnalyzeResult> analyzeResults) {
+			var res = Enumerable.Empty<SemanticError>();
+			var results = new Dictionary<IAnalyzer, object>();
+			var aResults = new List<AnalyzeResult>();
+			var queue = new Queue<AnalyzerNode>();
+			foreach (var root in _rootAnalyzers) {
+				object r = root.Value.Analyze(tree, out var errors);
+				results[root.Value] = r;
+				if (root.IsLeaf)
+					aResults.Add(new AnalyzeResult(root.Value.Name, r));
+				res = res.Concat(errors);
+				root.Children.Each(child => queue.Enqueue(child));
+			}
+			while (queue.Count > 0) {
+				var cur = queue.Dequeue();
+				object r = cur.Value.Analyze(results[cur.Parent!.Value], out var errors);
+				results[cur.Value] = r;
+				if (cur.IsLeaf)
+					aResults.Add(new AnalyzeResult(cur.Value.Name, r));
+				res = res.Concat(errors);
+				cur.Children.Each(child => queue.Enqueue(child));
+			}
+			analyzeResults = aResults;
+			return res;
+		}
+
 		private static (Type Source, Type Target) GetTypeParameters(IAnalyzer analyzer) {
 			var types = analyzer.GetType().GetGenericInterfaceArguments(_analyzerInterface);
 			if (types is null)
@@ -110,4 +136,6 @@ namespace Analyzer {
 			return (types[0], types[1]);
 		}
 	}
+
+	public record AnalyzeResult(string AnalyzerName, object Result);
 }

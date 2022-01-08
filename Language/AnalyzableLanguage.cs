@@ -25,6 +25,13 @@ namespace Language {
 			tree.Clean();
 			return Analyzers.Analyze(tree);
 		}
+
+		protected IReadOnlyList<AnalyzeResult> Analyze(string code, out IEnumerable<SemanticError> errors) {
+			var tree = Parse(code);
+			tree.Clean();
+			errors = Analyzers.Analyze(tree, out var results);
+			return results;
+		}
 	}
 
 	public abstract class AnalyzableLanguageFactoryBase : LanguageFactoryBase {
