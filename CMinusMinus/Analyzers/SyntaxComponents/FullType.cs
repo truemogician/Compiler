@@ -9,22 +9,30 @@ using TrueMogician.Extensions.Enumerator;
 
 namespace CMinusMinus.Analyzers.SyntaxComponents {
 	public class FullType {
-		internal FullType(TypeQualifier qualifier, FundamentalType type) {
-			Qualifier = qualifier;
-			Type = type;
-			ValueType = null;
+		private readonly TypeQualifier _qualifier;
+
+		private readonly BasicType? _type;
+
+		private readonly FullType? _valueType;
+
+		internal FullType(TypeQualifier qualifier, BasicType type) {
+			_qualifier = qualifier;
+			_type = type;
+			_valueType = null;
 		}
 
 		internal FullType(TypeQualifier qualifier, FullType valueType) {
-			Qualifier = qualifier;
-			Type = null;
-			ValueType = valueType;
+			_qualifier = qualifier;
+			_type = null;
+			_valueType = valueType;
 		}
+
+		internal FullType(FullType finalType, IEnumerable<SyntaxTreeNode> modifiers)
+			=> Initialize(out _qualifier, out _type, out _valueType, finalType, modifiers);
 
 		public FullType(IEnumerable<SyntaxTreeNode> nodes) {
 			var nds = nodes.AsArray();
 			var i = 0;
-			var qualifiers = new List<TypeQualifier>();
 			var qualifier = TypeQualifier.None;
 			for (; i < nds.Length && nds[i].Value.Token is { } t; ++i) {
 				ThrowHelper.IsTerminal(nds[i], LexemeType.Keyword);
@@ -34,41 +42,15 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 					_          => throw new UnexpectedSyntaxNodeException { Node = nds[i] }
 				};
 			}
-			qualifiers.Add(qualifier);
-			var fType = ParseFundamentalType(nds[i++]);
-			while (i < nds.Length) {
-				ThrowHelper.IsTerminal(nds[i++], "*");
-				qualifier = TypeQualifier.None;
-				for (; i < nds.Length && nds[i].Value.Lexeme?.GetNameAsEnum<LexemeType>() == LexemeType.Keyword; ++i)
-					qualifier |= nds[i].Value.Token!.Value switch {
-						"const"    => TypeQualifier.Const,
-						"volatile" => TypeQualifier.Volatile,
-						_          => throw new UnexpectedSyntaxNodeException { Node = nds[i] }
-					};
-				qualifiers.Add(qualifier);
-			}
-			if (qualifiers.Count == 1) {
-				Qualifier = qualifiers[0];
-				Type = fType;
-				ValueType = null;
-			}
-			else {
-				var prev = new FullType(qualifiers[0], fType);
-				for (var j = 1; j < qualifiers.Count - 1; ++j) {
-					var cur = new FullType(qualifiers[j], prev);
-					prev = cur;
-				}
-				Qualifier = qualifiers[^1];
-				Type = null;
-				ValueType = prev;
-			}
+			var finalType = FundamentalType.Parse(nds[i++]);
+			Initialize(out _qualifier, out _type, out _valueType, new FullType(qualifier, finalType), nds[i..]);
 		}
 
-		public TypeQualifier Qualifier { get; }
+		public TypeQualifier Qualifier => _qualifier;
 
-		public BasicType? Type { get; }
+		public BasicType? Type => _type;
 
-		public FullType? ValueType { get; }
+		public FullType? ValueType => _valueType;
 
 		public bool IsPointer => ValueType is not null;
 
@@ -91,28 +73,41 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			return builder.ToString();
 		}
 
-		private static FundamentalType ParseFundamentalType(SyntaxTreeNode node) {
-			ThrowHelper.IsNonterminal(node, NonterminalType.FundamentalType);
-			var tokens = node.Children.Select(n => n.Value.AsToken);
-			return string.Join(' ', tokens.Select(t => t.Value)) switch {
-				"void"                                                                         => FundamentalType.Void,
-				"char"                                                                         => FundamentalType.Char,
-				"signed char"                                                                  => FundamentalType.SignedChar,
-				"unsigned char"                                                                => FundamentalType.UnsignedChar,
-				"short" or "short int" or "signed short" or "signed short int"                 => FundamentalType.Short,
-				"unsigned short" or "unsigned short int"                                       => FundamentalType.UnsignedShort,
-				"int" or "signed" or "signed int"                                              => FundamentalType.Int,
-				"unsigned" or "unsigned int"                                                   => FundamentalType.UnsignedInt,
-				"long" or "long int" or "signed long" or "signed long int"                     => FundamentalType.Long,
-				"unsigned long" or "unsigned long int"                                         => FundamentalType.UnsignedLong,
-				"long long" or "long long int" or "signed long long" or "signed long long int" => FundamentalType.LongLong,
-				"unsigned long long" or "unsigned long long int"                               => FundamentalType.UnsignedLongLong,
-				"float"                                                                        => FundamentalType.Float,
-				"double"                                                                       => FundamentalType.Double,
-				"long double"                                                                  => FundamentalType.LongDouble,
-				_                                                                              => throw new UnexpectedSyntaxNodeException { Node = node }
-			};
+		private static void Initialize(out TypeQualifier qualifier, out BasicType? type, out FullType? valueType, FullType finalType, IEnumerable<SyntaxTreeNode> modifiers) {
+			if (finalType.IsPointer)
+				throw new ArgumentException("Final type shouldn't be a pointer type", nameof(finalType));
+			var mods = modifiers.AsArray();
+			if (mods.Length == 0) {
+				qualifier = finalType.Qualifier;
+				type = finalType.Type;
+				valueType = null;
+			}
+			else {
+				var i = 0;
+				var qualifiers = new List<TypeQualifier>();
+				while (i < mods.Length) {
+					ThrowHelper.IsTerminal(mods[i++], "*");
+					var q = TypeQualifier.None;
+					for (; i < mods.Length && mods[i].Value.Lexeme?.GetNameAsEnum<LexemeType>() == LexemeType.Keyword; ++i)
+						q |= mods[i].Value.Token!.Value switch {
+							"const"    => TypeQualifier.Const,
+							"volatile" => TypeQualifier.Volatile,
+							_          => throw new UnexpectedSyntaxNodeException { Node = mods[i] }
+						};
+					qualifiers.Add(q);
+				}
+				var prev = finalType;
+				for (var j = 0; j < qualifiers.Count - 1; ++j) {
+					var cur = new FullType(qualifiers[j], prev);
+					prev = cur;
+				}
+				qualifier = qualifiers[^1];
+				type = null;
+				valueType = prev;
+			}
 		}
+
+		public static implicit operator FullType(BasicType type) => new(TypeQualifier.None, type);
 	}
 
 	[Flags]
@@ -164,6 +159,29 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 		public static FundamentalType[] All { get; } = { Void, Char, SignedChar, UnsignedChar, Short, UnsignedShort, Int, UnsignedInt, Long, UnsignedLong, LongLong, UnsignedLongLong, Float, Double, LongDouble };
 
 		public string Name { get; }
+
+		public static FundamentalType Parse(SyntaxTreeNode node) {
+			ThrowHelper.IsNonterminal(node, NonterminalType.FundamentalType);
+			var tokens = node.Children.Select(n => n.Value.AsToken);
+			return string.Join(' ', tokens.Select(t => t.Value)) switch {
+				"void"                                                                         => Void,
+				"char"                                                                         => Char,
+				"signed char"                                                                  => SignedChar,
+				"unsigned char"                                                                => UnsignedChar,
+				"short" or "short int" or "signed short" or "signed short int"                 => Short,
+				"unsigned short" or "unsigned short int"                                       => UnsignedShort,
+				"int" or "signed" or "signed int"                                              => Int,
+				"unsigned" or "unsigned int"                                                   => UnsignedInt,
+				"long" or "long int" or "signed long" or "signed long int"                     => Long,
+				"unsigned long" or "unsigned long int"                                         => UnsignedLong,
+				"long long" or "long long int" or "signed long long" or "signed long long int" => LongLong,
+				"unsigned long long" or "unsigned long long int"                               => UnsignedLongLong,
+				"float"                                                                        => Float,
+				"double"                                                                       => Double,
+				"long double"                                                                  => LongDouble,
+				_                                                                              => throw new UnexpectedSyntaxNodeException { Node = node }
+			};
+		}
 
 		public override string ToString() => Name;
 	}

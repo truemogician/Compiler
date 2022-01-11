@@ -1,11 +1,28 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Analyzer;
 using Parser;
 using TrueMogician.Extensions.Enumerable;
+using TrueMogician.Extensions.Enumerator;
 
 namespace CMinusMinus.Analyzers.SyntaxComponents {
 	public class Declaration {
+		internal Declaration(FullType finalType, IEnumerator<SyntaxTreeNode> enumerator) {
+			var list = new List<SyntaxTreeNode>();
+			while (enumerator.Current.GetLexemeType() != LexemeType.Identifier)
+				list.Add(enumerator.GetAndMoveNext());
+			Type = new FullType(finalType, list);
+			Name = new Identifier(enumerator.GetAndMoveNext());
+			Type = enumerator.Current.GetLexemeType() switch {
+				LexemeType.IndexStartSymbol => new ArrayType(Type, enumerator),
+				LexemeType.LeftParenthesis  => new FunctionType(Type, enumerator),
+				_                           => Type
+			};
+			if (enumerator.Current.GetTokenValue() == "=") {
+				enumerator.MoveNext();
+				DefaultValue = enumerator.GetAndMoveNext();
+			}
+		}
+
 		public Declaration(IEnumerable<SyntaxTreeNode> nodes) {
 			var nds = nodes.AsArray();
 			var i = 0;
@@ -32,18 +49,25 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 
 		public static IEnumerable<Declaration> FromDeclarationStatement(SyntaxTreeNode node) {
 			ThrowHelper.IsNonterminal(node, NonterminalType.DeclarationStatement);
-			var i = 0;
-			for (; node.Children[i].Value.Lexeme?.GetNameAsEnum<LexemeType>() == LexemeType.Keyword; ++i) { }
-			var prefix = node.Children[..i];
-			int prev = i;
+			using var e = node.Children.GetEnumerator().ToExtended();
+			var list = new List<SyntaxTreeNode>();
+			while (e.MoveNextAndGet().GetLexemeType() == LexemeType.Keyword)
+				list.Add(e.Current);
+			ThrowHelper.IsNonterminal(e.Current, NonterminalType.FundamentalType);
+			list.Add(e.Current);
+			var type = new FullType(list);
 			do {
-				for (; i < node.Children.Count && node.Children[i].Value is var v && (!v.IsTerminal || v.Lexeme!.GetNameAsEnum<LexemeType>() is not (LexemeType.Separator or LexemeType.Delimiter)); ++i) { }
-				if (i == node.Children.Count - 1 && node.Children[i].Value.Lexeme!.GetNameAsEnum<LexemeType>() == LexemeType.Delimiter)
-					break;
-				if (i >= node.Children.Count)
-					throw new UnexpectedSyntaxNodeException { Node = node };
-				yield return new Declaration(prefix.Concat(node.Children[prev..i]));
-				prev = ++i;
+				e.MoveNext();
+				yield return new Declaration(type, e);
+				switch (e.Current.GetLexemeType()) {
+					case LexemeType.Separator: continue;
+					case LexemeType.Delimiter:
+						if (e.MoveNext())
+							throw new UnexpectedSyntaxNodeException("Unexpected node after delimiter") { Node = e.Current };
+						break;
+					default: throw new UnexpectedSyntaxNodeException { Node = e.Current };
+				}
+				break;
 			} while (true);
 		}
 	}
