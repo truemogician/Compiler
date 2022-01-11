@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using Lexer;
 using Microsoft.Extensions.Primitives;
@@ -23,6 +24,13 @@ namespace Parser {
 				var to = node.Value.AsToken.Segment;
 				return new StringSegment(from.Buffer, from.Offset, to.Offset - from.Offset + to.Length);
 			}
+		}
+
+		public SyntaxTreeNode Clone() {
+			var @new = new SyntaxTreeNode(Value);
+			if (!IsLeaf)
+				@new.Children.AddRange(Children.Select(n => n.Clone()));
+			return @new;
 		}
 
 		public string ToString(string? format, IFormatProvider? formatProvider = null)

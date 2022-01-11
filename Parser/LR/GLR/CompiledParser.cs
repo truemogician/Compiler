@@ -54,7 +54,7 @@ namespace Parser.LR.GLR {
 						var (nonterminalIndex, length) = _table.ProductionRules[action.Index];
 						var newNode = new SyntaxTreeNode(_table.Nonterminals[nonterminalIndex]);
 						stateStack.Pop(length);
-						var symbols = symbolStack.Pop(length);
+						var symbols = symbolStack.Pop(length, node => node.Clone());
 						symbols.Reverse();
 						newNode.Children.AddRange(symbols);
 						int nextState = _table.GotoTable[stateStack.Peek(), nonterminalIndex];

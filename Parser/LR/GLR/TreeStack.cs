@@ -96,13 +96,13 @@ namespace Parser.LR.GLR {
 			/// <summary>
 			///     Pop out the top item;
 			/// </summary>
-			public T Pop() => Pop(1)[0];
+			public T Pop(Func<T, T>? clone = null) => Pop(1, clone)[0];
 
 			/// <summary>
 			///     Pop out multiple items from top.
 			/// </summary>
 			/// <param name="count">Number of items to pop out</param>
-			public List<T> Pop(int count) {
+			public List<T> Pop(int count, Func<T, T>? clone = null) {
 				if (count > Count)
 					throw new ArgumentOutOfRangeException(nameof(count));
 				List<T> result;
@@ -112,12 +112,13 @@ namespace Parser.LR.GLR {
 					CurrentList.RemoveRange(CurrentList.Count - count, count);
 				}
 				else {
+					clone ??= value => value is ICloneable c ? (T)c.Clone() : value;
 					result = new List<T>(count);
 					var targetNode = Leaf;
 					int idx;
 					do {
 						idx = result.Count;
-						result.AddRange(targetNode.Value);
+						result.AddRange(targetNode == Leaf ? targetNode.Value : targetNode.Value.Select(clone));
 						result.Reverse(idx, targetNode.Value.Count);
 						targetNode = targetNode.Parent!;
 					} while (count > result.Count && targetNode.Value.Count <= count - result.Count);
@@ -129,7 +130,7 @@ namespace Parser.LR.GLR {
 						int index = list.Count + result.Count - count;
 						var slice = list.GetRange(index, count - result.Count);
 						idx = result.Count;
-						result.AddRange(slice);
+						result.AddRange(slice.Select(clone));
 						result.Reverse(idx, slice.Count);
 						var newNode = CreateNewNode(list.GetRange(0, index));
 						list.RemoveRange(0, index);
