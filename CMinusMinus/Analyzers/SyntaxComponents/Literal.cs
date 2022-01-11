@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Analyzer;
 using Parser;
@@ -8,6 +9,10 @@ using TrueMogician.Exceptions;
 namespace CMinusMinus.Analyzers.SyntaxComponents {
 	public class Literal : SyntaxComponent {
 		public Literal(SyntaxTreeNode node) : base(node) {
+			if (!node.Value.IsTerminal) {
+				ThrowHelper.IsNonterminal(node, NonterminalType.Literal);
+				node = node.Children.Single();
+			}
 			ThrowHelper.IsTerminal(node, LexemeType.CharacterLiteral, LexemeType.FloatLiteral, LexemeType.IntegerLiteral, LexemeType.StringLiteral);
 			string value = node.Value.AsToken.Value;
 			switch (node.Value.Lexeme!.GetNameAsEnum<LexemeType>()) {
@@ -24,7 +29,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 					bool negative = value[0] == '-';
 					if (!char.IsDigit(value[0]))
 						++idx;
-					int radix = value[idx] == '0'
+					int radix = value[idx] == '0' && idx < value.Length - 1
 						? value[idx + 1] switch {
 							'b' => 2,
 							'x' => 16,
