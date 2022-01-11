@@ -191,7 +191,6 @@ namespace CMinusMinus {
 				(RSF)tIf +
 				nParenthesizedExpression +
 				nLabeledComponent +
-				((RSF)tElse + tIf + nParenthesizedExpression + nLabeledComponent) * '*' +
 				((RSF)tElse + nLabeledComponent) * '?'
 			);
 			grammar.Add(

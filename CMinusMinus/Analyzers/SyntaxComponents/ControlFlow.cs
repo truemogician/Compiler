@@ -36,14 +36,11 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			branches.Add((expression, (ControlFlowBody)new BlockComponent(enumerator.Move())));
 			if (enumerator.Success) {
 				ThrowHelper.IsTerminal(enumerator.GetAndMoveNext(), "else");
-				if (enumerator.Current.GetTokenValue() == "if") {
-					ThrowHelper.IsTerminal(enumerator.MoveNextAndGet(), LexemeType.LeftParenthesis);
-					ThrowHelper.IsNonterminal(enumerator.MoveNextAndGet(), NonterminalType.Expression);
-					expression = new Expression(enumerator.Current);
-					ThrowHelper.IsTerminal(enumerator.MoveNextAndGet(), LexemeType.RightParenthesis);
-					enumerator.MoveNext();
-				}
-				branches.Add((expression, (ControlFlowBody)new BlockComponent(enumerator)));
+				var body = (ControlFlowBody)new BlockComponent(enumerator.Current);
+				if (body.Count == 1 && body[0].ControlFlow is IfBlock ifBlock)
+					branches.AddRange(ifBlock.Branches);
+				else
+					branches.Add((expression, body));
 			}
 			Branches = branches;
 		}
@@ -100,7 +97,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			Initialization = Statement.Create(enumerator.MoveNextAndGet());
 			Condition = Statement.Create(enumerator.MoveNextAndGet()) is ExpressionStatement es ? es.Expression : null;
 			Iteration = enumerator.MoveNextAndGet().GetNonterminalType() == NonterminalType.Expression ? new Expression(enumerator.GetAndMoveNext()) : null;
-			ThrowHelper.IsTerminal(enumerator.Current, LexemeType.RightParenthesis);
+			ThrowHelper.IsTerminal(enumerator.GetAndMoveNext(), LexemeType.RightParenthesis);
 			Body = (ControlFlowBody)new BlockComponent(enumerator);
 			if (enumerator.Success)
 				throw new UnexpectedSyntaxNodeException { Node = enumerator.Current };
