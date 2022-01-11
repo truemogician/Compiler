@@ -169,7 +169,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 	}
 
 	public class FunctionType : BasicType {
-		public FunctionType(FullType returnType, IEnumerable<SyntaxTreeNode> paramList) : this(returnType, paramList.GetEnumerator()) { }
+		public FunctionType(FullType returnType, IEnumerable<SyntaxTreeNode> paramList) : this(returnType, paramList.GetEnumerator().Move()) { }
 
 		public FunctionType(FullType returnType, IEnumerator<SyntaxTreeNode> paramList) {
 			ReturnType = returnType;
@@ -202,6 +202,21 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 		public IReadOnlyList<Parameter> Parameters { get; }
 
 		public record Parameter(FullType Type, Identifier? Name);
+
+		public override string ToString() {
+			var builder = new StringBuilder();
+			builder.Append($"{ReturnType} (");
+			for (var i = 0; i < Parameters.Count; ++i) {
+				var (type, name) = Parameters[i];
+				builder.Append(type);
+				if (name is not null)
+					builder.Append($" {name}");
+				if (i != Parameters.Count - 1)
+					builder.Append(", ");
+			}
+			builder.Append(')');
+			return builder.ToString();
+		}
 	}
 
 	public class ArrayType : BasicType {

@@ -9,6 +9,8 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 
 		public string Name { get; }
 
+		public override string ToString() => Name;
+
 		public static implicit operator string(Identifier identifier) => identifier.Name;
 	}
 }
