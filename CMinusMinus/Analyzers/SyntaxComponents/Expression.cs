@@ -92,12 +92,12 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 									ThrowHelper.IsNonterminal(node.Children[2], NonterminalType.Expression);
 									var exp = node.Children[2].Children;
 									if (exp.Count == 1 && exp[0].Value.Nonterminal?.GetNameAsEnum<NonterminalType>() == NonterminalType.CommaExpression) {
-										var commaExp = new Expression(exp) as IBinaryExpression;
+										var expression = new Expression(exp);
 										do {
-											operands.Add(commaExp.LeftOperand);
-											commaExp = commaExp.RightOperand;
-										} while (commaExp.Operator == Op.Comma);
-										operands.Add((Expression)commaExp);
+											operands.Add((expression as IBinaryExpression).LeftOperand);
+											expression = (expression as IBinaryExpression).RightOperand;
+										} while (expression.Operator == Op.Comma);
+										operands.Add(expression);
 									}
 									else
 										operands.Add(new Expression(exp));
