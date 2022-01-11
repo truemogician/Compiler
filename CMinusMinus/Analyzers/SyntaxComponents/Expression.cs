@@ -70,7 +70,7 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 								ThrowHelper.IsTerminal(node.Children[0], LexemeType.LeftParenthesis);
 								ThrowHelper.IsTerminal(node.Children[^2], LexemeType.RightParenthesis);
 								Operator = Op.Cast;
-								Type = new FullType(node.Children[1..^3]);
+								Type = new FullType(node.Children[1..^2]);
 								break;
 						}
 						break;
