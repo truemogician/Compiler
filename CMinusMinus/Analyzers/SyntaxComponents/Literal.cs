@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using Analyzer;
 using Parser;
 using TrueMogician.Exceptions;
 
@@ -19,19 +20,35 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 					Value = Regex.Unescape(value[1..^1]);
 					break;
 				case LexemeType.IntegerLiteral:
-					Type = new FullType(TypeQualifier.Const, FundamentalType.Int);
 					var idx = 0;
 					bool negative = value[0] == '-';
 					if (!char.IsDigit(value[0]))
 						++idx;
-					int radix = value[idx..(idx + 2)] switch {
-						"0b" => 2,
-						"0x" => 16,
-						_    => 10
-					};
-					if (radix != 10)
+					int radix = value[idx] == '0'
+						? value[idx + 1] switch {
+							'b' => 2,
+							'x' => 16,
+							_   => 8
+						}
+						: 10;
+					if (radix is 2 or 16)
 						idx += 2;
-					Value = Convert.ToInt32(value[idx..], radix);
+					int end = value.Length - 1;
+					while (char.ToLower(value[end]) is 'u' or 'l')
+						--end;
+					++end;
+					var type = end == value.Length
+						? FundamentalType.Int
+						: value[end ..].ToLower() switch {
+							"u"            => FundamentalType.UnsignedInt,
+							"l"            => FundamentalType.Long,
+							"ll"           => FundamentalType.LongLong,
+							"ul" or "lu"   => FundamentalType.UnsignedLong,
+							"ull" or "llu" => FundamentalType.UnsignedLongLong,
+							_              => throw new UnexpectedSyntaxNodeException("Wrong integer suffix") { Node = node }
+						};
+					Type = new FullType(TypeQualifier.Const, type);
+					Value = Convert.ToInt32(value[idx..end], radix);
 					if (negative)
 						Value = -(int)Value;
 					break;
