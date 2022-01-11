@@ -2,6 +2,7 @@
 using System.Linq;
 using Analyzer;
 using Parser;
+using TrueMogician.Extensions.Enumerator;
 
 namespace CMinusMinus.Analyzers.SyntaxComponents {
 	public class Block : SyntaxComponent {
@@ -42,10 +43,8 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 
 		internal BlockComponent(IEnumerator<SyntaxTreeNode> enumerator) {
 			SyntaxTreeNode? label = null;
-			if (enumerator.Current.GetNonterminalType() == NonterminalType.Literal) {
-				label = enumerator.Current;
-				enumerator.MoveNext();
-			}
+			if (enumerator.Current.GetNonterminalType() == NonterminalType.Label)
+				label = enumerator.GetAndMoveNext();
 			InitializeLabel(out _label, label);
 			InitializeContent(out _content, enumerator.Current);
 			enumerator.MoveNext();
