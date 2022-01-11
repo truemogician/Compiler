@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Analyzer;
 using Parser;
 using TrueMogician.Extensions.Enumerable;
@@ -70,6 +71,25 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 		public FullType? ValueType { get; }
 
 		public bool IsPointer => ValueType is not null;
+
+		public override string ToString() {
+			var builder = new StringBuilder();
+			if (!IsPointer) {
+				if (Qualifier.HasFlag(TypeQualifier.Const))
+					builder.Append("const ");
+				if (Qualifier.HasFlag(TypeQualifier.Volatile))
+					builder.Append("volatile ");
+				builder.Append(Type!);
+			}
+			else {
+				builder.Append($"{ValueType}*");
+				if (Qualifier.HasFlag(TypeQualifier.Const))
+					builder.Append(" const");
+				if (Qualifier.HasFlag(TypeQualifier.Volatile))
+					builder.Append(" volatile");
+			}
+			return builder.ToString();
+		}
 
 		private static FundamentalType ParseFundamentalType(SyntaxTreeNode node) {
 			ThrowHelper.IsNonterminal(node, NonterminalType.FundamentalType);
