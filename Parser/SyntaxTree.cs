@@ -15,7 +15,7 @@ namespace Parser {
 		public void Clean() {
 			if (Root.Value.Nonterminal is { Temporary: true })
 				throw new InvalidOperationException("Root is a temporary node");
-			foreach (var node in Root.Where(n => n.Value.Nonterminal?.Temporary == true))
+			foreach (var node in Root.Where(n => n.Value.Nonterminal?.Temporary == true).ToArray())
 				SyntaxTreeNode.Unlink(node);
 		}
 
