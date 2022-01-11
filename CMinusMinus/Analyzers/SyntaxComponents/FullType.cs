@@ -109,37 +109,43 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 	public abstract class BasicType { }
 
 	public class FundamentalType : BasicType {
-		private FundamentalType() { }
+		private FundamentalType(string name) => Name = name;
 
-		public static FundamentalType Void { get; } = new();
+		public static FundamentalType Void { get; } = new("void");
 
-		public static FundamentalType Char { get; } = new();
+		public static FundamentalType Char { get; } = new("char");
 
-		public static FundamentalType SignedChar { get; } = new();
+		public static FundamentalType SignedChar { get; } = new("signed char");
 
-		public static FundamentalType UnsignedChar { get; } = new();
+		public static FundamentalType UnsignedChar { get; } = new("unsigned char");
 
-		public static FundamentalType Short { get; } = new();
+		public static FundamentalType Short { get; } = new("short");
 
-		public static FundamentalType UnsignedShort { get; } = new();
+		public static FundamentalType UnsignedShort { get; } = new("unsigned short");
 
-		public static FundamentalType Int { get; } = new();
+		public static FundamentalType Int { get; } = new("int");
 
-		public static FundamentalType UnsignedInt { get; } = new();
+		public static FundamentalType UnsignedInt { get; } = new("unsigned int");
 
-		public static FundamentalType Long { get; } = new();
+		public static FundamentalType Long { get; } = new("long");
 
-		public static FundamentalType UnsignedLong { get; } = new();
+		public static FundamentalType UnsignedLong { get; } = new("unsigned long");
 
-		public static FundamentalType LongLong { get; } = new();
+		public static FundamentalType LongLong { get; } = new("long long");
 
-		public static FundamentalType UnsignedLongLong { get; } = new();
+		public static FundamentalType UnsignedLongLong { get; } = new("unsigned long long");
 
-		public static FundamentalType Float { get; } = new();
+		public static FundamentalType Float { get; } = new("float");
 
-		public static FundamentalType Double { get; } = new();
+		public static FundamentalType Double { get; } = new("double");
 
-		public static FundamentalType LongDouble { get; } = new();
+		public static FundamentalType LongDouble { get; } = new("long double");
+
+		public static FundamentalType[] All { get; } = { Void, Char, SignedChar, UnsignedChar, Short, UnsignedShort, Int, UnsignedInt, Long, UnsignedLong, LongLong, UnsignedLongLong, Float, Double, LongDouble };
+
+		public string Name { get; }
+
+		public override string ToString() => Name;
 	}
 
 	public class FunctionType : BasicType {
