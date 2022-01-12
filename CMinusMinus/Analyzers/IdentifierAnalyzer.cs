@@ -42,7 +42,7 @@ namespace CMinusMinus.Analyzers {
 						yield break;
 					if (exp.Identifier is { } id) {
 						if (!idStack.Contains(id))
-							yield return id.CreateError(NotDefinedError);
+							yield return id.CreateError(NotDefinedError, $"\"{id}\" not defined.");
 					}
 					else if (exp.Operands is { } ops)
 						foreach (var operand in ops)
