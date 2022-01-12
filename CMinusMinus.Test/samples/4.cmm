@@ -1,3 +1,4 @@
+//test control flows
 int global = 0;
 unsigned long long foo(const unsigned long long l) {
 	char c = 'c', d;

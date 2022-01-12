@@ -1,3 +1,4 @@
+//test expression and type parsing
 const const int* const x, * y, * const* volatile* const volatile z[2 + 3];
 const int* const* const main(const int argc) {
 	int a = 1, b = 2, c = 3;

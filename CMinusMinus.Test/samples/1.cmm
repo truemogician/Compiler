@@ -1,3 +1,4 @@
+//simple A+B problem
 int add(int a, int b) {
 	return a + b;
 }

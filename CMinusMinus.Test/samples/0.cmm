@@ -1,3 +1,4 @@
+//example from instructions
 int  program(int a, int b, int c) {
 	int i;
 	int j;
