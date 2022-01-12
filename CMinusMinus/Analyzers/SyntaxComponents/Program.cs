@@ -10,11 +10,11 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			var functions = new List<FunctionDefinition>();
 			var globals = new List<Declaration>();
 			foreach (var child in node.Children)
-				switch (child.Value.Nonterminal?.Name) {
-					case nameof(NonterminalType.FunctionDefinition):
+				switch (child.GetNonterminalType()) {
+					case NonterminalType.FunctionDefinition:
 						functions.Add(child);
 						break;
-					case nameof(NonterminalType.DeclarationStatement):
+					case NonterminalType.DeclarationStatement:
 						globals.AddRange(Declaration.FromDeclarationStatement(child));
 						break;
 					default: throw new UnexpectedSyntaxNodeException { Node = child };
