@@ -194,7 +194,8 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			ThrowHelper.IsTerminal(paramList.GetAndMoveNext(), LexemeType.LeftParenthesis);
 			var parameters = new List<Parameter>();
 			var typeNodes = new List<SyntaxTreeNode>();
-			for (Identifier? name = null; paramList.Current.GetLexemeType() is var type && type != LexemeType.RightParenthesis; paramList.MoveNext()) {
+			Identifier? name = null;
+			for (; paramList.Current.GetLexemeType() is var type && type != LexemeType.RightParenthesis; paramList.MoveNext()) {
 				if (type != LexemeType.Separator && name is not null)
 					throw new UnexpectedSyntaxNodeException();
 				switch (type) {
@@ -211,6 +212,8 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 						break;
 				}
 			}
+			if (typeNodes.Count > 0)
+				parameters.Add(new Parameter(new FullType(typeNodes), name));
 			Parameters = parameters;
 			paramList.MoveNext();
 		}
