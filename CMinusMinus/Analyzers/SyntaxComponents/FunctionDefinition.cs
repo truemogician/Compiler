@@ -1,19 +1,22 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Analyzer;
 using Parser;
+using TrueMogician.Extensions.Enumerator;
 
 namespace CMinusMinus.Analyzers.SyntaxComponents {
 	public class FunctionDefinition : SyntaxComponent {
 		public FunctionDefinition(SyntaxTreeNode node) : base(node) {
 			ThrowHelper.IsNonterminal(node, NonterminalType.FunctionDefinition);
-			var children = node.Children.Select(n => n.Value).ToArray();
-			var i = 0;
-			for (; i < children.Length && children[i].Lexeme?.GetNameAsEnum<LexemeType>() != LexemeType.Identifier; ++i) { }
-			if (i >= children.Length)
-				throw new UnexpectedSyntaxNodeException { Node = node };
-			Name = new Identifier(children[i]);
-			Type = new FunctionType(new FullType(node.Children[..i]), node.Children[(i + 1)..]);
-			Body = new Block(node.Children[^1]);
+			using var e = node.Children.GetEnumerator();
+			var list = new List<SyntaxTreeNode>();
+			while (e.MoveNextAndGet().GetLexemeType() != LexemeType.Identifier)
+				list.Add(e.Current);
+			Name = new Identifier(e.Current);
+			Type = new FunctionType(new FullType(list), e.Move());
+			Body = new Block(e.Current);
+			if (e.MoveNext())
+				throw new UnexpectedSyntaxNodeException("Unexpected node after block") { Node = e.Current };
 		}
 
 		public Identifier Name { get; }
