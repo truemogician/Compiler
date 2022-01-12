@@ -13,7 +13,8 @@ namespace CMinusMinus.Test {
 			Language.LoadCompiledParser(algorithm, CompiledParserTests.TableFilePath);
 			Language.SelectParser(algorithm, true);
 			try {
-				Language.Analyze(code);
+				foreach (var error in Language.Analyze(code))
+					Console.WriteLine(error.ToString());
 				return null;
 			}
 			catch (Exception ex) {
