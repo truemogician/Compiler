@@ -13,6 +13,8 @@ namespace CMinusMinus.Analyzers {
 
 		private static readonly SemanticErrorType NeverUpdatedWarning = new("ID0004", ErrorLevel.Warning, Name) { DefaultMessage = "Identifier is never updated." };
 
+		private static readonly SemanticErrorType MissingParamNameError = new("ID0005", ErrorLevel.Error, Name) { DefaultMessage = "Function parameter name is missing." };
+
 		public static string Name => nameof(IdentifierAnalyzer);
 
 		string IAnalyzer.Name => Name;
@@ -115,8 +117,15 @@ namespace CMinusMinus.Analyzers {
 				if (Push(v.Name, v.Name) is { } e)
 					yield return e;
 			foreach (var func in source.FunctionDefinitions) {
-				foreach (var e in AnalyzeBlock(func.Body.Components))
+				Enter();
+				foreach (var (_, name) in func.Type.Parameters)
+					if (name is null)
+						yield return func.Name.CreateError(MissingParamNameError);
+					else
+						Push(name, name);
+				foreach (var e in AnalyzeBlock(func.Body.Components, false))
 					yield return e;
+				Quit();
 			}
 		}
 	}
