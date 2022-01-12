@@ -6,7 +6,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="TrueMogician.Extensions.Enumerator" Version="1.0.0" />
+		<PackageReference Include="TrueMogician.Extensions.Enumerator" Version="1.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>

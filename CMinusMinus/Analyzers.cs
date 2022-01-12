@@ -8,7 +8,6 @@ namespace CMinusMinus {
 			var propertyAnalyzer = new PropertyAnalyzer();
 			collection.Add(propertyAnalyzer);
 			collection.Add(new JumpStatementAnalyzer(), propertyAnalyzer);
-			collection.Add(new DeclarationAnalyzer(), propertyAnalyzer);
 			var identifierAnalyzer = new IdentifierAnalyzer();
 			collection.Add(identifierAnalyzer, propertyAnalyzer);
 			collection.Add(new TypeAnalyzer(), identifierAnalyzer);

@@ -219,8 +219,6 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 
 		public IReadOnlyList<Parameter> Parameters { get; }
 
-		public record Parameter(FullType Type, Identifier? Name);
-
 		public override string ToString() {
 			var builder = new StringBuilder();
 			builder.Append($"{ReturnType} (");
@@ -235,6 +233,8 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			builder.Append(')');
 			return builder.ToString();
 		}
+
+		public record Parameter(FullType Type, Identifier? Name);
 	}
 
 	public class ArrayType : BasicType {

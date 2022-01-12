@@ -10,12 +10,12 @@ namespace CMinusMinus.Analyzers {
 
 		private static readonly SemanticErrorType PrecisionLostWarning = new("TP0003", ErrorLevel.Warning, Name) { DefaultMessage = "Identifier is never used." };
 
+		public static string Name => nameof(TypeAnalyzer);
+
 		string IAnalyzer.Name => nameof(TypeAnalyzer);
 
 		IEnumerable<SemanticError> IReadOnlyAnalyzer<Program>.Analyze(Program source) {
 			yield break;
 		}
-
-		public static string Name => nameof(TypeAnalyzer);
 	}
 }

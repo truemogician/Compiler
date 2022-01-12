@@ -9,11 +9,11 @@ namespace CMinusMinus.Analyzers {
 
 		private static readonly SemanticErrorType ContinueStatementError = new("JS0002", ErrorLevel.Error, Name) { DefaultMessage = "Continue statement appears in wrong context." };
 
+		public static string Name => nameof(JumpStatementAnalyzer);
+
 		string IAnalyzer.Name => Name;
 
 		IEnumerable<SemanticError> IReadOnlyAnalyzer<Program>.Analyze(Program source) => source.FunctionDefinitions.Aggregate(Enumerable.Empty<SemanticError>(), (current, func) => current.Concat(Analyze(func.Body.Components, false, false)));
-
-		public static string Name => nameof(JumpStatementAnalyzer);
 
 		private static IEnumerable<SemanticError> Analyze(IEnumerable<BlockComponent> components, bool allowBreak, bool allowContinue) {
 			foreach (var comp in components) {

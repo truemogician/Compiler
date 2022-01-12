@@ -13,6 +13,8 @@ namespace CMinusMinus.Analyzers {
 
 		private static readonly SemanticErrorType NeverUpdatedWarning = new("ID0004", ErrorLevel.Warning, Name) { DefaultMessage = "Identifier is never updated." };
 
+		public static string Name => nameof(IdentifierAnalyzer);
+
 		string IAnalyzer.Name => Name;
 
 		IEnumerable<SemanticError> IReadOnlyAnalyzer<Program>.Analyze(Program source) {
@@ -117,7 +119,5 @@ namespace CMinusMinus.Analyzers {
 					yield return e;
 			}
 		}
-
-		public static string Name => nameof(IdentifierAnalyzer);
 	}
 }

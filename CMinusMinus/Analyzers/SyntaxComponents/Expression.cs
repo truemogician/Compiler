@@ -154,16 +154,6 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 			}
 		}
 
-		Operator IUnaryExpression.Operator => Operator ?? throw new InvalidOperationException("Not an unary expression");
-
-		Expression IUnaryExpression.Operand => Arity == 1 ? Operands![0] : throw new InvalidOperationException("Not an unary expression");
-
-		Operator IBinaryExpression.Operator => Operator ?? throw new InvalidOperationException("Not a binary expression");
-
-		Expression IBinaryExpression.LeftOperand => Arity == 2 ? Operands![0] : throw new InvalidOperationException("Not a binary expression");
-
-		Expression IBinaryExpression.RightOperand => Arity == 2 ? Operands![1] : throw new InvalidOperationException("Not a binary expression");
-
 		public FullType? Type { get; set; }
 
 		public Operator? Operator { get; }
@@ -183,6 +173,16 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 		public Literal AsLiteral => Literal ?? throw new InvalidOperationException("Not a literal");
 
 		public Expression this[int index] => Operands?[index] ?? throw new ArgumentOutOfRangeException(nameof(index));
+
+		Operator IBinaryExpression.Operator => Operator ?? throw new InvalidOperationException("Not a binary expression");
+
+		Expression IBinaryExpression.LeftOperand => Arity == 2 ? Operands![0] : throw new InvalidOperationException("Not a binary expression");
+
+		Expression IBinaryExpression.RightOperand => Arity == 2 ? Operands![1] : throw new InvalidOperationException("Not a binary expression");
+
+		Operator IUnaryExpression.Operator => Operator ?? throw new InvalidOperationException("Not an unary expression");
+
+		Expression IUnaryExpression.Operand => Arity == 1 ? Operands![0] : throw new InvalidOperationException("Not an unary expression");
 
 		public static implicit operator Expression(SyntaxTreeNode node) => new(node);
 	}

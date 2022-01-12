@@ -4,20 +4,21 @@ using System.Linq;
 using Language;
 using Lexer;
 using Parser;
+using Parser.LR.CLR;
 
 namespace CMinusMinus {
 	using RegexLexer = Lexer.Lexer;
 	using CLRParser = Parser.LR.CLR.Parser;
-	using CompiledCLRParser = Parser.LR.CLR.CompiledParser;
+	using CompiledCLRParser = CompiledParser;
 	using GLRParser = Parser.LR.GLR.Parser;
 	using CompiledGLRParser = Parser.LR.GLR.CompiledParser;
 
 	public partial class CMinusMinusFactory : AnalyzableLanguageFactoryBase { }
 
 	public class CMinusMinus : AnalyzableLanguage<RegexLexer, IParser, CMinusMinusFactory> {
-		private bool _useCompiled;
-
 		private ParserAlgorithm? _algorithm;
+
+		private bool _useCompiled;
 
 		public CMinusMinus() { }
 
