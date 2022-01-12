@@ -1,0 +1,32 @@
+//test analyzers
+
+//jump statement analyzer
+void wrongJumpStatement() {
+	break;				//JS0001
+	if (1 == 1)
+		continue;		//JS0002
+	else
+		break;			//JS0001
+	while (1) {
+		for (;;) {
+			if (2) {
+				break;	//Pass
+			}
+		}
+		continue;		//Pass
+	}
+	switch (1) {
+	case 1:	continue;	//JS0002
+	default: break;
+	}
+}
+
+void wrongIdentifier() {
+	undefinedFunction(1);	//ID0001
+	int a, b, c;
+	c = a + b - d;			//ID0001
+	char c = 'c';			//ID0002
+	{
+		long c = 0;			//Pass
+	}
+}
