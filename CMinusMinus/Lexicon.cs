@@ -19,6 +19,8 @@ namespace CMinusMinus {
 			lexicon.Add(LexemeType.RelationalOperator, new Regex(@"[<>=!]=|[<>]"));
 			lexicon.Add(LexemeType.LogicalOperator, new Regex(@"!|&&|\|\|"));
 			lexicon.Add(LexemeType.MembershipOperator, new Regex(@"\.|->"));
+			lexicon.Add(LexemeType.IncrementOperator, "++");
+			lexicon.Add(LexemeType.DecrementOperator, "--");
 			lexicon.Add(LexemeType.Delimiter, ';');
 			lexicon.Add(LexemeType.Separator, ',');
 			lexicon.Add(LexemeType.Colon, ':');
@@ -61,6 +63,10 @@ namespace CMinusMinus {
 		LogicalOperator,
 
 		MembershipOperator,
+
+		IncrementOperator,
+
+		DecrementOperator,
 
 		Delimiter,
 

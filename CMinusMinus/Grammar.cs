@@ -62,6 +62,8 @@ namespace CMinusMinus {
 			var tShiftOperator = NewTerminal(LexemeType.BitwiseOperator, new Regex(@"<<|>>"));
 			var tPlusOperator = NewTerminal(LexemeType.ArithmeticOperator, "+");
 			var tMinusOperator = NewTerminal(LexemeType.ArithmeticOperator, "-");
+			var tIncrementOperator = NewTerminal(LexemeType.IncrementOperator);
+			var tDecrementOperator = NewTerminal(LexemeType.DecrementOperator);
 			var tMultiplyOperator = NewTerminal(LexemeType.ArithmeticOperator, "*");
 			var tDivideModuloOperator = NewTerminal(LexemeType.ArithmeticOperator, new Regex(@"[\/%]"));
 			var tEqualityOperator = NewTerminal(LexemeType.RelationalOperator, new Regex(@"[=!]="));
@@ -85,8 +87,6 @@ namespace CMinusMinus {
 			var nBitwiseOrExpression = new Nonterminal("BitwiseOrExpression", true);
 			var nBitwiseXorExpression = new Nonterminal("BitwiseXorExpression", true);
 			var nBitwiseAndExpression = new Nonterminal("BitwiseAndExpression", true);
-			var nUnaryPlusMinusExpression = new Nonterminal();
-			var nOtherUnaryExpression = new Nonterminal();
 			var nCommaOrHigherPriorityExpression = new Nonterminal("CommaExpression+", true);
 			var nAssignmentOrHigherPriorityExpression = new Nonterminal("AssignmentExpression+", true);
 			var nConditionalOrHigherPriorityExpression = new Nonterminal("ConditionalExpression+", true);
@@ -367,15 +367,7 @@ namespace CMinusMinus {
 			);
 			grammar.Add(
 				NonterminalType.UnaryExpression,
-				(RSF)nUnaryPlusMinusExpression | nOtherUnaryExpression
-			);
-			grammar.Add(
-				nUnaryPlusMinusExpression,
-				((RSF)tPlusOperator | tMinusOperator) + ((RSF)nOtherUnaryExpression | nPostfixOrHigherPriorityExpression)
-			);
-			grammar.Add(
-				nOtherUnaryExpression,
-				(((RSF)tPlusOperator * 2) | ((RSF)tMinusOperator * 2) | tLogicalNotOperator | tBitwiseNotOperator | tDereferenceOperator | tAddressOfOperator | tSizeOf | ((RSF)tLeftParenthesis + nType + tRightParenthesis)) + nUnaryOrHigherPriorityExpression
+				((RSF)tPlusOperator | tMinusOperator | tIncrementOperator | tDecrementOperator | tLogicalNotOperator | tBitwiseNotOperator | tDereferenceOperator | tAddressOfOperator | tSizeOf | ((RSF)tLeftParenthesis + nType + tRightParenthesis)) + nUnaryOrHigherPriorityExpression
 			);
 			grammar.Add(
 				nUnaryOrHigherPriorityExpression,
@@ -387,7 +379,8 @@ namespace CMinusMinus {
 				(((RSF)tIndexStart + NonterminalType.Expression + tIndexEnd) |
 					((RSF)tLeftParenthesis + (RSF)NonterminalType.Expression * '?' + tRightParenthesis) |
 					((RSF)tMembershipOperator + tIdentifier) |
-					(((RSF)tPlusOperator * 2) | ((RSF)tMinusOperator * 2)))
+					tIncrementOperator |
+					tDecrementOperator)
 			);
 			grammar.Add(
 				nPostfixOrHigherPriorityExpression,

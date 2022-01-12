@@ -52,18 +52,13 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 									null     => throw exception,
 									"+"      => Op.Plus,
 									"-"      => Op.Minus,
+									"++"     => Op.PrefixIncrement,
+									"--"     => Op.PrefixDecrement,
 									"!"      => Op.LogicalNot,
 									"~"      => Op.BitwiseNot,
 									"*"      => Op.Dereference,
 									"&"      => Op.AddressOf,
 									"sizeof" => Op.SizeOf
-								};
-								break;
-							case 3:
-								Operator = (node.Children[0].GetTokenValue() + node.Children[1].GetTokenValue()) switch {
-									"++" => Op.PrefixIncrement,
-									"--" => Op.PrefixDecrement,
-									_    => throw exception
 								};
 								break;
 							case >= 4:
@@ -104,10 +99,11 @@ namespace CMinusMinus.Analyzers.SyntaxComponents {
 								}
 								Operator = Op.FunctionCall;
 								break;
-							case LexemeType.ArithmeticOperator:
-								ThrowHelper.ChildrenCountIs(node, 3);
+							case LexemeType.IncrementOperator:
+							case LexemeType.DecrementOperator:
+								ThrowHelper.ChildrenCountIs(node, 2);
 								operands.Add(new Expression(node.Children[0]));
-								Operator = node.Children[1].GetTokenValue() == "+" ? Op.SuffixIncrement : Op.SuffixDecrement;
+								Operator = node.Children[1].GetLexemeType() == LexemeType.IncrementOperator ? Op.SuffixIncrement : Op.SuffixDecrement;
 								break;
 							case LexemeType.MembershipOperator: goto BinaryExpression;
 							default:                            throw new UnexpectedSyntaxNodeException { Node = node };
